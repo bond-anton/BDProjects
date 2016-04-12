@@ -13,3 +13,5 @@ if my_projects:
     print('I have %d project(s)' % len(my_projects))
     for project in my_projects:
         print('  ' + project.name)
+    pm.open_project(my_projects[0])
+print(pm.get_current_project_teams())
