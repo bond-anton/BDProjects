@@ -1,7 +1,6 @@
 from __future__ import division, print_function
 
 from sqlalchemy import Column, DateTime, String, Text, Integer, ForeignKey, func
-from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
 
