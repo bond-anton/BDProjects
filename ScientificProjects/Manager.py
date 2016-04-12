@@ -1,4 +1,5 @@
 from __future__ import division, print_function
+import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -41,6 +42,7 @@ class ProjectsManager(object):
         try:
             self.session.add(user)
             self.session.commit()
+            self.sign_in(login, password)
         except IntegrityError as e:
             print('User with provided login/email is already registered.')
             self.session.rollback()
@@ -56,3 +58,27 @@ class ProjectsManager(object):
                 print('Incorrect username/password')
         else:
             print('Incorrect username/password')
+
+    def create_project(self, name, description, data_dir):
+        if self.user:
+            data_dir = str(data_dir)
+            if os.path.isdir(data_dir) and os.access(data_dir, os.W_OK | os.X_OK):
+                project = Project(name=str(name), description=str(description), owner=self.user)
+                try:
+                    self.session.add(project)
+                    self.session.commit()
+                    # self.sign_in(login, password)
+                except IntegrityError as e:
+                    print('Project with provided name is already registered.')
+                    self.session.rollback()
+            else:
+                print('Can not create project: Either %s is not a directory or it is not writable' % data_dir)
+        else:
+            print('Please sign in, or create a new user')
+
+    def get_own_projects(self):
+        if self.user:
+            projects = self.session.query(Project).filter(Project.owner == self.user).all()
+            return projects
+        else:
+            print('Please sign in, or create a new user')
