@@ -51,6 +51,6 @@ setup(
     keywords='Scientific database',
 
     packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib']),
-    install_requires=['sqlalchemy', 'sqlalchemy_utils'],
+    install_requires=['sqlalchemy', 'sqlalchemy_utils', 'passlib'],
     test_suite='nose.collector',
 )
