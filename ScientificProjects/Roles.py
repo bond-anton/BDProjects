@@ -11,7 +11,7 @@ from ScientificProjects.Teams import Team
 class RoleType(Base):
     __tablename__ = 'role_type'
     id = Column(Integer, primary_key=True)
-    title = Column(String)
+    title = Column(String, unique=True)
     description = Column(Text)
 
 

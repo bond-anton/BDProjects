@@ -36,17 +36,34 @@ class ProjectsManager(object):
         if overwrite:
             self.metadata.drop_all(self.engine)
         self.metadata.create_all(self.engine)
+        self.register_basic_role_types()
 
-    def add_user(self, name_first, name_last, email, login, password):
+    def register_basic_role_types(self):
+        self.create_role_type(title='Project manager', description='Manager of the project')
+        self.create_role_type(title='Team manager', description='Manager of the team')
+
+    def create_role_type(self, title, description=None):
+        role = RoleType(title=str(title), description=str(description))
+        try:
+            self.session.add(role)
+            self.session.commit()
+            return role
+        except IntegrityError:
+            self.session.rollback()
+            return self.session.query(RoleType).filter(RoleType.title == str(title)).one()
+
+    def create_user(self, name_first, name_last, email, login, password):
         user = User(name_first=str(name_first), name_last=str(name_last),
                     email=str(email), login=str(login), password=str(password))
         try:
             self.session.add(user)
             self.session.commit()
-            self.sign_in(login, password)
+            print('User %s successfully created' % user.login)
+            return user
         except IntegrityError as e:
             print('User with provided login/email is already registered')
             self.session.rollback()
+            return self.session.query(User).filter(User.login == str(login)).one()
 
     def sign_in(self, login, password):
         user = self.session.query(User).filter(User.login == str(login)).all()
@@ -68,8 +85,10 @@ class ProjectsManager(object):
                 try:
                     self.session.add(project)
                     self.session.commit()
-                    print('Project created')
                     self.open_project(project)
+                    team = self.create_team('Project board', 'Project executive managers')
+                    role = self.create_role(team, 'Project owner', 'Project owner', self.user, 'Project manager')
+                    print('Project created')
                 except IntegrityError as e:
                     print('Project with provided name is already registered')
                     self.session.rollback()
@@ -115,14 +134,30 @@ class ProjectsManager(object):
                 self.session.add(team)
                 self.session.commit()
                 print('Team created')
+                return team
             except IntegrityError as e:
                 print('Team with provided name is already registered')
                 self.session.rollback()
+                return self.session.query(Team).filter(Team.name == name).one()
         else:
             print('To create a new team you have to select project which you own')
 
-    def create_role(self, team, title, description, user, role_type, manager):
+    def create_role(self, team, title, description, user, role_type, manager=None):
+        if isinstance(role_type, str):
+            role_type_title = role_type
+            role_type = self.session.query(RoleType).filter(RoleType.title == role_type).one()
+            if not role_type:
+                role_type = self.create_role_type(title=role_type_title)
+        elif isinstance(role_type, RoleType):
+            if role_type not in self.session.query(RoleType).all():
+                role_type = self.create_role_type(title=role_type.title, description=role_type.description)
+        else:
+            raise ValueError('bad role type provided')
+        if isinstance(manager, Role):
+            manager_id = manager.id
+        else:
+            manager_id = None
         role = Role(title=title, description=description, role_type=role_type,
-                    team=team, user=user, manager_id=manager.id)
+                    team=team, user=user, manager_id=manager_id)
         self.session.add(role)
         self.session.commit()
