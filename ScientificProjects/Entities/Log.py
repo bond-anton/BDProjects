@@ -19,8 +19,8 @@ class Log(Base):
     __tablename__ = 'log'
     id = Column(Integer, primary_key=True)
     record = Column(String)
-    log_category_id = Column(Integer, ForeignKey('log_category.id'))
-    log_category = relationship(LogCategory, backref=backref('logs', uselist=True, cascade='delete,all'))
+    category_id = Column(Integer, ForeignKey('log_category.id'))
+    category = relationship(LogCategory, backref=backref('logs', uselist=True, cascade='delete,all'))
     project_id = Column(Integer, ForeignKey('project.id'))
     project = relationship(Project, backref=backref('logs', uselist=True, cascade='delete,all'))
     role_id = Column(Integer, ForeignKey('role.id'))
