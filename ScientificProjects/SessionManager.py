@@ -13,6 +13,7 @@ from ScientificProjects.EntityManagers.UserManager import UserManager
 
 
 class SessionManager(object):
+
     def __init__(self, db_name='/:memory:', backend='sqlite',
                  hostname='', port='', user='', password='',
                  overwrite=False):
@@ -50,8 +51,6 @@ class SessionManager(object):
         except IntegrityError:
             self.session.rollback()
             return self.session.query(RoleType).filter(RoleType.title == str(title)).one()
-
-
 
     def create_team(self, name, description):
         if self.current_project in self.get_own_projects():
