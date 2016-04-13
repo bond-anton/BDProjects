@@ -4,15 +4,14 @@ from sqlalchemy import Column, DateTime, String, Text, Integer, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
-from ScientificProjects.Users import User
+from ScientificProjects.Entities.Projects import Project
 
 
-class Project(Base):
-    __tablename__ = 'project'
+class Team(Base):
+    __tablename__ = 'team'
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     description = Column(Text)
-    created = Column(DateTime, default=func.now())
-    owner_id = Column(Integer, ForeignKey('user.id'))
-    owner = relationship(User, backref=backref('projects', uselist=True, cascade='delete,all'))
-    data_dir = Column(String)
+    project_id = Column(Integer, ForeignKey('project.id'))
+    project = relationship(Project, backref=backref('teems', uselist=True, cascade='delete,all'))
+    registered = Column(DateTime, default=func.now())

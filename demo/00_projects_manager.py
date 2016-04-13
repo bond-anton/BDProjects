@@ -1,10 +1,13 @@
 from __future__ import division, print_function
-from ScientificProjects.Manager import ProjectsManager
+from ScientificProjects.SessionManager import SessionManager
 
-pm = ProjectsManager('data/test.db')
-pm.create_user('John', 'Smith', 'john.smith@somecorp.com', 'john_smith', 'secret_password')
-pm.sign_in('john_smith', 'secret_password')
-
+sm = SessionManager('data/test.db')
+sm.user_manager.create_user('John', 'Smith', 'john.smith@somecorp.com', 'john_smith', 'secret_password')
+sm.user_manager.sign_in('john_smith', 'secret_password')
+print(sm.user_manager.signed_in_users())
+sm.user_manager.logoff_all()
+print(sm.user_manager.signed_in_users())
+'''
 project_name = 'Super Project'
 pm.create_project(project_name, 'My first ever really super project', 'data/files')
 
@@ -16,3 +19,4 @@ if my_projects:
 
 pm.open_project(project_name)
 pm.create_team('ResearchLab 1', 'ResearchLab #1 from XXX State University')
+'''
