@@ -2,7 +2,7 @@ from __future__ import division, print_function
 
 from sqlalchemy.exc import IntegrityError
 
-from ScientificProjects.Entities.Users import User
+from ScientificProjects.Entities.User import User
 from ScientificProjects.EntityManagers import EntityManager
 
 

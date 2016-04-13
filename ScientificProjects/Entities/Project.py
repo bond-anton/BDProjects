@@ -4,7 +4,7 @@ from sqlalchemy import Column, DateTime, String, Text, Integer, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
-from ScientificProjects.Entities.Users import User
+from ScientificProjects.Entities.User import User
 
 
 class Project(Base):

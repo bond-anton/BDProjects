@@ -4,7 +4,7 @@ from sqlalchemy import Column, DateTime, String, Text, Integer, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
-from ScientificProjects.Entities.Projects import Project
+from ScientificProjects.Entities.Project import Project
 
 
 class Team(Base):
@@ -13,5 +13,5 @@ class Team(Base):
     name = Column(String, unique=True)
     description = Column(Text)
     project_id = Column(Integer, ForeignKey('project.id'))
-    project = relationship(Project, backref=backref('teems', uselist=True, cascade='delete,all'))
+    project = relationship(Project, backref=backref('teams', uselist=True, cascade='delete,all'))
     registered = Column(DateTime, default=func.now())

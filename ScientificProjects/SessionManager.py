@@ -5,8 +5,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 
 from ScientificProjects import Base
-from ScientificProjects.Entities.Roles import RoleType, Role
-from ScientificProjects.Entities.Teams import Team
+from ScientificProjects.Entities.Log import LogCategory, Log
+from ScientificProjects.Entities.Role import RoleType, Role
+from ScientificProjects.Entities.Team import Team
 from ScientificProjects.EntityManagers.ProjectManager import ProjectManager
 from ScientificProjects.EntityManagers.UserManager import UserManager
 

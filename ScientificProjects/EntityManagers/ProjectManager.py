@@ -4,7 +4,7 @@ import os
 
 from sqlalchemy.exc import IntegrityError
 
-from ScientificProjects.Entities.Projects import Project
+from ScientificProjects.Entities.Project import Project
 from ScientificProjects.EntityManagers import EntityManager
 
 
