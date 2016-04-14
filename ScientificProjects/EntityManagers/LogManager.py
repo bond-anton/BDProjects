@@ -11,7 +11,6 @@ from ScientificProjects.EntityManagers import EntityManager
 class LogManager(EntityManager):
 
     def __init__(self, engine, session_manager):
-        self.user = None
         super(LogManager, self).__init__(engine, session_manager)
         self._create_default_log_categories()
 

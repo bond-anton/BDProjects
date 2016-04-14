@@ -38,10 +38,16 @@ class UserManager(EntityManager):
                 self.user.signed_in = True
                 self.session.commit()
                 print('%s signed in' % self.user.login)
+                self.session_manager.log_manager.log_record(record='User %s signed in' % self.user.login,
+                                                            category='Information')
                 print('Welcome back, %s %s' % (user.name_first, user.name_last))
             else:
+                self.session_manager.log_manager.log_record(record='Login failed. Username: %s' % self.user.login,
+                                                            category='Warning')
                 print('Incorrect username/password')
         else:
+            self.session_manager.log_manager.log_record(record='Login failed. Username: %s' % str(login),
+                                                        category='Warning')
             print('Incorrect username/password')
 
     def sign_out(self):
@@ -49,6 +55,8 @@ class UserManager(EntityManager):
             self.user.signed_in = False
             self.session.commit()
             print('%s signed out' % self.user.login)
+            self.session_manager.log_manager.log_record(record='User %s signed out' % self.user.login,
+                                                        category='Information')
             self.user = None
 
     def signed_in(self):
@@ -70,3 +78,5 @@ class UserManager(EntityManager):
         for user in users:
             user.signed_in = False
             self.session.commit()
+            self.session_manager.log_manager.log_record(record='User %s signed out' % user.login,
+                                                        category='Information')
