@@ -8,8 +8,10 @@ from ScientificProjects import Base
 from ScientificProjects.Entities.Log import LogCategory, Log
 from ScientificProjects.Entities.Role import RoleType, Role
 from ScientificProjects.Entities.Team import Team
-from ScientificProjects.EntityManagers.ProjectManager import ProjectManager
+
+from ScientificProjects.EntityManagers.LogManager import LogManager
 from ScientificProjects.EntityManagers.UserManager import UserManager
+from ScientificProjects.EntityManagers.ProjectManager import ProjectManager
 
 
 class SessionManager(object):
@@ -29,8 +31,9 @@ class SessionManager(object):
         self.session = session()
         self.metadata = Base.metadata
         self.create_tables(overwrite)
-        self.user_manager = UserManager(self.engine)
-        self.project_manager = ProjectManager(self.engine)
+        self.log_manager = LogManager(self.engine, self)
+        self.user_manager = UserManager(self.engine, self)
+        self.project_manager = ProjectManager(self.engine, self)
 
     def create_tables(self, overwrite=False):
         if overwrite:

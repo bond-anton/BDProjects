@@ -10,9 +10,9 @@ from ScientificProjects.EntityManagers import EntityManager
 
 class ProjectManager(EntityManager):
 
-    def __init__(self, engine):
+    def __init__(self, engine, session_manager):
         self.user = None
-        super(ProjectManager, self).__init__(engine)
+        super(ProjectManager, self).__init__(engine, session_manager)
 
     def create_project(self, name, description, data_dir):
         if self.user:

@@ -8,9 +8,9 @@ from ScientificProjects.EntityManagers import EntityManager
 
 class UserManager(EntityManager):
 
-    def __init__(self, engine):
+    def __init__(self, engine, session_manager):
         self.user = None
-        super(UserManager, self).__init__(engine)
+        super(UserManager, self).__init__(engine, session_manager)
 
     def create_user(self, name_first, name_last, email, login, password):
         user = User(name_first=str(name_first), name_last=str(name_last),
@@ -19,10 +19,14 @@ class UserManager(EntityManager):
             self.session.add(user)
             self.session.commit()
             print('User %s successfully created' % user.login)
+            self.session_manager.log_manager.log_record(record='User %s successfully created' % user.login,
+                                                        category='Information')
             return user
         except IntegrityError as e:
-            print('User with provided login/email is already registered')
             self.session.rollback()
+            print('User with provided login/email is already registered')
+            self.session_manager.log_manager.log_record(record='User %s is already registered' % user.login,
+                                                        category='Warning')
             return self.session.query(User).filter(User.login == str(login)).one()
 
     def sign_in(self, login, password):
