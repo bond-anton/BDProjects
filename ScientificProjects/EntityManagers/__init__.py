@@ -11,3 +11,10 @@ class EntityManager(object):
         session = sessionmaker()
         session.configure(bind=self.engine)
         self.session = session()
+
+
+class DependentEntityManager(object):
+
+    def __init__(self, session, session_manager):
+        self.session = session
+        self.session_manager = session_manager

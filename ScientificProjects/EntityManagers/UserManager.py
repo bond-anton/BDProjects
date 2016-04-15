@@ -18,13 +18,11 @@ class UserManager(EntityManager):
         try:
             self.session.add(user)
             self.session.commit()
-            print('User %s successfully created' % user.login)
             self.session_manager.log_manager.log_record(record='User %s successfully created' % user.login,
                                                         category='Information')
             return user
-        except IntegrityError as e:
+        except IntegrityError:
             self.session.rollback()
-            print('User with provided login/email is already registered')
             self.session_manager.log_manager.log_record(record='User %s is already registered' % user.login,
                                                         category='Warning')
             return self.session.query(User).filter(User.login == str(login)).one()
@@ -37,24 +35,19 @@ class UserManager(EntityManager):
                 self.user = user
                 self.user.signed_in = True
                 self.session.commit()
-                print('%s signed in' % self.user.login)
                 self.session_manager.log_manager.log_record(record='User %s signed in' % self.user.login,
                                                             category='Information')
-                print('Welcome back, %s %s' % (user.name_first, user.name_last))
             else:
                 self.session_manager.log_manager.log_record(record='Login failed. Username: %s' % self.user.login,
                                                             category='Warning')
-                print('Incorrect username/password')
         else:
             self.session_manager.log_manager.log_record(record='Login failed. Username: %s' % str(login),
                                                         category='Warning')
-            print('Incorrect username/password')
 
     def sign_out(self):
         if self.signed_in():
             self.user.signed_in = False
             self.session.commit()
-            print('%s signed out' % self.user.login)
             self.session_manager.log_manager.log_record(record='User %s signed out' % self.user.login,
                                                         category='Information')
             self.user = None

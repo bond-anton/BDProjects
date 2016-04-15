@@ -10,7 +10,11 @@ from ScientificProjects.EntityManagers import EntityManager
 
 class LogManager(EntityManager):
 
-    def __init__(self, engine, session_manager):
+    def __init__(self, engine, session_manager, echo=True):
+        self.echo = echo
+        self.default_log_categories = {'Information': 'Informational messages',
+                                       'Warning': 'Warning messages',
+                                       'Error': 'Error messages'}
         super(LogManager, self).__init__(engine, session_manager)
         self._create_default_log_categories()
 
@@ -19,26 +23,40 @@ class LogManager(EntityManager):
         if log_category and not category_exists:
             self.session.add(log_category)
             self.session.commit()
-            print('Category %s successfully created' % log_category.category)
+            if log_category.category not in self.default_log_categories:
+                self.log_record('Log category %s successfully created' % log_category.category, 'Information')
             return log_category
         else:
-            print('Log category %s is already registered' % log_category.category)
             self.session.rollback()
+            self.log_record('Log category %s is already registered' % log_category.category, 'Warning')
             return self.session.query(LogCategory).filter(LogCategory.category == log_category.category).one()
 
     def log_record(self, record, category=None, project=None, role=None):
         log_category, category_exists = self._check_category_name(category)
+        category_id, project_id, role_id = None, None, None
         if not category_exists:
-            print('Create log category first')
-        if project is not None:
-            if not isinstance(project, Project):
-                raise ValueError('provide a Project instance or None')
-        if role is not None:
-            if not isinstance(role, Role):
-                raise ValueError('provide a Role instance or None')
-        log = Log(record=record, category=log_category, project=project, role=role)
-        self.session.add(log)
-        self.session.commit()
+            self.log_record('Create log category first', 'Warning', project=project, role=role)
+        else:
+            category_id = log_category.id
+            if project is not None:
+                if not isinstance(project, Project):
+                    raise ValueError('provide a Project instance or None')
+                project_id = project.id
+            if role is not None:
+                if not isinstance(role, Role):
+                    raise ValueError('provide a Role instance or None')
+                role_id = role.id
+            log = Log(record=record, category_id=category_id, project_id=project_id, role_id=role_id)
+            self.session.add(log)
+            self.session.commit()
+            if self.echo:
+                if role is None:
+                    role_title = 'bot'
+                    user_login = 'bot'
+                else:
+                    role_title = role.title
+                    user_login = role.user.login
+                print('[%s] %s (%s): %s' % (log_category.category, role_title, user_login, record))
 
     def _check_category_name(self, category, description=None):
         category_exists = False
@@ -55,8 +73,5 @@ class LogManager(EntityManager):
         return log_category, category_exists
 
     def _create_default_log_categories(self):
-        default_log_categories = {'Information': 'Informational messages',
-                                  'Warning': 'Warning messages',
-                                  'Error': 'Error messages',}
-        for category in default_log_categories:
-            self.create_log_category(category, default_log_categories[category])
+        for category in self.default_log_categories:
+            self.create_log_category(category, self.default_log_categories[category])
