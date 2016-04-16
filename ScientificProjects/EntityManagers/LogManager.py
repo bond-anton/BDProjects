@@ -30,29 +30,26 @@ class LogManager(EntityManager):
                 self.log_record('Log category %s is already registered' % log_category.category, 'Warning')
             return self.session.query(LogCategory).filter(LogCategory.category == log_category.category).one()
 
-    def log_record(self, record, category=None, project=None, user=None):
+    def log_record(self, record, category=None):
         log_category, category_exists = self._check_category_name(category)
         category_id, project_id, user_id = None, None, None
         if not category_exists:
-            self.log_record('Create log category first', 'Warning', project=project, user=user)
+            self.log_record('Create log category first', 'Warning')
         else:
             category_id = log_category.id
-            if project is not None:
-                if not isinstance(project, Project):
+            if self.session_manager.project is not None:
+                if not isinstance(self.session.project, Project):
                     raise ValueError('provide a Project instance or None')
-                project_id = project.id
-            if user is not None:
-                if not isinstance(user, User):
+                project_id = self.session_manager.project.id
+            if self.session_manager.user is not None:
+                if not isinstance(self.session_manager.user, User):
                     raise ValueError('provide a valid User or None')
-                user_id = user.id
+                user_id = self.session_manager.user.id
             log = Log(record=record, category_id=category_id, project_id=project_id, user_id=user_id)
             self.session.add(log)
             self.session.commit()
             if self.echo:
-                if user is None:
-                    user_login = 'bot'
-                else:
-                    user_login = user.login
+                user_login = self.session_manager.user.login
                 print('[%s] @%s: %s' % (log_category.category, user_login, record))
 
     def _check_category_name(self, category, description=None):
