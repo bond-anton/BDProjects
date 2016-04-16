@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from ScientificProjects import Base
-
+from ScientificProjects.EntityManagers.VersionManager import VersionManager
 from ScientificProjects.EntityManagers.LogManager import LogManager
 from ScientificProjects.EntityManagers.UserManager import UserManager
 from ScientificProjects.EntityManagers.ProjectManager import ProjectManager
@@ -30,6 +30,7 @@ class SessionManager(object):
         self.session.close()
 
         self.log_manager = LogManager(self.engine, self)
+        self.version_manager = VersionManager(self.engine, self)
         self.user_manager = UserManager(self.engine, self)
         self.project_manager = ProjectManager(self.engine, self)
 
