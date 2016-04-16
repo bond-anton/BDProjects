@@ -4,13 +4,15 @@ from sqlalchemy.exc import IntegrityError
 
 from ScientificProjects.Entities.User import User
 from ScientificProjects.EntityManagers import EntityManager
+from ScientificProjects.EntityManagers.LogManager import LogManager
 
 
 class UserManager(EntityManager):
 
     def __init__(self, engine, session_manager):
-        self.user = None
         super(UserManager, self).__init__(engine, session_manager)
+        self.user = None
+        self.log_manager = self.session_manager.log_manager
 
     def create_user(self, name_first, name_last, email, login, password):
         user = User(name_first=str(name_first), name_last=str(name_last),
@@ -18,13 +20,13 @@ class UserManager(EntityManager):
         try:
             self.session.add(user)
             self.session.commit()
-            self.session_manager.log_manager.log_record(record='User @%s successfully created' % user.login,
-                                                        category='Information')
+            self.log_manager.log_record(record='User @%s successfully created' % user.login,
+                                        category='Information')
             return user
         except IntegrityError:
             self.session.rollback()
-            self.session_manager.log_manager.log_record(record='User @%s is already registered' % user.login,
-                                                        category='Warning')
+            self.log_manager.log_record(record='User @%s is already registered' % user.login,
+                                        category='Warning')
             return self.session.query(User).filter(User.login == str(login)).one()
 
     def sign_in(self, login, password):
@@ -35,21 +37,23 @@ class UserManager(EntityManager):
                 self.user = user
                 self.user.signed_in = True
                 self.session.commit()
-                self.session_manager.log_manager.log_record(record='User @%s signed in' % self.user.login,
-                                                            category='Information')
+                self.log_manager.log_record(record='User @%s signed in' % self.user.login,
+                                            category='Information')
+                self.log_manager = LogManager(self.engine, self)
             else:
-                self.session_manager.log_manager.log_record(record='Login failed. Username: @%s' % self.user.login,
-                                                            category='Warning')
+                self.log_manager.log_record(record='Login failed. Username: @%s' % self.user.login,
+                                            category='Warning')
         else:
-            self.session_manager.log_manager.log_record(record='Login failed. Username: @%s' % str(login),
-                                                        category='Warning')
+            self.log_manager.log_record(record='Login failed. Username: @%s' % str(login),
+                                        category='Warning')
 
     def sign_out(self):
         if self.signed_in():
             self.user.signed_in = False
             self.session.commit()
-            self.session_manager.log_manager.log_record(record='User @%s signed out' % self.user.login,
-                                                        category='Information')
+            self.log_manager = self.session_manager.log_manager
+            self.log_manager.log_record(record='User @%s signed out' % self.user.login,
+                                        category='Information')
             self.user = None
 
     def signed_in(self):
@@ -59,12 +63,12 @@ class UserManager(EntityManager):
         return False
 
     def signed_in_users(self):
-        return self.session.query(User).filter(User.signed_in == True).all()
+        return self.session.query(User).filter(User.signed_in is True).all()
 
     def logoff_all(self):
-        users = self.session.query(User).filter(User.signed_in == True).all()
+        users = self.session.query(User).filter(User.signed_in is True).all()
         for user in users:
             user.signed_in = False
             self.session.commit()
-            self.session_manager.log_manager.log_record(record='User @%s signed out' % user.login,
-                                                        category='Information')
+            self.log_manager.log_record(record='User @%s signed out' % user.login,
+                                        category='Information')

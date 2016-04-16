@@ -57,7 +57,7 @@ class LogManager(EntityManager):
                 else:
                     role_title = role.title
                     user_login = role.user.login
-                print('[%s] %s (@%s): %s' % (log_category.category, role_title, user_login, record))
+                print('[%s] %s (@%s): %s' % (log_category.category[:4], role_title, user_login, record))
 
     def _check_category_name(self, category, description=None):
         category_exists = False

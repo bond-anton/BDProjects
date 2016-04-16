@@ -11,8 +11,9 @@ from ScientificProjects.EntityManagers import EntityManager
 class ProjectManager(EntityManager):
 
     def __init__(self, engine, session_manager):
-        self.current_project = None
         super(ProjectManager, self).__init__(engine, session_manager)
+        self.current_project = None
+        self.log_manager = self.session_manager.log_manager
 
     def create_project(self, name, description, data_dir):
         if self.session_manager.user_manager.signed_in():
@@ -24,17 +25,17 @@ class ProjectManager(EntityManager):
                 try:
                     self.session.add(project)
                     self.session.commit()
-                    self.session_manager.log_manager.log_record(record='Project %s created' % project.name,
-                                                                category='Information')
+                    self.log_manager.log_record(record='Project %s created' % project.name,
+                                                category='Information')
                 except IntegrityError:
                     self.session.rollback()
-                    self.session_manager.log_manager.log_record(record='Project %s already exists' % project.name,
+                    self.log_manager.log_record(record='Project %s already exists' % project.name,
                                                                 category='Warning')
             else:
-                self.session_manager.log_manager.log_record(record='Directory %s not writable' % data_dir,
+                self.log_manager.log_record(record='Directory %s not writable' % data_dir,
                                                             category='Warning')
         else:
-            self.session_manager.log_manager.log_record(record='Attempt to create project before signing in',
+            self.log_manager.log_record(record='Attempt to create project before signing in',
                                                         category='Warning')
 
     def get_own_projects(self):
@@ -42,7 +43,7 @@ class ProjectManager(EntityManager):
             projects = self.session.query(Project).filter(Project.owner == self.session_manager.user_manager.user).all()
             return projects
         else:
-            self.session_manager.log_manager.log_record(record='Attempt to get list of user project before signing in',
+            self.log_manager.log_record(record='Attempt to get list of user project before signing in',
                                                         category='Warning')
 
     def open_project(self, project):
@@ -50,24 +51,24 @@ class ProjectManager(EntityManager):
             if isinstance(project, Project):
                 if project in self.get_own_projects():
                     self.current_project = project
-                    self.session_manager.log_manager.log_record(record='Project %s opened' % project.name,
+                    self.log_manager.log_record(record='Project %s opened' % project.name,
                                                                 category='Information')
                 else:
-                    self.session_manager.log_manager.log_record(record='Project %s not found' % project.name,
+                    self.log_manager.log_record(record='Project %s not found' % project.name,
                                                                 category='Information')
             elif isinstance(project, str):
                 projects = self.session.query(Project).filter(Project.owner == self.session_manager.user_manager.user,
                                                               Project.name == project).all()
                 if projects:
                     self.current_project = projects[0]
-                    self.session_manager.log_manager.log_record(record='Project %s opened' % self.current_project,
+                    self.log_manager.log_record(record='Project %s opened' % self.current_project,
                                                                 category='Information')
                 else:
-                    self.session_manager.log_manager.log_record(record='Project %s not found' % project,
+                    self.log_manager.log_record(record='Project %s not found' % project,
                                                                 category='Information')
             else:
-                self.session_manager.log_manager.log_record(record='Can not open project: wrong argument',
+                self.log_manager.log_record(record='Can not open project: wrong argument',
                                                             category='Warning')
         else:
-            self.session_manager.log_manager.log_record(record='Attempt to open project before signing in',
+            self.log_manager.log_record(record='Attempt to open project before signing in',
                                                         category='Warning')
