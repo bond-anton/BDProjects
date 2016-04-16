@@ -8,6 +8,7 @@ from ScientificProjects.EntityManagers.VersionManager import VersionManager
 from ScientificProjects.EntityManagers.LogManager import LogManager
 from ScientificProjects.EntityManagers.UserManager import UserManager
 from ScientificProjects.Entities.User import User
+from ScientificProjects.Entities.Project import Project
 
 
 class SessionManager(object):
@@ -45,8 +46,19 @@ class SessionManager(object):
         return self.session.query(User).filter(User.signed_in == 1).all()
 
     def logoff_all(self):
+        self.close_all_projects()
         for user in self.signed_in_users():
             user.signed_in = False
             self.session.commit()
             self.log_manager.log_record(record='@%s was logged off' % user.login,
+                                        category='Information')
+
+    def opened_projects(self):
+        return self.session.query(Project).filter(Project.opened == 1).all()
+
+    def close_all_projects(self):
+        for project in self.opened_projects():
+            project.opened = False
+            self.session.commit()
+            self.log_manager.log_record(record='Project %s was closed' % project.name,
                                         category='Information')

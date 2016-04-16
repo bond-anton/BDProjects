@@ -13,7 +13,11 @@ class UserManager(EntityManager):
     def __init__(self, engine, session_manager):
         super(UserManager, self).__init__(engine, session_manager)
         self.log_manager = self.session_manager.log_manager
-        self.project_manager = None
+        self.project_manager = ProjectManager(self.engine, self)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.sign_out()
+        self.close_session()
 
     def create_user(self, name_first, name_last, email, login, password):
         user = User(name_first=str(name_first), name_last=str(name_last),
@@ -44,8 +48,6 @@ class UserManager(EntityManager):
                 self.log_manager = LogManager(self.engine, self)
                 self.log_manager.log_record(record='@%s signed in' % self.user.login,
                                             category='Information')
-                # Project manager is created only if user signed in
-                self.project_manager = ProjectManager(self.engine, self)
             else:
                 self.log_manager.log_record(record='Login failed. Username: @%s' % self.user.login,
                                             category='Warning')
@@ -55,16 +57,22 @@ class UserManager(EntityManager):
 
     def sign_out(self):
         if self.signed_in():
+            self.project_manager.close_project()
             self.user.signed_in = False
             self.session.commit()
             self.log_manager.log_record(record='@%s signed out' % self.user.login,
                                         category='Information')
             self.user = self.session_manager.user
             self.log_manager = self.session_manager.log_manager
-            self.project_manager = None
 
     def signed_in(self):
         if isinstance(self.user, User):
-            if self.user.signed_in:
+            users = self.session.query(User).filter(User.login == str(self.user.login),
+                                                    User.signed_in == 1).all()
+            if users:
                 return True
+            else:
+                self.user = self.session_manager.user
+                self.log_manager = self.session_manager.log_manager
+                return False
         return False

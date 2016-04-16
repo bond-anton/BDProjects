@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-from sqlalchemy import Column, DateTime, String, Text, Integer, ForeignKey, func
+from sqlalchemy import Column, Integer, Boolean, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
@@ -16,6 +16,7 @@ class Project(Base):
     owner_id = Column(Integer, ForeignKey('user.id'))
     owner = relationship(User, backref=backref('projects', uselist=True, cascade='delete,all'))
     data_dir = Column(String)
+    opened = Column(Boolean, default=False)
 
     def __str__(self):
         return self.name

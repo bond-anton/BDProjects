@@ -16,6 +16,9 @@ sm.user_manager.project_manager.open_project(project_name)
 sm.user_manager.sign_in('john_smith', 'secret_password')
 sm.user_manager.project_manager.create_project(project_name, 'My first ever really super project', 'data/files')
 sm.user_manager.project_manager.open_project(project_name)
+sm.logoff_all()
+sm.close_all_projects()
+sm.user_manager.project_manager.open_project(project_name)
 sm.user_manager.sign_out()
 
 '''

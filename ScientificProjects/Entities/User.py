@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, func
+from sqlalchemy import Column, Integer, Boolean, String, DateTime, func
 from sqlalchemy_utils import PasswordType
 
 from ScientificProjects import Base
