@@ -19,10 +19,3 @@ class EntityManager(object):
     def close_session(self):
         self.session.close()
         self.session = None
-
-
-class DependentEntityManager(object):
-
-    def __init__(self, session, session_manager):
-        self.session = session
-        self.session_manager = session_manager

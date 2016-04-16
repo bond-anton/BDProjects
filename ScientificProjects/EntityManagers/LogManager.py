@@ -28,7 +28,8 @@ class LogManager(EntityManager):
             return log_category
         else:
             self.session.rollback()
-            self.log_record('Log category %s is already registered' % log_category.category, 'Warning')
+            if log_category.category not in self.default_log_categories:
+                self.log_record('Log category %s is already registered' % log_category.category, 'Warning')
             return self.session.query(LogCategory).filter(LogCategory.category == log_category.category).one()
 
     def log_record(self, record, category=None, project=None, role=None):
@@ -56,7 +57,7 @@ class LogManager(EntityManager):
                 else:
                     role_title = role.title
                     user_login = role.user.login
-                print('[%s] %s (%s): %s' % (log_category.category, role_title, user_login, record))
+                print('[%s] %s (@%s): %s' % (log_category.category, role_title, user_login, record))
 
     def _check_category_name(self, category, description=None):
         category_exists = False

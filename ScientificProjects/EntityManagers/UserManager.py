@@ -18,12 +18,12 @@ class UserManager(EntityManager):
         try:
             self.session.add(user)
             self.session.commit()
-            self.session_manager.log_manager.log_record(record='User %s successfully created' % user.login,
+            self.session_manager.log_manager.log_record(record='User @%s successfully created' % user.login,
                                                         category='Information')
             return user
         except IntegrityError:
             self.session.rollback()
-            self.session_manager.log_manager.log_record(record='User %s is already registered' % user.login,
+            self.session_manager.log_manager.log_record(record='User @%s is already registered' % user.login,
                                                         category='Warning')
             return self.session.query(User).filter(User.login == str(login)).one()
 
@@ -35,20 +35,20 @@ class UserManager(EntityManager):
                 self.user = user
                 self.user.signed_in = True
                 self.session.commit()
-                self.session_manager.log_manager.log_record(record='User %s signed in' % self.user.login,
+                self.session_manager.log_manager.log_record(record='User @%s signed in' % self.user.login,
                                                             category='Information')
             else:
-                self.session_manager.log_manager.log_record(record='Login failed. Username: %s' % self.user.login,
+                self.session_manager.log_manager.log_record(record='Login failed. Username: @%s' % self.user.login,
                                                             category='Warning')
         else:
-            self.session_manager.log_manager.log_record(record='Login failed. Username: %s' % str(login),
+            self.session_manager.log_manager.log_record(record='Login failed. Username: @%s' % str(login),
                                                         category='Warning')
 
     def sign_out(self):
         if self.signed_in():
             self.user.signed_in = False
             self.session.commit()
-            self.session_manager.log_manager.log_record(record='User %s signed out' % self.user.login,
+            self.session_manager.log_manager.log_record(record='User @%s signed out' % self.user.login,
                                                         category='Information')
             self.user = None
 
@@ -59,17 +59,12 @@ class UserManager(EntityManager):
         return False
 
     def signed_in_users(self):
-        users = self.session.query(User).filter(User.signed_in == True).all()
-        signed_in_users = {}
-        for user in users:
-            signed_in_users[user.login] = {'full name': '%s %s' % (user.name_first, user.name_last),
-                                           'email': user.email}
-        return signed_in_users
+        return self.session.query(User).filter(User.signed_in == True).all()
 
     def logoff_all(self):
         users = self.session.query(User).filter(User.signed_in == True).all()
         for user in users:
             user.signed_in = False
             self.session.commit()
-            self.session_manager.log_manager.log_record(record='User %s signed out' % user.login,
+            self.session_manager.log_manager.log_record(record='User @%s signed out' % user.login,
                                                         category='Information')

@@ -16,3 +16,6 @@ class Project(Base):
     owner_id = Column(Integer, ForeignKey('user.id'))
     owner = relationship(User, backref=backref('projects', uselist=True, cascade='delete,all'))
     data_dir = Column(String)
+
+    def __str__(self):
+        return self.name
