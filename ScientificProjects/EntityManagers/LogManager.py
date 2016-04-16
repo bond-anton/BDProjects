@@ -1,5 +1,5 @@
 from __future__ import division, print_function
-
+import numpy as np
 from ScientificProjects.Entities.Log import LogCategory, Log
 from ScientificProjects.Entities.Project import Project
 from ScientificProjects.Entities.User import User
@@ -49,8 +49,14 @@ class LogManager(EntityManager):
             self.session.add(log)
             self.session.commit()
             if self.echo:
+                login_length = self._get_max_login_length()
                 user_login = self.session_manager.user.login
-                print('[%s] @%s: %s' % (log_category.category, user_login, record))
+                user_login = '@' + user_login + ' ' * (login_length - len(user_login))
+                print('[%s] %s: %s' % (log_category.category.upper()[:4], user_login, record))
+
+    def _get_max_login_length(self):
+        all_users_login = list(np.array(self.session.query(User.login).all()).ravel())
+        return len(max(all_users_login, key=len))
 
     def _check_category_name(self, category, description=None):
         category_exists = False
