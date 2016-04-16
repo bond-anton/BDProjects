@@ -1,10 +1,8 @@
 from __future__ import division, print_function
 
-from sqlalchemy.exc import IntegrityError
-
 from ScientificProjects.Entities.Log import LogCategory, Log
 from ScientificProjects.Entities.Project import Project
-from ScientificProjects.Entities.Role import Role
+from ScientificProjects.Entities.User import User
 from ScientificProjects.EntityManagers import EntityManager
 
 
@@ -32,32 +30,30 @@ class LogManager(EntityManager):
                 self.log_record('Log category %s is already registered' % log_category.category, 'Warning')
             return self.session.query(LogCategory).filter(LogCategory.category == log_category.category).one()
 
-    def log_record(self, record, category=None, project=None, role=None):
+    def log_record(self, record, category=None, project=None, user=None):
         log_category, category_exists = self._check_category_name(category)
-        category_id, project_id, role_id = None, None, None
+        category_id, project_id, user_id = None, None, None
         if not category_exists:
-            self.log_record('Create log category first', 'Warning', project=project, role=role)
+            self.log_record('Create log category first', 'Warning', project=project, user=user)
         else:
             category_id = log_category.id
             if project is not None:
                 if not isinstance(project, Project):
                     raise ValueError('provide a Project instance or None')
                 project_id = project.id
-            if role is not None:
-                if not isinstance(role, Role):
-                    raise ValueError('provide a Role instance or None')
-                role_id = role.id
-            log = Log(record=record, category_id=category_id, project_id=project_id, role_id=role_id)
+            if user is not None:
+                if not isinstance(user, User):
+                    raise ValueError('provide a valid User or None')
+                user_id = user.id
+            log = Log(record=record, category_id=category_id, project_id=project_id, user_id=user_id)
             self.session.add(log)
             self.session.commit()
             if self.echo:
-                if role is None:
-                    role_title = 'bot'
+                if user is None:
                     user_login = 'bot'
                 else:
-                    role_title = role.title
-                    user_login = role.user.login
-                print('[%s] %s (@%s): %s' % (log_category.category, role_title, user_login, record))
+                    user_login = user.login
+                print('[%s] @%s: %s' % (log_category.category, user_login, record))
 
     def _check_category_name(self, category, description=None):
         category_exists = False

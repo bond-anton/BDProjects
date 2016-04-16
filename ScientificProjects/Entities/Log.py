@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
 from ScientificProjects.Entities.Project import Project
-from ScientificProjects.Entities.Role import Role
+from ScientificProjects.Entities.User import User
 
 
 class LogCategory(Base):
@@ -23,6 +23,6 @@ class Log(Base):
     category = relationship(LogCategory, backref=backref('logs', uselist=True, cascade='delete,all'))
     project_id = Column(Integer, ForeignKey('project.id'))
     project = relationship(Project, backref=backref('logs', uselist=True, cascade='delete,all'))
-    role_id = Column(Integer, ForeignKey('role.id'))
-    role = relationship(Role, backref=backref('logs', uselist=True, cascade='delete,all'))
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User, backref=backref('logs', uselist=True, cascade='delete,all'))
     created = Column(DateTime, default=func.now())
