@@ -1,4 +1,5 @@
 from __future__ import division, print_function
+import datetime
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -45,13 +46,27 @@ class SessionManager(object):
     def signed_in_users(self):
         return self.session.query(User).filter(User.signed_in == 1).all()
 
+    def log_signed_in_users(self):
+        self.log_manager.log_record(record='Logging signed in users',
+                                    category='Information')
+        for user in self.signed_in_users():
+            signed_in_for = (datetime.datetime.utcnow() - user.last_sign_in)
+            las_login_string = user.last_sign_in.strftime("%Y-%m-%d %H:%M:%S")
+            self.log_manager.log_record(record='@%s is signed in for %s (since %s)' % (user.login,
+                                                                                       signed_in_for,
+                                                                                       las_login_string),
+                                        category='Information')
+
     def logoff_all(self):
+        self.log_manager.log_record(record='Logging off ALL signed in users',
+                                    category='Warning')
         self.close_all_projects()
         for user in self.signed_in_users():
             user.signed_in = False
+            user.last_sign_out = datetime.datetime.utcnow()
             self.session.commit()
             self.log_manager.log_record(record='@%s was logged off' % user.login,
-                                        category='Information')
+                                        category='Warning')
 
     def opened_projects(self):
         return self.session.query(Project).filter(Project.opened == 1).all()

@@ -1,4 +1,5 @@
 from __future__ import division, print_function
+import datetime
 
 from sqlalchemy.exc import IntegrityError
 
@@ -44,6 +45,7 @@ class UserManager(EntityManager):
             if user.password == str(password):
                 self.user = user
                 self.user.signed_in = True
+                self.user.last_sign_in = datetime.datetime.utcnow()
                 self.session.commit()
                 self.log_manager = LogManager(self.engine, self)
                 self.log_manager.log_record(record='@%s signed in' % self.user.login,
@@ -59,6 +61,7 @@ class UserManager(EntityManager):
         if self.signed_in():
             self.project_manager.close_project()
             self.user.signed_in = False
+            self.user.last_sign_out = datetime.datetime.utcnow()
             self.session.commit()
             self.log_manager.log_record(record='@%s signed out' % self.user.login,
                                         category='Information')

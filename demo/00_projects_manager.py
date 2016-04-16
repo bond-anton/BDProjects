@@ -1,12 +1,12 @@
 from __future__ import division, print_function
+import time
 from ScientificProjects.SessionManager import SessionManager
 
 sm = SessionManager('data/test.db')
 sm.user_manager.create_user('John', 'Smith', 'john.smith@somecorp.com', 'john_smith', 'secret_password')
 sm.user_manager.sign_in('john_smith', 'secret_password')
-print('Signed in users:')
-for logged_in_user in sm.signed_in_users():
-    print('\t', logged_in_user)
+time.sleep(5)
+sm.log_signed_in_users()
 sm.logoff_all()
 # print(sm.user_manager.signed_in_users())
 

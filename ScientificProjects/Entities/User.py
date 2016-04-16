@@ -14,8 +14,10 @@ class User(Base):
     email = Column(String, unique=True)
     login = Column(String, unique=True)
     password = Column(PasswordType(schemes=['pbkdf2_sha512', 'md5_crypt']))
-    signed_in = Column(Boolean, default=False)
     registered = Column(DateTime, default=func.now())
+    signed_in = Column(Boolean, default=False)
+    last_sign_in = Column(DateTime)
+    last_sign_out = Column(DateTime)
 
     def __str__(self):
         user_record = '@%s (%s %s) <%s>' % (self.login, self.name_first.title(), self.name_last.upper(), self.email)

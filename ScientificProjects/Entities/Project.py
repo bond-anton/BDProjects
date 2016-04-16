@@ -16,6 +16,7 @@ class Project(Base):
     owner_id = Column(Integer, ForeignKey('user.id'))
     owner = relationship(User, backref=backref('projects', uselist=True, cascade='delete,all'))
     data_dir = Column(String)
+    # TODO: Turn User-Project relation into many-to-many
     opened = Column(Boolean, default=False)
 
     def __str__(self):
