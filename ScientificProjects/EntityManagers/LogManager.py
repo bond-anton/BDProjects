@@ -38,7 +38,7 @@ class LogManager(EntityManager):
         else:
             category_id = log_category.id
             if self.session_manager.project is not None:
-                if not isinstance(self.session.project, Project):
+                if not isinstance(self.session_manager.project, Project):
                     raise ValueError('provide a Project instance or None')
                 project_id = self.session_manager.project.id
             if self.session_manager.user is not None:

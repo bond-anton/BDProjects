@@ -4,11 +4,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from ScientificProjects import Base
-from ScientificProjects.Entities.User import User
 from ScientificProjects.EntityManagers.VersionManager import VersionManager
 from ScientificProjects.EntityManagers.LogManager import LogManager
 from ScientificProjects.EntityManagers.UserManager import UserManager
-from ScientificProjects.EntityManagers.ProjectManager import ProjectManager
+from ScientificProjects.Entities.User import User
 
 
 class SessionManager(object):
@@ -23,12 +22,12 @@ class SessionManager(object):
         if port:
             hostname += ':' + str(port)
         self.engine = create_engine(backend + '://' + credentials + hostname + '/' + db_name)
+        self.metadata = Base.metadata
+        self._create_tables(overwrite)
+
         session = sessionmaker()
         session.configure(bind=self.engine)
         self.session = session()
-        self.metadata = Base.metadata
-        self._create_tables(overwrite)
-        self.session.close()
 
         self.user = User(name_first='Bot', name_last='Bot', login='bot')
         self.project = None
@@ -36,9 +35,18 @@ class SessionManager(object):
         self.log_manager = LogManager(self.engine, self)
         self.version_manager = VersionManager(self.engine, self)
         self.user_manager = UserManager(self.engine, self)
-        self.project_manager = ProjectManager(self.engine, self)
 
     def _create_tables(self, overwrite=False):
         if overwrite:
             self.metadata.drop_all(self.engine)
         self.metadata.create_all(self.engine)
+
+    def signed_in_users(self):
+        return self.session.query(User).filter(User.signed_in == 1).all()
+
+    def logoff_all(self):
+        for user in self.signed_in_users():
+            user.signed_in = False
+            self.session.commit()
+            self.log_manager.log_record(record='@%s was logged off' % user.login,
+                                        category='Information')
