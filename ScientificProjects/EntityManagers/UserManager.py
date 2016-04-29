@@ -15,6 +15,8 @@ class UserManager(EntityManager):
         super(UserManager, self).__init__(engine, session_manager)
         self.log_manager = self.session_manager.log_manager
         self.project_manager = ProjectManager(self.engine, self)
+        self.default_users = {'bot': [None, None, None, 'bot', None]}
+        self._create_default_users()
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.sign_out()
@@ -26,35 +28,41 @@ class UserManager(EntityManager):
         try:
             self.session.add(user)
             self.session.commit()
-            self.log_manager.log_record(record='User @%s successfully created' % user.login,
-                                        category='Information')
+            if user.login not in self.default_users:
+                self.log_manager.log_record(record='User @%s successfully created' % user.login,
+                                            category='Information')
             return user
         except IntegrityError:
             self.session.rollback()
-            self.log_manager.log_record(record='User @%s already exists' % user.login,
-                                        category='Warning')
+            if user.login not in self.default_users:
+                self.log_manager.log_record(record='User @%s already exists' % user.login,
+                                            category='Warning')
             return self.session.query(User).filter(User.login == str(login)).one()
 
     def sign_in(self, login, password):
-        if self.signed_in():
-            # UserManager works with only one User at a time
-            self.sign_out()
-        user = self.session.query(User).filter(User.login == str(login)).all()
-        if user:
-            user = user[0]
-            if user.password == str(password):
-                self.user = user
-                self.user.signed_in = True
-                self.user.last_sign_in = datetime.datetime.utcnow()
-                self.session.commit()
-                self.log_manager = LogManager(self.engine, self)
-                self.log_manager.log_record(record='@%s signed in' % self.user.login,
-                                            category='Information')
+        if login not in self.default_users:
+            if self.signed_in():
+                # UserManager works with only one User at a time
+                self.sign_out()
+            user = self.session.query(User).filter(User.login == str(login)).all()
+            if user:
+                user = user[0]
+                if user.password == str(password):
+                    self.user = user
+                    self.user.signed_in = True
+                    self.user.last_sign_in = datetime.datetime.utcnow()
+                    self.session.commit()
+                    self.log_manager = LogManager(self.engine, self)
+                    self.log_manager.log_record(record='@%s signed in' % self.user.login,
+                                                category='Information')
+                else:
+                    self.log_manager.log_record(record='Login failed. Username: @%s' % self.user.login,
+                                                category='Warning')
             else:
-                self.log_manager.log_record(record='Login failed. Username: @%s' % self.user.login,
+                self.log_manager.log_record(record='Login failed. Username: @%s' % str(login),
                                             category='Warning')
         else:
-            self.log_manager.log_record(record='Login failed. Username: @%s' % str(login),
+            self.log_manager.log_record(record='Login failed (system user). Username: @%s' % str(login),
                                         category='Warning')
 
     def sign_out(self):
@@ -79,3 +87,8 @@ class UserManager(EntityManager):
                 self.log_manager = self.session_manager.log_manager
                 return False
         return False
+
+    def _create_default_users(self):
+        for user_data in self.default_users:
+            user = self.default_users[user_data]
+            self.create_user(user[0], user[1], user[2], user[3], user[4])

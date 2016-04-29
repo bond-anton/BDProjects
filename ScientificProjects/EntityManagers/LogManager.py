@@ -32,7 +32,7 @@ class LogManager(EntityManager):
 
     def log_record(self, record, category=None):
         log_category, category_exists = self._check_category_name(category)
-        category_id, project_id, user_id = None, None, None
+        category_id, project_id = None, None
         if not category_exists:
             self.log_record('Create log category first', 'Warning')
         else:

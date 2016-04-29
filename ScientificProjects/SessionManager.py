@@ -31,12 +31,13 @@ class SessionManager(object):
         session.configure(bind=self.engine)
         self.session = session()
 
-        self.user = User(name_first='Bot', name_last='Bot', login='bot')
+        self.user = None #User(name_first=None, name_last=None, login='bot')
         self.project = None
 
         self.log_manager = LogManager(self.engine, self)
         self.version_manager = VersionManager(self.engine, self)
         self.user_manager = UserManager(self.engine, self)
+        self.user = self.session.query(User).filter(User.login == 'bot').all()[0]
 
     def _create_tables(self, overwrite=False):
         if overwrite:
@@ -47,7 +48,7 @@ class SessionManager(object):
         return self.session.query(User).filter(User.signed_in == 1).all()
 
     def log_signed_in_users(self):
-        self.log_manager.log_record(record='Logging signed in users',
+        self.log_manager.log_record(record='Listing signed in users',
                                     category='Information')
         for user in self.signed_in_users():
             signed_in_for = (datetime.datetime.utcnow() - user.last_sign_in)
@@ -58,7 +59,7 @@ class SessionManager(object):
                                         category='Information')
 
     def logoff_all(self):
-        self.log_manager.log_record(record='Logging off ALL signed in users',
+        self.log_manager.log_record(record='Kick-off ALL signed in users',
                                     category='Warning')
         self.close_all_projects()
         for user in self.signed_in_users():
