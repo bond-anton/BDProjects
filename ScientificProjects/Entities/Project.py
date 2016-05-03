@@ -8,6 +8,7 @@ from ScientificProjects.Entities.User import User
 
 
 class Project(Base):
+
     __tablename__ = 'project'
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)

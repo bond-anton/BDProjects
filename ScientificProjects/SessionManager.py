@@ -17,7 +17,6 @@ class SessionManager(object):
     def __init__(self, db_name='/:memory:', backend='sqlite',
                  hostname='', port='', user='', password='',
                  overwrite=False):
-        # postgresql://scott:tiger@localhost:5432/mydatabase
         credentials = user + ':' + password if password else user
         if credentials:
             credentials += '@'
@@ -31,7 +30,7 @@ class SessionManager(object):
         session.configure(bind=self.engine)
         self.session = session()
 
-        self.user = None #User(name_first=None, name_last=None, login='bot')
+        self.user = None
         self.project = None
 
         self.log_manager = LogManager(self.engine, self)
