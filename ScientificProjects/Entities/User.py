@@ -7,6 +7,7 @@ from ScientificProjects import Base
 
 
 class User(Base):
+
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
     name_first = Column(String)

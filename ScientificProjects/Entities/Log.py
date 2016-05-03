@@ -9,6 +9,7 @@ from ScientificProjects.Entities.User import User
 
 
 class LogCategory(Base):
+
     __tablename__ = 'log_category'
     id = Column(Integer, primary_key=True)
     category = Column(String, unique=True)
@@ -16,6 +17,7 @@ class LogCategory(Base):
 
 
 class Log(Base):
+
     __tablename__ = 'log'
     id = Column(Integer, primary_key=True)
     record = Column(String)

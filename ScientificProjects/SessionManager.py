@@ -10,6 +10,7 @@ from ScientificProjects.EntityManagers.LogManager import LogManager
 from ScientificProjects.EntityManagers.UserManager import UserManager
 from ScientificProjects.Entities.User import User
 from ScientificProjects.Entities.Project import Project
+from ScientificProjects.Entities.Sample import Sample
 
 
 class SessionManager(object):

@@ -6,6 +6,7 @@ from ScientificProjects import Base
 
 
 class Version(Base):
+
     __tablename__ = 'version'
     id = Column(Integer, primary_key=True)
     version_major = Column(Integer)
