@@ -8,24 +8,28 @@ from ScientificProjects.Entities.Project import Project
 from ScientificProjects.Entities.User import User
 from ScientificProjects.Entities.Parameter import Parameter
 
-
-association_table = Table('sample_parameter', Base.metadata,
-                          Column('sample_id', Integer, ForeignKey('sample.id')),
+association_table = Table('experimental_setup_parameter', Base.metadata,
+                          Column('setup_id', Integer, ForeignKey('experimental_setup.id')),
                           Column('parameter_id', Integer, ForeignKey('parameter.id')))
 
 
-class Sample(Base):
+class ExperimentalSetup(Base):
+    __tablename__ = 'experimental_setup'
+    id = Column(Integer, primary_key=True)
+    instrument_id = Column(Integer, ForeignKey('instrument.id'))
+    measurement_type_id = Column(Integer, ForeignKey('measurement_type.id'))
+    registered = Column(DateTime, default=func.now())
+    instrument = relationship("Instrument", back_populates="methods")
+    measurement_type = relationship("MeasurementType", back_populates="instruments")
 
-    __tablename__ = 'sample'
+
+class Instrument(Base):
+
+    __tablename__ = 'instrument'
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     description = Column(Text)
     created = Column(DateTime, default=func.now())
-    project_id = Column(Integer, ForeignKey('project.id'))
-    project = relationship(Project, backref=backref('samples', uselist=True, cascade='delete,all'))
-    owner_id = Column(Integer, ForeignKey('user.id'))
-    owner = relationship(User, backref=backref('samples', uselist=True, cascade='delete,all'))
-    parameters = relationship(Parameter, secondary=association_table, backref="samples")
 
     def __str__(self):
         return self.name
