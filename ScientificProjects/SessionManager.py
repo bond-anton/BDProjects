@@ -11,6 +11,7 @@ from ScientificProjects.EntityManagers.UserManager import UserManager
 from ScientificProjects.Entities.User import User
 from ScientificProjects.Entities.Project import Project
 from ScientificProjects.Entities.Sample import Sample
+from ScientificProjects.Entities.Equipment import Equipment
 
 
 class SessionManager(object):
