@@ -32,7 +32,7 @@ class MeasurementsCollection(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User, backref=backref('measurements_collections', uselist=True,
                                               cascade='delete,all'))
-    measurements = relationship(Measurement, secondary=measurement_collection_table,
+    measurements = relationship('Measurement', secondary=measurement_collection_table,
                                 backref="collections")
     created = Column(DateTime, default=func.now())
 
@@ -55,7 +55,7 @@ class Measurement(Base):
     user = relationship(User, backref=backref('measurements', uselist=True,
                                               cascade='delete,all'))
     input_data_id = Column(Integer, ForeignKey('measurements_collection.id'))
-    input_data = relationship(MeasurementsCollection, backref=backref('measurements', uselist=True,
+    input_data = relationship(MeasurementsCollection, backref=backref('analyses', uselist=True,
                                                                       cascade='delete,all'))
     parameters = relationship(Parameter, secondary=measurement_parameter_table,
                               backref="measurements")

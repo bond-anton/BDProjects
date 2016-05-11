@@ -64,7 +64,7 @@ class Equipment(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User, backref=backref('equipment', uselist=True, cascade='delete,all'))
     parameters = relationship(Parameter, secondary=equipment_parameters_table, backref="equipment")
-    measurements = relationship(MeasurementType, secondary=equipment_measurement_table, backref="equipment")
+    measurement_types = relationship(MeasurementType, secondary=equipment_measurement_table, backref="equipment")
     created = Column(DateTime, default=func.now())
 
     def __str__(self):

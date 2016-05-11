@@ -30,6 +30,7 @@ class DataChannel(Base):
 class DataPoint(Base):
 
     __tablename__ = 'data_point'
+    id = Column(Integer, primary_key=True)
     channel_id = Column(Integer, ForeignKey('data_channel.id'))
     channel = relationship(DataChannel, backref=backref('data_points', uselist=True,
                                                         cascade='delete,all'))
