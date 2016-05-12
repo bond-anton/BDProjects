@@ -7,6 +7,7 @@ from ScientificProjects.Entities.User import User
 from ScientificProjects.EntityManagers import EntityManager
 from ScientificProjects.EntityManagers.LogManager import LogManager
 from ScientificProjects.EntityManagers.ProjectManager import ProjectManager
+from ScientificProjects.EntityManagers.ParameterManager import ParameterManager
 
 
 class UserManager(EntityManager):
@@ -15,6 +16,7 @@ class UserManager(EntityManager):
         super(UserManager, self).__init__(engine, session_manager)
         self.log_manager = self.session_manager.log_manager
         self.project_manager = ProjectManager(self.engine, self)
+        self.parameter_manager = ParameterManager(self.engine, self)
         self.default_users = {'bot': [None, None, None, 'bot', None]}
         self._create_default_users()
 

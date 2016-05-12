@@ -1,9 +1,10 @@
 from __future__ import division, print_function
 
-from sqlalchemy import Column, DateTime, String, Text, Integer, BigInteger, ForeignKey, func
+from sqlalchemy import Column, DateTime, String, Text, Integer, BigInteger, Float, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
+from ScientificProjects.Entities.User import User
 
 
 class ParameterType(Base):
@@ -14,6 +15,9 @@ class ParameterType(Base):
     description = Column(Text)
     registered = Column(DateTime, default=func.now())
 
+    def __str__(self):
+        return self.name
+
 
 class Parameter(Base):
 
@@ -23,15 +27,13 @@ class Parameter(Base):
     type = relationship(ParameterType, backref=backref('parameters', uselist=True, cascade='delete,all'))
     parent_id = Column(Integer, ForeignKey('parameter.id'))
     children = relationship('Parameter')
-    name = Column(String, unique=True)
+    name = Column(String)
     description = Column(Text)
     unit_name = Column(String, unique=False)
     index = Column(BigInteger, nullable=False, default=0)
     string_value = Column(String)
-    value_sign = Column(Integer, nullable=False)
-    value_mantissa = Column(BigInteger, nullable=False)
-    value_exponent = Column(Integer, nullable=False)
-    value_bytecount = Column(Integer, nullable=False)
-    value_measured = Column(DateTime, nullable=False)
+    float_value = Column(Float)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User, backref=backref('parameters', uselist=True, cascade='delete,all'))
     value_added = Column(DateTime, default=func.now())
     value_altered = Column(DateTime, default=func.now(), onupdate=func.now())

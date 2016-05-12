@@ -12,6 +12,7 @@ from ScientificProjects.Entities.User import User
 from ScientificProjects.Entities.Project import Project
 from ScientificProjects.Entities.Sample import Sample
 from ScientificProjects.Entities.Equipment import Equipment
+from ScientificProjects.Entities.Measurement import Measurement
 from ScientificProjects.Entities.DataPoint import DataPoint
 
 

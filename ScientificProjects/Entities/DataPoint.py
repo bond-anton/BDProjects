@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-from sqlalchemy import Table, Column, DateTime, String, Text, Integer, BigInteger, ForeignKey, func
+from sqlalchemy import Table, Column, DateTime, String, Text, Integer, BigInteger, Float, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
@@ -36,10 +36,7 @@ class DataPoint(Base):
                                                         cascade='delete,all'))
     index = Column(BigInteger, nullable=False, default=0)
     string_value = Column(String)
-    value_sign = Column(Integer, nullable=False)
-    value_mantissa = Column(BigInteger, nullable=False)
-    value_exponent = Column(Integer, nullable=False)
-    value_bytecount = Column(Integer, nullable=False)
+    float_value = Column(Float)
     value_measured = Column(DateTime, nullable=False)
     value_added = Column(DateTime, default=func.now())
     value_altered = Column(DateTime, default=func.now(), onupdate=func.now())

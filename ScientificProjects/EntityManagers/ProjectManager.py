@@ -70,8 +70,7 @@ class ProjectManager(EntityManager):
             if isinstance(project, Project):
                 self.open_project(project.name)
             elif isinstance(project, str):
-                projects = self.session.query(Project).filter(Project.owner == self.session_manager.user,
-                                                              Project.name == project).all()
+                projects = self.session.query(Project).filter(Project.name == project).all()
                 if projects:
                     self.project = projects[0]
                     self.project.opened = True
