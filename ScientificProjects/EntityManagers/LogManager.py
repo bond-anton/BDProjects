@@ -19,6 +19,10 @@ class LogManager(EntityManager):
     def create_log_category(self, category, description=None):
         log_category, category_exists = self._check_category_name(category, description)
         if log_category and not category_exists:
+            if self.session_manager.user is not None:
+                log_category.user_id = self.session_manager.user.id
+            else:
+                log_category.user_id = 1
             self.session.add(log_category)
             self.session.commit()
             if log_category.category not in self.default_log_categories:

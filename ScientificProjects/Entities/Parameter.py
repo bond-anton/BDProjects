@@ -14,6 +14,8 @@ class ParameterType(Base):
     name = Column(String, unique=True)
     description = Column(Text)
     registered = Column(DateTime, default=func.now())
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User, backref=backref('parameter_types', uselist=True, cascade='delete,all'))
 
     def __str__(self):
         return self.name

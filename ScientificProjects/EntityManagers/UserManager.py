@@ -14,11 +14,13 @@ class UserManager(EntityManager):
 
     def __init__(self, engine, session_manager):
         super(UserManager, self).__init__(engine, session_manager)
+        self.default_users = {'bot': [None, None, None, 'bot', None]}
+        self._create_default_users()
+        self.session_manager.user = self.session.query(User).filter(User.login == 'bot').all()[0]
+        self.user = self.session_manager.user
         self.log_manager = self.session_manager.log_manager
         self.project_manager = ProjectManager(self.engine, self)
         self.parameter_manager = ParameterManager(self.engine, self)
-        self.default_users = {'bot': [None, None, None, 'bot', None]}
-        self._create_default_users()
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.sign_out()

@@ -38,9 +38,8 @@ class SessionManager(object):
         self.project = None
 
         self.log_manager = LogManager(self.engine, self)
-        self.version_manager = VersionManager(self.engine, self)
         self.user_manager = UserManager(self.engine, self)
-        self.user = self.session.query(User).filter(User.login == 'bot').all()[0]
+        self.version_manager = VersionManager(self.engine, self)
 
     def _create_tables(self, overwrite=False):
         if overwrite:

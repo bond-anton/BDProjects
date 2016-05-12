@@ -22,7 +22,7 @@ print(sm.user_manager.parameter_manager.get_parameter_types())
 sm.logoff_all()
 sm.close_all_projects()
 sm.user_manager.project_manager.open_project(project_name)
-
+sm.user_manager.parameter_manager.create_parameter('test parameter', 'Numeric value', 2*np.pi, index=0, unit_name='m')
 sm.user_manager.sign_out()
 
 '''

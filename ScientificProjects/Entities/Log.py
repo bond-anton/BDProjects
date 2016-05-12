@@ -14,6 +14,9 @@ class LogCategory(Base):
     id = Column(Integer, primary_key=True)
     category = Column(String, unique=True)
     description = Column(Text)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User, backref=backref('log_categories', uselist=True, cascade='delete,all'))
+    created = Column(DateTime, default=func.now())
 
 
 class Log(Base):
