@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 import time
 import numpy as np
-from ScientificProjects.SessionManager import SessionManager
+from ScientificProjects.Client import SessionManager
 
 sm = SessionManager('data/test.db')
 sm.user_manager.create_user('John', 'Smith', 'john.smith@somecorp.com', 'john_smith', 'secret_password')
