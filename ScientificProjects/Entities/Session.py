@@ -9,7 +9,7 @@ from ScientificProjects.Entities.User import User
 
 class Session(Base):
 
-    __table__ = 'session'
+    __tablename__ = 'session'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User, backref=backref('parameter_types', uselist=True, cascade='delete,all'))
