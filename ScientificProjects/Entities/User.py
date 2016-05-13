@@ -16,6 +16,7 @@ class User(Base):
     login = Column(String, unique=True)
     password = Column(PasswordType(schemes=['pbkdf2_sha512', 'md5_crypt']))
     registered = Column(DateTime, default=func.now())
+    altered = Column(DateTime, default=func.now(), onupdate=func.now())
     signed_in = Column(Boolean, default=False)
     last_sign_in = Column(DateTime)
     last_sign_out = Column(DateTime)
