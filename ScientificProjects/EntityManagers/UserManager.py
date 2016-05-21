@@ -1,9 +1,14 @@
 from __future__ import division, print_function
+import sys
 import datetime
+import socket
+import uuid
 
+from sqlalchemy import exists
 from sqlalchemy.exc import IntegrityError
 
 from ScientificProjects.Entities.User import User
+from ScientificProjects.Entities.Session import Session
 from ScientificProjects.EntityManagers import EntityManager
 from ScientificProjects.EntityManagers.LogManager import LogManager
 from ScientificProjects.EntityManagers.ProjectManager import ProjectManager
@@ -18,6 +23,7 @@ class UserManager(EntityManager):
         self._create_default_users()
         self.session_manager.user = self.session.query(User).filter(User.login == 'bot').all()[0]
         self.user = self.session_manager.user
+        self.session_data = None
         self.log_manager = self.session_manager.log_manager
         self.project_manager = ProjectManager(self.engine, self)
         self.parameter_manager = ParameterManager(self.engine, self)
@@ -53,8 +59,8 @@ class UserManager(EntityManager):
                 user = user[0]
                 if user.password == str(password):
                     self.user = user
-                    self.user.signed_in = True
-                    self.user.last_sign_in = datetime.datetime.utcnow()
+                    self.session_data = self.generate_session_data()
+                    self.session.add(self.session_data)
                     self.session.commit()
                     self.log_manager = LogManager(self.engine, self)
                     self.log_manager.log_record(record='@%s signed in' % self.user.login,
@@ -69,25 +75,41 @@ class UserManager(EntityManager):
             self.log_manager.log_record(record='Login failed (system user). Username: @%s' % str(login),
                                         category='Warning')
 
+    def generate_session_data(self):
+        if isinstance(self.user, User):
+            session_data = Session(user_id=self.user.id)
+            session_data.host = socket.gethostname()
+            session_data.python = sys.version
+            session_data.platform = sys.platform
+            session_data.active = True
+            token = str(uuid.uuid4())
+            while self.session.query(exists().where(Session.token == token)).scalar():
+                token = str(uuid.uuid4())
+            session_data.token = token
+        else:
+            session_data = None
+        return session_data
+
     def sign_out(self):
         if self.signed_in():
             self.project_manager.close_project()
-            self.user.signed_in = False
-            self.user.last_sign_out = datetime.datetime.utcnow()
+            self.session_data.active = False
             self.session.commit()
             self.log_manager.log_record(record='@%s signed out' % self.user.login,
                                         category='Information')
             self.user = self.session_manager.user
+            self.session_data = None
             self.log_manager = self.session_manager.log_manager
 
     def signed_in(self):
-        if isinstance(self.user, User):
-            users = self.session.query(User).filter(User.login == str(self.user.login),
-                                                    User.signed_in == 1).all()
-            if users:
+        if isinstance(self.session_data, Session):
+            sessions = self.session.query(Session).filter(Session.token == self.session_data.token,
+                                                          Session.active == 1).all()
+            if sessions:
                 return True
             else:
                 self.user = self.session_manager.user
+                self.session_data = None
                 self.log_manager = self.session_manager.log_manager
                 return False
         return False

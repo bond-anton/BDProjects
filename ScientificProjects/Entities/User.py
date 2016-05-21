@@ -17,9 +17,6 @@ class User(Base):
     password = Column(PasswordType(schemes=['pbkdf2_sha512', 'md5_crypt']))
     registered = Column(DateTime, default=func.now())
     altered = Column(DateTime, default=func.now(), onupdate=func.now())
-    signed_in = Column(Boolean, default=False)
-    last_sign_in = Column(DateTime)
-    last_sign_out = Column(DateTime)
 
     def __str__(self):
         user_record = '@%s (%s %s) <%s>' % (self.login, self.name_first.title(), self.name_last.upper(), self.email)

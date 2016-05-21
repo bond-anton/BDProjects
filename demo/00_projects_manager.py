@@ -6,6 +6,8 @@ from ScientificProjects.Client import SessionManager
 sm = SessionManager('data/test.db')
 sm.user_manager.create_user('John', 'Smith', 'john.smith@somecorp.com', 'john_smith', 'secret_password')
 sm.user_manager.sign_in('john_smith', 'secret_password')
+sm.user_manager.create_user('Jack', 'Black', 'jack.black@somecorp.com', 'jack_black', 'secret_password')
+sm.log_opened_sessions()
 time.sleep(3)
 sm.log_signed_in_users()
 sm.logoff_all()
