@@ -1,5 +1,6 @@
 from __future__ import division, print_function
 
+from ScientificProjects import default_parameter_types
 from ScientificProjects.Entities.Parameter import ParameterType, Parameter
 from ScientificProjects.EntityManagers import EntityManager
 
@@ -7,38 +8,27 @@ from ScientificProjects.EntityManagers import EntityManager
 class ParameterManager(EntityManager):
 
     def __init__(self, engine, session_manager):
-        self.default_parameter_types = {'Numeric value': 'Single numeric value',
-                                        'String value': 'String value',
-                                        'Boolean value': 'Boolean value',
-                                        'DateTime value': 'Single DateTime value',
-                                        'Numeric range': 'Numeric values range',
-                                        'Multiple numeric range': 'Tuple of numeric ranges',
-                                        'DateTime range': 'DateTime values range',
-                                        'Multiple DateTime range': 'Tuple of DateTime ranges',
-                                        'Uniform numeric grid': 'Uniform numeric grid',
-                                        'NonUniform numeric grid': 'NonUniform numeric grid',
-                                        }
         super(ParameterManager, self).__init__(engine, session_manager)
-        self._create_default_parameter_types()
 
     def create_parameter_type(self, parameter_type, description=None):
         parameter_type_object, parameter_type_exists = self._check_parameter_type_name(parameter_type, description)
         if isinstance(parameter_type_object, ParameterType):
-            if self.session_manager.signed_in() or parameter_type_object.name in self.default_parameter_types:
+            if self.session_manager.signed_in() or parameter_type_object.name in default_parameter_types:
                 if not parameter_type_exists:
                     parameter_type_object.user_id = self.session_manager.user.id
                     self.session.add(parameter_type_object)
                     self.session.commit()
-                    if parameter_type_object.name not in self.default_parameter_types:
+                    if parameter_type_object.name not in default_parameter_types:
                         self.session_manager.log_manager.log_record('Parameter type %s successfully created' %
                                                                     parameter_type_object.name, 'Information')
                     return parameter_type_object
                 else:
                     self.session.rollback()
-                    if parameter_type_object.name not in self.default_parameter_types:
+                    if parameter_type_object.name not in default_parameter_types:
                         self.session_manager.log_manager.log_record('Parameter type %s is already registered' %
                                                                     parameter_type_object.name, 'Warning')
-                    return self.session.query(ParameterType).filter(ParameterType.name == parameter_type_object.name).one()
+                    return self.session.query(ParameterType).filter(
+                        ParameterType.name == parameter_type_object.name).one()
             else:
                 self.session_manager.log_manager.log_record('Attempt to create Parameter Type before signing in',
                                                             'Warning')
@@ -114,10 +104,6 @@ class ParameterManager(EntityManager):
             parameter_type_object = existing_parameter_type[0]
             parameter_type_exists = True
         return parameter_type_object, parameter_type_exists
-
-    def _create_default_parameter_types(self):
-        for parameter_type in self.default_parameter_types:
-            self.create_parameter_type(parameter_type, self.default_parameter_types[parameter_type])
 
     def get_parameter_types(self):
         parameter_types = self.session.query(ParameterType).all()

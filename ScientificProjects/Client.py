@@ -17,19 +17,19 @@ from ScientificProjects.Entities.Measurement import Measurement
 from ScientificProjects.Entities.DataPoint import DataPoint
 
 
-class SessionManager(object):
+class Client(object):
 
     def __init__(self, db_name='/:memory:', backend='sqlite',
-                 hostname='', port='', user='', password='',
-                 overwrite=False):
+                 hostname='', port='', user='', password=''):
         credentials = user + ':' + password if password else user
         if credentials:
             credentials += '@'
         if port:
             hostname += ':' + str(port)
-        self.engine = create_engine(backend + '://' + credentials + hostname + '/' + db_name)
+        db_url = backend + '://' + credentials + hostname + '/' + db_name
+        print(db_url)
+        self.engine = create_engine(db_url)
         self.metadata = Base.metadata
-        self._create_tables(overwrite)
 
         session = sessionmaker()
         session.configure(bind=self.engine)
@@ -41,11 +41,6 @@ class SessionManager(object):
         self.log_manager = LogManager(self.engine, self)
         self.user_manager = UserManager(self.engine, self)
         self.version_manager = VersionManager(self.engine, self)
-
-    def _create_tables(self, overwrite=False):
-        if overwrite:
-            self.metadata.drop_all(self.engine)
-        self.metadata.create_all(self.engine)
 
     def count_opened_sessions(self, user=None):
         if isinstance(user, User):

@@ -1,5 +1,8 @@
 from __future__ import division, print_function
-import numpy as np
+
+from sqlalchemy import func
+
+from ScientificProjects import default_log_categories
 from ScientificProjects.Entities.Log import LogCategory, Log
 from ScientificProjects.Entities.Project import Project
 from ScientificProjects.Entities.User import User
@@ -10,11 +13,7 @@ class LogManager(EntityManager):
 
     def __init__(self, engine, session_manager, echo=True):
         self.echo = echo
-        self.default_log_categories = {'Information': 'Informational messages',
-                                       'Warning': 'Warning messages',
-                                       'Error': 'Error messages'}
         super(LogManager, self).__init__(engine, session_manager)
-        self._create_default_log_categories()
 
     def create_log_category(self, category, description=None):
         log_category, category_exists = self._check_category_name(category, description)
@@ -25,18 +24,18 @@ class LogManager(EntityManager):
                 log_category.user_id = 1
             self.session.add(log_category)
             self.session.commit()
-            if log_category.category not in self.default_log_categories:
+            if log_category.category not in default_log_categories:
                 self.log_record('Log category %s successfully created' % log_category.category, 'Information')
             return log_category
         else:
             self.session.rollback()
-            if log_category.category not in self.default_log_categories:
+            if log_category.category not in default_log_categories:
                 self.log_record('Log category %s is already registered' % log_category.category, 'Warning')
             return self.session.query(LogCategory).filter(LogCategory.category == log_category.category).one()
 
     def log_record(self, record, category=None):
         log_category, category_exists = self._check_category_name(category)
-        category_id, project_id = None, None
+        category_id, project_id, user_id = None, None, None
         if not category_exists:
             self.log_record('Create log category first', 'Warning')
         else:
@@ -59,23 +58,17 @@ class LogManager(EntityManager):
                 print('[%s] %s: %s' % (log_category.category.upper()[:4], user_login, record))
 
     def _get_max_login_length(self):
-        all_users_login = list(np.array(self.session.query(User.login).all()).ravel())
-        return len(max(all_users_login, key=len))
+        return self.session.query(func.max(func.length(User.login))).one()[0]
 
     def _check_category_name(self, category, description=None):
         category_exists = False
         if isinstance(category, str):
             log_category = LogCategory(category=category, description=description)
-        elif isinstance(category, LogCategory):
-            log_category = category
+            existing_category = self.session.query(LogCategory).filter(
+                LogCategory.category == log_category.category).all()
+            if existing_category:
+                log_category = existing_category[0]
+                category_exists = True
         else:
             log_category = None
-        existing_category = self.session.query(LogCategory).filter(LogCategory.category == log_category.category).all()
-        if existing_category:
-            log_category = existing_category[0]
-            category_exists = True
         return log_category, category_exists
-
-    def _create_default_log_categories(self):
-        for category in self.default_log_categories:
-            self.create_log_category(category, self.default_log_categories[category])
