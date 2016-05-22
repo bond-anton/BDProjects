@@ -9,6 +9,7 @@ class EntityManager(object):
         self.engine = engine
         self.session_manager = session_manager
         self.user = None
+        self.session_data = None
         self.project = None
         self.session = None
         self.open_session()

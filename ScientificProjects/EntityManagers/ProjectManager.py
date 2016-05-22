@@ -15,20 +15,17 @@ class ProjectManager(EntityManager):
         super(ProjectManager, self).__init__(engine, session_manager)
         self.log_manager = self.session_manager.log_manager
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.close_project()
-        self.close_session()
-
     def create_project(self, name, description, data_dir):
         if self.project_opened():
             self.close_project()
         if self.session_manager.signed_in():
             self.user = self.session_manager.user
+            self.session_data = self.session_manager.session_data
             self.log_manager = LogManager(self.engine, self)
             data_dir = str(data_dir)
             if os.path.isdir(data_dir) and os.access(data_dir, os.W_OK | os.X_OK):
                 project = Project(name=str(name), description=str(description),
-                                  owner_id=self.session_manager.user.id,
+                                  session_id=self.session_manager.session_data.id,
                                   data_dir=data_dir)
                 try:
                     self.session.add(project)
@@ -48,10 +45,11 @@ class ProjectManager(EntityManager):
             self.log_manager.log_record(record='Attempt to create project before signing in',
                                         category='Warning')
 
-    def get_own_projects(self):
+    def get_projects_list(self):
         if self.session_manager.signed_in():
             self.user = self.session_manager.user
-            projects = self.session.query(Project).filter(Project.owner == self.session_manager.user).all()
+            self.session_data = self.session_manager.session_data
+            projects = self.session.query(Project).all()  # filter(Project.owner == self.session_manager.user).all()
             return projects
         else:
             self.log_manager.log_record(record='Attempt to get list of user project before signing in',
@@ -67,6 +65,7 @@ class ProjectManager(EntityManager):
                 self.close_project()
         if self.session_manager.signed_in():
             self.user = self.session_manager.user
+            self.session_data = self.session_manager.session_data
             if isinstance(project, Project):
                 self.open_project(project.name)
             elif isinstance(project, str):
@@ -111,4 +110,5 @@ class ProjectManager(EntityManager):
                                         category='Information')
             self.project = None
             self.user = self.session_manager.user
+            self.session_data = self.session_manager.session_data
             self.log_manager = self.session_manager.log_manager

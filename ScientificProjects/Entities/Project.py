@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, Boolean, String, Text, DateTime, Foreign
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
-from ScientificProjects.Entities.User import User
+from ScientificProjects.Entities.Session import Session
 
 
 class Project(Base):
@@ -14,8 +14,8 @@ class Project(Base):
     name = Column(String, unique=True)
     description = Column(Text)
     created = Column(DateTime, default=func.now())
-    owner_id = Column(Integer, ForeignKey('user.id'))
-    owner = relationship(User, backref=backref('projects', uselist=True, cascade='delete,all'))
+    session_id = Column(Integer, ForeignKey('session.id'))
+    session = relationship(Session, backref=backref('projects', uselist=True, cascade='delete,all'))
     data_dir = Column(String)
     opened = Column(Boolean, default=False)
 

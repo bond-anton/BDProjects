@@ -36,6 +36,7 @@ class Client(object):
         self.session = session()
 
         self.user = None
+        self.session_data = None
         self.project = None
 
         self.log_manager = LogManager(self.engine, self)
