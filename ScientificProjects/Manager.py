@@ -1,7 +1,6 @@
 from __future__ import division, print_function
-import datetime
 
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from ScientificProjects import Base, default_log_categories, default_users, default_parameter_types
