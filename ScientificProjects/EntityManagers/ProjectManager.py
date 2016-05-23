@@ -1,10 +1,12 @@
 from __future__ import division, print_function
 
 import os
+import datetime
 
 from sqlalchemy.exc import IntegrityError
 
-from ScientificProjects.Entities.Project import Project
+from ScientificProjects.Entities.Session import Session
+from ScientificProjects.Entities.Project import Project, SessionProject
 from ScientificProjects.EntityManagers import EntityManager
 from ScientificProjects.EntityManagers.LogManager import LogManager
 
@@ -16,8 +18,6 @@ class ProjectManager(EntityManager):
         self.log_manager = self.session_manager.log_manager
 
     def create_project(self, name, description, data_dir):
-        if self.project_opened():
-            self.close_project()
         if self.session_manager.signed_in():
             self.user = self.session_manager.user
             self.session_data = self.session_manager.session_data
@@ -25,19 +25,17 @@ class ProjectManager(EntityManager):
             data_dir = str(data_dir)
             if os.path.isdir(data_dir) and os.access(data_dir, os.W_OK | os.X_OK):
                 project = Project(name=str(name), description=str(description),
-                                  session_id=self.session_manager.session_data.id,
+                                  created_session_id=self.session_manager.session_data.id,
                                   data_dir=data_dir)
                 try:
                     self.session.add(project)
                     self.session.commit()
                     self.log_manager.log_record(record='Project %s created' % project.name,
                                                 category='Information')
-                    self.open_project(project)
                 except IntegrityError:
                     self.session.rollback()
                     self.log_manager.log_record(record='Project %s already exists' % project.name,
                                                 category='Warning')
-                    self.open_project(project)
             else:
                 self.log_manager.log_record(record='Directory %s not writable' % data_dir,
                                             category='Warning')
@@ -49,14 +47,74 @@ class ProjectManager(EntityManager):
         if self.session_manager.signed_in():
             self.user = self.session_manager.user
             self.session_data = self.session_manager.session_data
-            projects = self.session.query(Project).all()  # filter(Project.owner == self.session_manager.user).all()
+            projects = self.session.query(Project).all()
             return projects
         else:
             self.log_manager.log_record(record='Attempt to get list of user project before signing in',
                                         category='Warning')
 
-    def open_project(self, project):
-        if self.project_opened():
+    def open_project(self, project_name):
+        project = self.session.query(Project).filter(Project.name == str(project_name)).all()
+        if project:
+            project = project[0]
+            if not self.project_opened(project):
+                self.session_data = self.session_manager.session_data
+                sp = SessionProject(session_id=self.session_data.id,
+                                    project_id=project.id)
+                self.session_data.projects_opened.append(sp)
+                self.session.commit()
+                self.log_manager.log_record(record='Project %s opened' % self.project,
+                                            category='Information')
+            else:
+                self.log_manager.log_record(record='Project %s already opened' % project_name,
+                                            category='Information')
+            return True
+        else:
+            self.log_manager.log_record(record='Project %s not found' % project_name,
+                                        category='Information')
+            return False
+
+    def project_opened(self, project):
+        if self.session_manager.signed_in():
+            self.user = self.session_manager.user
+            self.session_data = self.session_manager.session_data
+            projects = self.session.query(SessionProject).filter(
+                SessionProject.session_id == self.session_data.id,
+                SessionProject.closed == None).join(
+                Project).filter(Project.name == str(project)).all()
+            if projects:
+                return True
+            else:
+                return False
+        else:
+            self.log_manager.log_record(record='Attempt to get list of user project before signing in',
+                                        category='Warning')
+            return False
+
+    def close_project(self, project_name):
+        if self.project_opened(project_name):
+            self.session_data = self.session_manager.session_data
+            self.session_data.projects_opened.closed = datetime.datetime.now()
+            self.session.commit()
+            self.log_manager.log_record(record='Project %s closed' % self.project,
+                                        category='Information')
+            #self.project = None
+            #self.user = self.session_manager.user
+            #self.session_data = self.session_manager.session_data
+            #self.log_manager = self.session_manager.log_manager
+
+    def opened_projects(self):
+        return self.session.query(Project).filter(Project.opened == 1).all()
+
+    def close_all_projects(self):
+        for project in self.opened_projects():
+            #project.opened = False
+            #self.session.commit()
+            self.log_manager.log_record(record='Project %s was closed' % project.name,
+                                        category='Information')
+
+    def select_working_project(self, project):
+        if self.project_opened(project):
             if self.project.name == str(project):
                 self.log_manager.log_record(record='Project %s already opened' % self.project,
                                             category='Information')
@@ -67,12 +125,12 @@ class ProjectManager(EntityManager):
             self.user = self.session_manager.user
             self.session_data = self.session_manager.session_data
             if isinstance(project, Project):
-                self.open_project(project.name)
+                self.select_working_project(project.name)
             elif isinstance(project, str):
                 projects = self.session.query(Project).filter(Project.name == project).all()
                 if projects:
                     self.project = projects[0]
-                    self.project.opened = True
+                    #self.project.opened = True
                     self.session.commit()
                     self.log_manager = LogManager(self.engine, self)
                     self.log_manager.log_record(record='Project %s opened' % self.project,
@@ -90,35 +148,3 @@ class ProjectManager(EntityManager):
             self.log_manager.log_record(record='Attempt to open project before signing in',
                                         category='Warning')
             return False
-
-    def project_opened(self):
-        if isinstance(self.project, Project):
-            projects = self.session.query(Project).filter(Project.name == str(self.project.name),
-                                                          Project.opened == 1).all()
-            if projects:
-                return True
-            else:
-                self.project = None
-                self.log_manager = self.session_manager.log_manager
-        return False
-
-    def close_project(self):
-        if self.project_opened():
-            self.project.opened = False
-            self.session.commit()
-            self.log_manager.log_record(record='Project %s closed' % self.project,
-                                        category='Information')
-            self.project = None
-            self.user = self.session_manager.user
-            self.session_data = self.session_manager.session_data
-            self.log_manager = self.session_manager.log_manager
-
-    def opened_projects(self):
-        return self.session.query(Project).filter(Project.opened == 1).all()
-
-    def close_all_projects(self):
-        for project in self.opened_projects():
-            project.opened = False
-            self.session.commit()
-            self.log_manager.log_record(record='Project %s was closed' % project.name,
-                                        category='Information')

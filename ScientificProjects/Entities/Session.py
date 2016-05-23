@@ -20,3 +20,4 @@ class Session(Base):
     python = Column(String)
     platform = Column(String)
     token = Column(String)
+    projects_opened = relationship('SessionProject', back_populates='session')

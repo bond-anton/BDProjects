@@ -121,7 +121,7 @@ class UserManager(EntityManager):
         self.log_manager.log_record(record='Listing opened sessions' + user_text,
                                     category='Information')
         for opened_session in self.opened_sessions(user=user):
-            signed_in_for = (datetime.datetime.utcnow() - opened_session.opened)
+            signed_in_for = (datetime.datetime.now() - opened_session.opened)
             opened = opened_session.opened.strftime(default_date_time_format)
             self.log_manager.log_record(record='#%s (@%s) is opened for %s (since %s)' % (opened_session.token,
                                                                                           opened_session.user.login,
