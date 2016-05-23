@@ -43,11 +43,11 @@ class Installer(object):
         self.log_manager = LogManager(self.engine, self)
         self._create_default_log_categories()
 
-        self.version_manager = VersionManager(self.engine, self)
-
         self.user_manager = UserManager(self.engine, self)
         self._create_default_users()
         self._create_default_parameter_types()
+
+        self.version_manager = VersionManager(self.engine, self)
 
     def _create_tables(self, overwrite=False):
         print('Creating tables')

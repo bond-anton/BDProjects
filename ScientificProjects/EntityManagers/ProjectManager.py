@@ -112,3 +112,13 @@ class ProjectManager(EntityManager):
             self.user = self.session_manager.user
             self.session_data = self.session_manager.session_data
             self.log_manager = self.session_manager.log_manager
+
+    def opened_projects(self):
+        return self.session.query(Project).filter(Project.opened == 1).all()
+
+    def close_all_projects(self):
+        for project in self.opened_projects():
+            project.opened = False
+            self.session.commit()
+            self.log_manager.log_record(record='Project %s was closed' % project.name,
+                                        category='Information')
