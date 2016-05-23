@@ -104,7 +104,7 @@ class ProjectManager(EntityManager):
             #self.log_manager = self.session_manager.log_manager
 
     def opened_projects(self):
-        return self.session.query(Project).filter(Project.opened == 1).all()
+        return []#self.session.query(Project).filter(Project.opened == 1).all()
 
     def close_all_projects(self):
         for project in self.opened_projects():
