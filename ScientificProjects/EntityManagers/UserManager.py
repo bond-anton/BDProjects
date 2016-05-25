@@ -77,7 +77,7 @@ class UserManager(EntityManager):
 
     def sign_out(self):
         if self.signed_in():
-            self.project_manager.close_project()
+            self.project_manager.close_all_projects()
             self.session_data.active = False
             self.session.commit()
             self.log_manager.log_record(record='@%s signed out' % self.user.login,

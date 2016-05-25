@@ -14,6 +14,7 @@ class SessionProject(Base):
     project_id = Column(Integer, ForeignKey('project.id'), primary_key=True)
     opened = Column(DateTime, default=func.now())
     closed = Column(DateTime)
+    active = Column(Boolean, default=False)
     session = relationship('Session', back_populates='projects_opened')
     project = relationship('Project', back_populates='sessions')
 
