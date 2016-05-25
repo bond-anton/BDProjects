@@ -22,7 +22,6 @@ class Client(object):
         if config['port']:
             hostname += ':' + str(config['port'])
         db_url = config['backend'] + '://' + credentials + hostname + '/' + config['db_name']
-        print(db_url)
 
         self.engine = create_engine(db_url)
         self.metadata = Base.metadata
