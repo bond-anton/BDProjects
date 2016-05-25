@@ -9,6 +9,13 @@ default_date_format = '%Y-%m-%d'
 default_time_format = '%H:%M:%S'
 default_date_time_format = default_date_format + ' ' + default_time_format
 
+default_connection_parameters = {'db_name': '/:memory:',
+                                 'backend': 'sqlite',
+                                 'hostname': '',
+                                 'port': '',
+                                 'user': '',
+                                 'password': ''}
+
 default_log_categories = {'Information': 'Informational messages',
                           'Warning': 'Warning messages',
                           'Error': 'Error messages'}
