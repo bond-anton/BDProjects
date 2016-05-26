@@ -52,8 +52,9 @@ class UserManager(EntityManager):
     def sign_in(self, login, password):
         if login not in default_users:
             if self.signed_in():
-                # UserManager works with only one User at a time
-                self.sign_out()
+                record = 'Please sign out first'
+                self.log_manager.log_record(record=record, category='Warning')
+                return False
             user = self.session.query(User).filter(User.login == str(login)).all()
             if user:
                 user = user[0]
@@ -63,25 +64,27 @@ class UserManager(EntityManager):
                     self.session.add(self.session_data)
                     self.session.commit()
                     self.log_manager = LogManager(self.engine, self)
-                    self.log_manager.log_record(record='@%s signed in' % self.user.login,
-                                                category='Information')
+                    record = '@%s signed in (%s)' % (self.user.login, self.session_data.token)
+                    self.log_manager.log_record(record=record, category='Information')
+                    return True
                 else:
-                    self.log_manager.log_record(record='Login failed. Username: @%s' % self.user.login,
-                                                category='Warning')
+                    record = 'Login failed. Username: @%s' % self.user.login
+                    self.log_manager.log_record(record=record, category='Warning')
             else:
-                self.log_manager.log_record(record='Login failed. Username: @%s' % str(login),
-                                            category='Warning')
+                record = 'Login failed. Username: @%s' % str(login)
+                self.log_manager.log_record(record=record, category='Warning')
         else:
-            self.log_manager.log_record(record='Login failed (system user). Username: @%s' % str(login),
-                                        category='Warning')
+            record = 'Login failed (system user). Username: @%s' % str(login)
+            self.log_manager.log_record(record=record, category='Warning')
+        return False
 
     def sign_out(self):
         if self.signed_in():
-            self.project_manager.close_all_projects()
-            self.session_data.active = False
-            self.session.commit()
-            self.log_manager.log_record(record='@%s signed out' % self.user.login,
-                                        category='Information')
+            record = '@%s (%s) is going to sign out' % (self.user.login, self.session_data.token)
+            self.log_manager.log_record(record=record, category='Information')
+            self.close_session(session=self.session_data)
+            record = '@%s (%s) signed out' % (self.user.login, self.session_data.token)
+            self.log_manager.log_record(record=record, category='Information')
             self.user = self.session_manager.user
             self.session_data = None
             self.log_manager = self.session_manager.log_manager
@@ -158,15 +161,24 @@ class UserManager(EntityManager):
                                                                                 last_log_off),
                                             category='Information')
 
+    def close_session(self, session):
+        if isinstance(session, Session):
+            if session.active:
+                self.project_manager.close_project(session=session)
+                session.active = False
+                self.session.commit()
+                record = 'Session %s closed' % session.token
+                self.log_manager.log_record(record=record, category='Information')
+
     def logoff_user(self, user):
         if isinstance(user, User):
+            record = 'Kicking off @%s' % user.login
+            self.log_manager.log_record(record=record, category='Warning')
             opened_sessions = self.count_opened_sessions(user)
             for session in self.opened_sessions(user):
-                session.active = False
-            self.session.commit()
-            self.log_manager.log_record(record='@%s was logged off (closed %d sessions)' % (user.login,
-                                                                                            opened_sessions),
-                                        category='Warning')
+                self.close_session(session)
+            record = '@%s was logged off (closed %d sessions)' % (user.login, opened_sessions)
+            self.log_manager.log_record(record=record, category='Warning')
 
     def logoff_users(self, users):
         if isinstance(users, (list, tuple)):
@@ -174,9 +186,8 @@ class UserManager(EntityManager):
                 self.logoff_user(user)
 
     def logoff_all(self):
-        self.log_manager.log_record(record='Kick-off ALL signed in users',
-                                    category='Warning')
-        self.project_manager.close_all_projects()
+        record = 'Kick-off ALL signed in users'
+        self.log_manager.log_record(record=record, category='Warning')
         self.logoff_users(self.signed_in_users())
 
     def _generate_session_data(self):

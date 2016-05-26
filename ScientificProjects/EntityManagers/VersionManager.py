@@ -18,7 +18,7 @@ class VersionManager(EntityManager):
 
     def check_version(self):
         if not self.session:
-            self.open_session()
+            self.open_db_session()
         self.database_version = self.session.query(Version).order_by(Version.id.desc()).first()
         if not self.database_version:
             self.session.add(self.current_version)
@@ -31,15 +31,15 @@ class VersionManager(EntityManager):
                                                             category='Warning')
             elif self.database_version < self.current_version:
                 self._upgrade_database()
-        self.close_session()
+        self.close_db_session()
 
     def _upgrade_database(self):
         if not self.session:
-            self.open_session()
+            self.open_db_session()
         log_record = 'Upgrading database version from %s to %s'
         log_record = log_record % (self.database_version, self.current_version)
         self.session_manager.log_manager.log_record(record=log_record,
                                                     category='Information')
         self.session.add(self.current_version)
         self.session.commit()
-        self.close_session()
+        self.close_db_session()

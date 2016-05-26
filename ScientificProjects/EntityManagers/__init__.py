@@ -12,9 +12,9 @@ class EntityManager(object):
         self.session_data = None
         self.project = None
         self.session = None
-        self.open_session()
+        self.open_db_session()
 
-    def open_session(self):
+    def open_db_session(self):
         if self.session_manager is None:
             session = sessionmaker()
             session.configure(bind=self.engine)
@@ -23,6 +23,6 @@ class EntityManager(object):
             self.session = self.session_manager.session
             self.user = self.session_manager.user
 
-    def close_session(self):
+    def close_db_session(self):
         self.session.close()
         self.session = None

@@ -15,4 +15,5 @@ client.user_manager.logoff_all()
 
 client.user_manager.sign_in('john_smith', 'secret_password')
 client.user_manager.sign_out()
+
 client.user_manager.create_user('John', 'Smith', 'john.smith@somecorp.com', 'john_smith', 'secret_password')
