@@ -14,6 +14,7 @@ from ScientificProjects.Entities.Session import Session
 from ScientificProjects.EntityManagers import EntityManager
 from ScientificProjects.EntityManagers.LogManager import LogManager
 from ScientificProjects.EntityManagers.ProjectManager import ProjectManager
+from ScientificProjects.EntityManagers.MeasurementTypeManager import MeasurementTypeManager
 from ScientificProjects.EntityManagers.ParameterManager import ParameterManager
 
 
@@ -30,6 +31,7 @@ class UserManager(EntityManager):
         self.session_data = None
         self.log_manager = self.session_manager.log_manager
         self.project_manager = ProjectManager(self.engine, self)
+        self.measurement_type_manager = MeasurementTypeManager(self.engine, self)
         self.parameter_manager = ParameterManager(self.engine, self)
 
     def create_user(self, name_first, name_last, email, login, password):

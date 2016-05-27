@@ -7,7 +7,7 @@ from ScientificProjects import Base
 from ScientificProjects.Entities.MeasurementType import MeasurementType
 from ScientificProjects.Entities.Equipment import Equipment
 from ScientificProjects.Entities.Project import Project
-from ScientificProjects.Entities.User import User
+from ScientificProjects.Entities.Session import Session
 from ScientificProjects.Entities.Parameter import Parameter
 
 
@@ -29,9 +29,9 @@ class MeasurementsCollection(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     description = Column(Text)
-    user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User, backref=backref('measurements_collections', uselist=True,
-                                              cascade='delete,all'))
+    session_id = Column(Integer, ForeignKey('session.id'))
+    session = relationship(Session, backref=backref('measurements_collections', uselist=True,
+                                                    cascade='delete,all'))
     measurements = relationship('Measurement', secondary=measurement_collection_table,
                                 backref="collections")
     created = Column(DateTime, default=func.now())
@@ -51,9 +51,9 @@ class Measurement(Base):
     project_id = Column(Integer, ForeignKey('project.id'))
     project = relationship(Project, backref=backref('measurements', uselist=True,
                                                     cascade='delete,all'))
-    user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User, backref=backref('measurements', uselist=True,
-                                              cascade='delete,all'))
+    session_id = Column(Integer, ForeignKey('session.id'))
+    session = relationship(Session, backref=backref('measurements', uselist=True,
+                                                    cascade='delete,all'))
     input_data_id = Column(Integer, ForeignKey('measurements_collection.id'))
     input_data = relationship(MeasurementsCollection, backref=backref('analyses', uselist=True,
                                                                       cascade='delete,all'))

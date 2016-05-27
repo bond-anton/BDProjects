@@ -4,7 +4,7 @@ from sqlalchemy import Table, Column, Integer, String, Text, DateTime, ForeignKe
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
-from ScientificProjects.Entities.User import User
+from ScientificProjects.Entities.Session import Session
 from ScientificProjects.Entities.Parameter import Parameter
 from ScientificProjects.Entities.MeasurementType import MeasurementType
 
@@ -61,8 +61,8 @@ class Equipment(Base):
     serial_number = Column(String)
     version = Column(String)
     description = Column(Text)
-    user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User, backref=backref('equipment', uselist=True, cascade='delete,all'))
+    session_id = Column(Integer, ForeignKey('session.id'))
+    session = relationship(Session, backref=backref('equipment', uselist=True, cascade='delete,all'))
     parameters = relationship(Parameter, secondary=equipment_parameters_table, backref="equipment")
     measurement_types = relationship(MeasurementType, secondary=equipment_measurement_table, backref="equipment")
     created = Column(DateTime, default=func.now())
@@ -78,6 +78,6 @@ class EquipmentAssembly(Base):
     name = Column(String, unique=True)
     description = Column(Text)
     parts = relationship(Equipment, secondary=equipment_assembly_table, backref="assemblies")
-    user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User, backref=backref('assemblies', uselist=True, cascade='delete,all'))
+    session_id = Column(Integer, ForeignKey('session.id'))
+    session = relationship(Session, backref=backref('assemblies', uselist=True, cascade='delete,all'))
     created = Column(DateTime, default=func.now())
