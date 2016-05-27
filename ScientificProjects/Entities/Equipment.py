@@ -27,8 +27,10 @@ class Manufacturer(Base):
     __tablename__ = 'manufacturer'
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
-    abbreviation = Column(String)
+    name_short = Column(String, unique=True)
     description = Column(Text)
+    session_id = Column(Integer, ForeignKey('session.id'))
+    session = relationship(Session, backref=backref('manufacturers', uselist=True, cascade='delete,all'))
     created = Column(DateTime, default=func.now())
 
 
