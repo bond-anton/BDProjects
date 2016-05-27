@@ -12,3 +12,7 @@ client.user_manager.project_manager.open_project(project_name)
 client.user_manager.project_manager.close_project()
 
 client.user_manager.sign_out()
+
+client.user_manager.sign_in('john_smith', 'secret_password')
+client.user_manager.project_manager.open_project(project_name)
+client.user_manager.sign_out()

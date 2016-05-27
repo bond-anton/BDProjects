@@ -44,6 +44,7 @@ class ProjectManager(EntityManager):
 
     def get_projects_list(self):
         if self.session_manager.signed_in():
+            self.session_data = self.session_manager.session_data
             projects = self.session.query(Project).all()
             return projects
         else:
@@ -52,6 +53,7 @@ class ProjectManager(EntityManager):
 
     def open_project(self, project_name):
         if self.session_manager.signed_in():
+            self.session_data = self.session_manager.session_data
             project = self.session.query(Project).filter(Project.name == str(project_name)).all()
             if project:
                 project = project[0]
@@ -108,6 +110,7 @@ class ProjectManager(EntityManager):
 
     def close_project(self, session=None, project=None):
         if self.session_manager.signed_in():
+            self.session_data = self.session_manager.session_data
             if self.project_opened(session, project):
                 if not isinstance(session, Session):
                     session = self.session_data
@@ -122,7 +125,7 @@ class ProjectManager(EntityManager):
                         Project).filter(Project.name == str(project)).all()
                 projects[0].closed = datetime.datetime.now()
                 self.session.commit()
-                record = 'Project %s closed' % self.project
+                record = 'Project %s closed (#%s)' % (self.project, session.token)
                 self.log_manager.log_record(record=record, category='Information')
                 self.project = None
                 self.log_manager = None
@@ -138,17 +141,3 @@ class ProjectManager(EntityManager):
             record = 'Attempt to close project before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
-
-    def opened_projects(self, user=None):
-        if self.session_manager.signed_in():
-            if not isinstance(user, User):
-                user = self.session_manager.user
-            # TODO: write correct query here.
-            projects = self.session.query(Session).filter(Session.active == 1,
-                                                          Session.user_id == user.id).join(
-                SessionProject).filter(SessionProject.closed == None)
-            return projects
-        else:
-            record = 'Attempt to get list of user project before signing in'
-            self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return []
