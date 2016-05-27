@@ -1,6 +1,7 @@
 from __future__ import division, print_function
 
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import NoResultFound
 from ScientificProjects.Entities.MeasurementType import MeasurementType
 from ScientificProjects.EntityManagers import EntityManager
 
@@ -17,9 +18,12 @@ class MeasurementTypeManager(EntityManager):
             if description is not None:
                 measurement_type.description = str(description)
             if parent is not None:
-                parent_id = self.session.query(MeasurementType.id).filter(MeasurementType.name == str(parent)).one()
-                if parent_id:
-                    measurement_type.parent_id = parent_id[0]
+                try:
+                    parent_id = self.session.query(MeasurementType.id).filter(MeasurementType.name == str(parent)).one()
+                    if parent_id:
+                        measurement_type.parent_id = parent_id[0]
+                except NoResultFound:
+                    pass
             try:
                 self.session.add(measurement_type)
                 self.session.commit()
@@ -35,3 +39,26 @@ class MeasurementTypeManager(EntityManager):
             record = 'Attempt to create measurement type before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
+
+    def get_measurement_types(self, root=None):
+        if self.session_manager.signed_in():
+            measurement_types = {}
+            if root is None:
+                roots = self.session.query(MeasurementType.name).filter(MeasurementType.parent_id == None).all()
+            else:
+                roots = []
+                try:
+                    root_id = self.session.query(MeasurementType.id).filter(
+                        MeasurementType.name == str(root)).one()
+                    if root_id:
+                        roots = self.session.query(MeasurementType.name).filter(
+                            MeasurementType.parent_id == root_id[0]).all()
+                except NoResultFound:
+                    pass
+            for root in roots:
+                measurement_types[root[0]] = self.get_measurement_types(root[0])
+            return measurement_types
+        else:
+            record = 'Attempt to get measurement types before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return {}
