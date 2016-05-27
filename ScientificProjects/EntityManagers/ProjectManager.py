@@ -5,7 +5,6 @@ import datetime
 
 from sqlalchemy.exc import IntegrityError
 
-from ScientificProjects.Entities.User import User
 from ScientificProjects.Entities.Session import Session
 from ScientificProjects.Entities.Project import Project, SessionProject
 from ScientificProjects.EntityManagers import EntityManager
