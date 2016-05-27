@@ -17,7 +17,7 @@ class MeasurementTypeManager(EntityManager):
             if description is not None:
                 measurement_type.description = str(description)
             if parent is not None:
-                parent_id = self.session.query(MeasurementType.id).filter(MeasurementType.name == str(parent)).all()
+                parent_id = self.session.query(MeasurementType.id).filter(MeasurementType.name == str(parent)).one()
                 if parent_id:
                     measurement_type.parent_id = parent_id[0]
             try:
