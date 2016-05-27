@@ -64,7 +64,7 @@ class UserManager(EntityManager):
                     self.session.add(self.session_data)
                     self.session.commit()
                     self.log_manager = LogManager(self.engine, self)
-                    record = '@%s signed in (%s)' % (self.user.login, self.session_data.token)
+                    record = '@%s signed in (#%s)' % (self.user.login, self.session_data.token)
                     self.log_manager.log_record(record=record, category='Information')
                     return True
                 else:
@@ -80,10 +80,10 @@ class UserManager(EntityManager):
 
     def sign_out(self):
         if self.signed_in():
-            record = '@%s (%s) is going to sign out' % (self.user.login, self.session_data.token)
+            record = '@%s (#%s) is going to sign out' % (self.user.login, self.session_data.token)
             self.log_manager.log_record(record=record, category='Information')
             self.close_session(session=self.session_data)
-            record = '@%s (%s) signed out' % (self.user.login, self.session_data.token)
+            record = '@%s (#%s) signed out' % (self.user.login, self.session_data.token)
             self.log_manager.log_record(record=record, category='Information')
             self.user = self.session_manager.user
             self.session_data = None
@@ -167,7 +167,7 @@ class UserManager(EntityManager):
                 self.project_manager.close_project(session=session)
                 session.active = False
                 self.session.commit()
-                record = 'Session %s closed' % session.token
+                record = 'Session #%s closed' % session.token
                 self.log_manager.log_record(record=record, category='Information')
 
     def logoff_user(self, user):

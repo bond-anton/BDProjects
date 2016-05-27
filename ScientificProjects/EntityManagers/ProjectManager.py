@@ -64,11 +64,11 @@ class ProjectManager(EntityManager):
                     self.project = project
                     self.user = self.session_manager.user
                     self.log_manager = LogManager(self.engine, self)
-                    record = 'Project %s opened' % self.project
+                    record = 'Project %s opened (#%s)' % (self.project, self.session_data.token)
                     self.log_manager.log_record(record=record, category='Information')
                     return True
                 elif self.project_opened(project):
-                    record = 'Project %s already opened' % project_name
+                    record = 'Project %s is already opened in #%s' % (project_name, self.session_data.token)
                     self.log_manager.log_record(record=record, category='Information')
                     return True
                 else:
@@ -131,7 +131,7 @@ class ProjectManager(EntityManager):
                 return True
             else:
                 if project is None:
-                    record = 'Session %s has no projects opened' % session.token
+                    record = 'Session #%s has no projects opened' % session.token
                 else:
                     record = 'Project %s is not opened' % self.project
                 self.session_manager.log_manager.log_record(record=record, category='Information')
