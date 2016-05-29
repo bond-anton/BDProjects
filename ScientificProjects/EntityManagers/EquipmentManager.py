@@ -1,4 +1,5 @@
 from __future__ import division, print_function
+import uuid
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
@@ -87,10 +88,14 @@ class EquipmentManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return {}
 
-    def create_equipment(self, name, category, assembly=None, description=None):
+    def create_equipment(self, name, category, serial_number=None, assembly=None, description=None):
         if self.session_manager.signed_in():
             equipment = Equipment(name=str(name))
             equipment.session_id = self.session_manager.session_data.id
+            if serial_number is None:
+                equipment.serial_number = str(uuid.uuid4())
+            else:
+                equipment.serial_number = str(serial_number)
             if description is not None:
                 equipment.description = str(description)
             if category is not None:
@@ -109,12 +114,34 @@ class EquipmentManager(EntityManager):
                         equipment.assembly_id = assembly_id[0]
                 except NoResultFound:
                     pass
-            self.session.add(equipment)
-            self.session.commit()
-            record = 'Equipment "%s" created' % equipment.name
-            self.session_manager.log_manager.log_record(record=record, category='Information')
+            try:
+                self.session.add(equipment)
+                self.session.commit()
+                record = 'Equipment "%s" created' % equipment.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+            except IntegrityError:
+                self.session.rollback()
+                record = 'Equipment "%s (s/n: %s)" already exist' % (equipment.name, equipment.serial_number)
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return True
             return True
         else:
             record = 'Attempt to create equipment before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def create_equipment_assembly(self, name, description=None):
+        if self.session_manager.signed_in():
+            assembly = EquipmentAssembly(name=str(name))
+            assembly.session_id = self.session_manager.session_data.id
+            if description is not None:
+                assembly.description = str(description)
+            self.session.add(assembly)
+            self.session.commit()
+            record = 'Equipment assembly "%s" created' % assembly.name
+            self.session_manager.log_manager.log_record(record=record, category='Information')
+            return True
+        else:
+            record = 'Attempt to create equipment assembly before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False

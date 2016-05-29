@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-from sqlalchemy import Table, Column, Integer, String, Text, DateTime, ForeignKey, func
+from sqlalchemy import Table, Column, UniqueConstraint, Integer, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
@@ -58,6 +58,7 @@ class Equipment(Base):
     __tablename__ = 'equipment'
     id = Column(Integer, primary_key=True)
     name = Column(String)
+    serial_number = Column(String)
     manufacturer_id = Column(Integer, ForeignKey('manufacturer.id'))
     manufacturer = relationship('Manufacturer', backref=backref('equipment', uselist=True,
                                                                 cascade='delete,all'))
@@ -73,6 +74,7 @@ class Equipment(Base):
     parameters = relationship(Parameter, secondary=equipment_parameters_table, backref="equipment")
     measurement_types = relationship(MeasurementType, secondary=equipment_measurement_table, backref="equipment")
     created = Column(DateTime, default=func.now())
+    __table_args__ = (UniqueConstraint('name', 'serial_number', name='_name_serial_number'),)
 
     def __str__(self):
         return self.name
