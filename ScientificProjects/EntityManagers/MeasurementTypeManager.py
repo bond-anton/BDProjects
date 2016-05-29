@@ -28,13 +28,13 @@ class MeasurementTypeManager(EntityManager):
                 self.session.add(measurement_type)
                 self.session.commit()
                 record = 'Measurement type "%s" created' % measurement_type.name
-                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                self.session_manager.log_manager.log_record(record=record, category='Information')
                 return True
             except IntegrityError:
                 self.session.rollback()
                 record = 'Measurement type "%s" already exists' % measurement_type.name
                 self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return False
+                return True
         else:
             record = 'Attempt to create measurement type before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')

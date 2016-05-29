@@ -42,6 +42,8 @@ class EquipmentCategory(Base):
     subcategories = relationship('EquipmentCategory')
     name = Column(String, unique=True)
     description = Column(Text)
+    session_id = Column(Integer, ForeignKey('session.id'))
+    session = relationship(Session, backref=backref('equipment_categories', uselist=True, cascade='delete,all'))
     created = Column(DateTime, default=func.now())
 
 

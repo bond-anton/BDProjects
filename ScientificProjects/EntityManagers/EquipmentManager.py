@@ -33,27 +33,56 @@ class EquipmentManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
-    """
-    def get_measurement_types(self, root=None):
+    def create_equipment_category(self, name, description=None, parent=None):
+        if self.session_manager.signed_in():
+            equipment_category = EquipmentCategory(name=str(name))
+            equipment_category.session_id = self.session_manager.session_data.id
+            if description is not None:
+                equipment_category.description = str(description)
+            if parent is not None:
+                try:
+                    parent_id = self.session.query(EquipmentCategory.id).filter(
+                        EquipmentCategory.name == str(parent)).one()
+                    if parent_id:
+                        equipment_category.parent_id = parent_id[0]
+                except NoResultFound:
+                    pass
+            try:
+                self.session.add(equipment_category)
+                self.session.commit()
+                record = 'Equipment category "%s" created' % equipment_category.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            except IntegrityError:
+                self.session.rollback()
+                record = 'Equipment category "%s" already exists' % equipment_category.name
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return True
+        else:
+            record = 'Attempt to create equipment category before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def get_equipment_categories(self, root=None):
         if self.session_manager.signed_in():
             measurement_types = {}
             if root is None:
-                roots = self.session.query(MeasurementType.name).filter(MeasurementType.parent_id == None).all()
+                roots = self.session.query(EquipmentCategory.name).filter(
+                    EquipmentCategory.parent_id == None).all()
             else:
                 roots = []
                 try:
-                    root_id = self.session.query(MeasurementType.id).filter(
-                        MeasurementType.name == str(root)).one()
+                    root_id = self.session.query(EquipmentCategory.id).filter(
+                        EquipmentCategory.name == str(root)).one()
                     if root_id:
-                        roots = self.session.query(MeasurementType.name).filter(
-                            MeasurementType.parent_id == root_id[0]).all()
+                        roots = self.session.query(EquipmentCategory.name).filter(
+                            EquipmentCategory.parent_id == root_id[0]).all()
                 except NoResultFound:
                     pass
             for root in roots:
-                measurement_types[root[0]] = self.get_measurement_types(root[0])
+                measurement_types[root[0]] = self.get_equipment_categories(root[0])
             return measurement_types
         else:
-            record = 'Attempt to get measurement types before signing in'
+            record = 'Attempt to get equipment categories list before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return {}
-    """
