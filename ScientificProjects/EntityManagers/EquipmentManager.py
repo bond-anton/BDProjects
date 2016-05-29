@@ -86,3 +86,35 @@ class EquipmentManager(EntityManager):
             record = 'Attempt to get equipment categories list before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return {}
+
+    def create_equipment(self, name, category, assembly=None, description=None):
+        if self.session_manager.signed_in():
+            equipment = Equipment(name=str(name))
+            equipment.session_id = self.session_manager.session_data.id
+            if description is not None:
+                equipment.description = str(description)
+            if category is not None:
+                try:
+                    category_id = self.session.query(EquipmentCategory.id).filter(
+                        EquipmentCategory.name == str(category)).one()
+                    if category_id:
+                        equipment.category_id = category_id[0]
+                except NoResultFound:
+                    pass
+            if assembly is not None:
+                try:
+                    assembly_id = self.session.query(EquipmentAssembly.id).filter(
+                        EquipmentAssembly.name == str(assembly)).one()
+                    if assembly_id:
+                        equipment.assembly_id = assembly_id[0]
+                except NoResultFound:
+                    pass
+            self.session.add(equipment)
+            self.session.commit()
+            record = 'Equipment "%s" created' % equipment.name
+            self.session_manager.log_manager.log_record(record=record, category='Information')
+            return True
+        else:
+            record = 'Attempt to create equipment before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False

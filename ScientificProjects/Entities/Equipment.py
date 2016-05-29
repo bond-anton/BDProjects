@@ -33,6 +33,9 @@ class Manufacturer(Base):
     session = relationship(Session, backref=backref('manufacturers', uselist=True, cascade='delete,all'))
     created = Column(DateTime, default=func.now())
 
+    def __str__(self):
+        return self.name
+
 
 class EquipmentCategory(Base):
 
@@ -46,12 +49,15 @@ class EquipmentCategory(Base):
     session = relationship(Session, backref=backref('equipment_categories', uselist=True, cascade='delete,all'))
     created = Column(DateTime, default=func.now())
 
+    def __str__(self):
+        return self.name
+
 
 class Equipment(Base):
 
     __tablename__ = 'equipment'
     id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True)
+    name = Column(String)
     manufacturer_id = Column(Integer, ForeignKey('manufacturer.id'))
     manufacturer = relationship('Manufacturer', backref=backref('equipment', uselist=True,
                                                                 cascade='delete,all'))
@@ -61,9 +67,6 @@ class Equipment(Base):
     assembly_id = Column(Integer, ForeignKey('equipment_assembly.id'))
     assembly = relationship('EquipmentAssembly', backref=backref('equipment', uselist=True,
                                                                  cascade='delete,all'))
-    inventory_number = Column(String)
-    serial_number = Column(String)
-    version = Column(String)
     description = Column(Text)
     session_id = Column(Integer, ForeignKey('session.id'))
     session = relationship(Session, backref=backref('equipment', uselist=True, cascade='delete,all'))
@@ -85,3 +88,6 @@ class EquipmentAssembly(Base):
     session_id = Column(Integer, ForeignKey('session.id'))
     session = relationship(Session, backref=backref('assemblies', uselist=True, cascade='delete,all'))
     created = Column(DateTime, default=func.now())
+
+    def __str__(self):
+        return self.name
