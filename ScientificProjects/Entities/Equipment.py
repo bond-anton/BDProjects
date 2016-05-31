@@ -16,7 +16,8 @@ equipment_assembly_table = Table('assembly_parts', Base.metadata,
 
 equipment_parameters_table = Table('equipment_parameters', Base.metadata,
                                    Column('equipment_id', Integer, ForeignKey('equipment.id')),
-                                   Column('parameter_id', Integer, ForeignKey('parameter.id')))
+                                   Column('parameter_id', Integer, ForeignKey('parameter.id')),
+                                   UniqueConstraint('equipment_id', 'parameter_id', name='equipment_parameter'))
 
 equipment_measurement_table = Table('equipment_measurement', Base.metadata,
                                     Column('equipment_id', Integer, ForeignKey('equipment.id')),
