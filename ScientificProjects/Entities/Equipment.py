@@ -11,7 +11,8 @@ from ScientificProjects.Entities.MeasurementType import MeasurementType
 
 equipment_assembly_table = Table('assembly_parts', Base.metadata,
                                  Column('assembly_id', Integer, ForeignKey('equipment_assembly.id')),
-                                 Column('equipment_id', Integer, ForeignKey('equipment.id')))
+                                 Column('equipment_id', Integer, ForeignKey('equipment.id')),
+                                 UniqueConstraint('assembly_id', 'equipment_id', name='assembly_equipment'))
 
 equipment_parameters_table = Table('equipment_parameters', Base.metadata,
                                    Column('equipment_id', Integer, ForeignKey('equipment.id')),
