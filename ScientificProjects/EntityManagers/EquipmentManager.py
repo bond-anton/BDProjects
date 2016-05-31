@@ -145,3 +145,16 @@ class EquipmentManager(EntityManager):
             record = 'Attempt to create equipment assembly before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
+
+    def add_equipment_to_assembly(self, assembly, equipment):
+        if self.session_manager.signed_in():
+            if isinstance(assembly, EquipmentAssembly) and isinstance(equipment, Equipment):
+                return True
+            else:
+                record = 'Wrong argument type for adding equipment to assembly'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to create equipment assembly before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
