@@ -4,6 +4,7 @@ import uuid
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from ScientificProjects.Entities.Equipment import Manufacturer, EquipmentCategory, EquipmentAssembly, Equipment
+from ScientificProjects.Entities.Parameter import Parameter
 from ScientificProjects.EntityManagers import EntityManager
 
 
@@ -143,6 +144,29 @@ class EquipmentManager(EntityManager):
             return True
         else:
             record = 'Attempt to create equipment assembly before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def add_parameter_to_equipment(self, equipment, parameter):
+        if self.session_manager.signed_in():
+            if isinstance(equipment, Equipment) and isinstance(parameter, Parameter):
+                try:
+                    equipment.parameters.append(parameter)
+                    self.session.commit()
+                    record = 'parameter %s added to equipment %s' % (str(parameter), str(equipment))
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    return True
+                except IntegrityError:
+                    self.session.rollback()
+                    record = 'parameter %s is already added to equipment %s' % (str(parameter), str(equipment))
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    return True
+            else:
+                record = 'Wrong argument type for adding parameter to equipment'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to add parameter to equipment before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
