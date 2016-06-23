@@ -1,5 +1,10 @@
 from __future__ import division, print_function
 
+import datetime as dt
+import numpy as np
+import numbers
+
+from ScientificProjects import reference_time
 from ScientificProjects.Entities.Parameter import ParameterType, Parameter
 from ScientificProjects.EntityManagers import EntityManager
 
@@ -49,7 +54,8 @@ class ParameterManager(EntityManager):
             self.session_manager.log_manager.log_record('Wrong Parameter Type argument',
                                                         'Warning')
 
-    def create_parameter(self, name, parameter_type, value, index=0, unit_name=None, description=None, parent=None):
+    def _create_parameter(self, name, parameter_type, float_value=None, string_value=None,
+                          index=0, unit_name=None, description=None, parent=None):
         if self.session_manager.signed_in():
             parameter_type_object, parameter_type_exists = self._check_parameter_type_name(parameter_type, description)
             if unit_name is None:
@@ -85,14 +91,10 @@ class ParameterManager(EntityManager):
                 parameter.unit_name = unit_name
                 if parent_id:
                     parameter.parent_id = parent_id
-                if isinstance(value, str):
-                    parameter.string_value = value
-                elif isinstance(value, (int, float)):
-                    parameter.float_value = value
-                else:
-                    self.session_manager.log_manager.log_record('Wrong value of the parameter',
-                                                                'Error')
-                    raise ValueError('Wrong value of parameter')
+                if string_value is not None:
+                    parameter.string_value = string_value
+                if float_value is not None:
+                    parameter.float_value = float_value
                 self.session.add(parameter)
                 self.session.commit()
                 self.session_manager.log_manager.log_record('Parameter %s created' % parameter.name,
@@ -124,3 +126,31 @@ class ParameterManager(EntityManager):
         for parameter_type in parameter_types:
             result[parameter_type.name] = parameter_type.id
         return result
+
+    def create_numeric_parameter(self, name, value, unit_name=None, description=None, parent=None):
+        if not isinstance(value, numbers.Number):
+            raise ValueError('Expected numeric value for a parameter')
+        return self._create_parameter(name, parameter_type=default_parameter_types['Numeric value'],
+                                      float_value=np.float(value), unit_name=unit_name, description=description,
+                                      parent=parent)
+
+    def create_string_parameter(self, name, value, unit_name=None, description=None, parent=None):
+        if not isinstance(value, str):
+            raise ValueError('Expected string value for a parameter')
+        return self._create_parameter(name, parameter_type=default_parameter_types['String value'],
+                                      string_value=value, unit_name=unit_name, description=description,
+                                      parent=parent)
+
+    def create_boolean_parameter(self, name, value, description=None, parent=None):
+        if not isinstance(value, numbers.Number):
+            raise ValueError('Expected boolean or numeric value for a parameter')
+        return self._create_parameter(name, parameter_type=default_parameter_types['Boolean value'],
+                                      float_value=np.float(bool(value)), description=description, parent=parent)
+
+    def create_datetime_parameter(self, name, value, description=None, parent=None):
+        if not isinstance(value, dt.datetime):
+            raise ValueError('Expected datetime value for a parameter')
+        td = (value - reference_time).total_seconds()
+        return self._create_parameter(name, parameter_type=default_parameter_types['Boolean value'],
+                                      float_value=td, description=description, parent=parent)
+
