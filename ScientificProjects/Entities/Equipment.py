@@ -21,7 +21,9 @@ equipment_parameters_table = Table('equipment_parameters', Base.metadata,
 
 equipment_measurement_table = Table('equipment_measurement', Base.metadata,
                                     Column('equipment_id', Integer, ForeignKey('equipment.id')),
-                                    Column('measurement_type_id', Integer, ForeignKey('measurement_type.id')))
+                                    Column('measurement_type_id', Integer, ForeignKey('measurement_type.id')),
+                                    UniqueConstraint('equipment_id', 'measurement_type_id',
+                                                     name='equipment_measurement_type'))
 
 
 class Manufacturer(Base):
