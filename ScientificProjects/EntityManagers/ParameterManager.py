@@ -1,8 +1,21 @@
 from __future__ import division, print_function
 
-from ScientificProjects import default_parameter_types
 from ScientificProjects.Entities.Parameter import ParameterType, Parameter
 from ScientificProjects.EntityManagers import EntityManager
+
+default_parameter_types = {'Numeric value': 'Single numeric value',
+                           'String value': 'String value',
+                           'Boolean value': 'Boolean value',
+                           'DateTime value': 'Single DateTime value',
+                           # ranges
+                           'Numeric range': 'Numeric values range',
+                           'Multiple numeric range': 'Tuple of numeric ranges',
+                           'DateTime range': 'DateTime values range',
+                           'Multiple DateTime range': 'Tuple of DateTime ranges',
+                           # grids
+                           'Uniform numeric grid': 'Uniform numeric grid',
+                           'NonUniform numeric grid': 'NonUniform numeric grid',
+                           }
 
 
 class ParameterManager(EntityManager):

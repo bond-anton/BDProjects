@@ -3,11 +3,12 @@ from __future__ import division, print_function
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from ScientificProjects import Base, default_log_categories, default_users, default_parameter_types
+from ScientificProjects import Base
 from ScientificProjects.Config import read_config
 from ScientificProjects.EntityManagers.VersionManager import VersionManager
-from ScientificProjects.EntityManagers.LogManager import LogManager
-from ScientificProjects.EntityManagers.UserManager import UserManager
+from ScientificProjects.EntityManagers.LogManager import LogManager, default_log_categories
+from ScientificProjects.EntityManagers.UserManager import UserManager, default_users
+from ScientificProjects.EntityManagers.ParameterManager import default_parameter_types
 from ScientificProjects.Entities.User import User
 from ScientificProjects.Entities.Session import Session
 from ScientificProjects.Entities.Project import Project

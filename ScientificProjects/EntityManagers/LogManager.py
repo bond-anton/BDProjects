@@ -2,12 +2,15 @@ from __future__ import division, print_function
 
 from sqlalchemy import func
 
-from ScientificProjects import default_log_categories
 from ScientificProjects.Entities.Log import LogCategory, Log
 from ScientificProjects.Entities.Project import Project
 from ScientificProjects.Entities.Session import Session
 from ScientificProjects.Entities.User import User
 from ScientificProjects.EntityManagers import EntityManager
+
+default_log_categories = {'Information': 'Informational messages',
+                          'Warning': 'Warning messages',
+                          'Error': 'Error messages'}
 
 
 class LogManager(EntityManager):

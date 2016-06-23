@@ -8,7 +8,7 @@ from sqlalchemy import exists, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
-from ScientificProjects import default_users, default_date_time_format
+from ScientificProjects import default_date_time_format
 from ScientificProjects.Entities.User import User
 from ScientificProjects.Entities.Session import Session
 from ScientificProjects.EntityManagers import EntityManager
@@ -17,6 +17,8 @@ from ScientificProjects.EntityManagers.ProjectManager import ProjectManager
 from ScientificProjects.EntityManagers.MeasurementTypeManager import MeasurementTypeManager
 from ScientificProjects.EntityManagers.EquipmentManager import EquipmentManager
 from ScientificProjects.EntityManagers.ParameterManager import ParameterManager
+
+default_users = {'bot': [None, None, None, 'bot', None]}
 
 
 class UserManager(EntityManager):
