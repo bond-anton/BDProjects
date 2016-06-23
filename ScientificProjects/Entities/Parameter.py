@@ -4,7 +4,7 @@ from sqlalchemy import Column, DateTime, String, Text, Integer, BigInteger, Floa
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
-from ScientificProjects.Entities.User import User
+from ScientificProjects.Entities.Session import Session
 
 
 class ParameterType(Base):
@@ -14,8 +14,8 @@ class ParameterType(Base):
     name = Column(String, unique=True)
     description = Column(Text)
     registered = Column(DateTime, default=func.now())
-    user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User, backref=backref('parameter_types', uselist=True, cascade='delete,all'))
+    session_id = Column(Integer, ForeignKey('session.id'))
+    session = relationship(Session, backref=backref('parameter_types', uselist=True, cascade='delete,all'))
 
     def __str__(self):
         return self.name
@@ -35,7 +35,7 @@ class Parameter(Base):
     index = Column(BigInteger, nullable=False, default=0)
     string_value = Column(String)
     float_value = Column(Float)
-    user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User, backref=backref('parameters', uselist=True, cascade='delete,all'))
+    session_id = Column(Integer, ForeignKey('session.id'))
+    session = relationship(Session, backref=backref('parameters', uselist=True, cascade='delete,all'))
     value_added = Column(DateTime, default=func.now())
     value_altered = Column(DateTime, default=func.now(), onupdate=func.now())

@@ -4,6 +4,7 @@ import uuid
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from ScientificProjects.Entities.Equipment import Manufacturer, EquipmentCategory, EquipmentAssembly, Equipment
+from ScientificProjects.Entities.MeasurementType import MeasurementType
 from ScientificProjects.Entities.Parameter import Parameter
 from ScientificProjects.EntityManagers import EntityManager
 
@@ -144,6 +145,30 @@ class EquipmentManager(EntityManager):
             return True
         else:
             record = 'Attempt to create equipment assembly before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def add_measurement_type_to_equipment(self, equipment, measurement_type):
+        if self.session_manager.signed_in():
+            if isinstance(equipment, Equipment) and isinstance(measurement_type, MeasurementType):
+                try:
+                    equipment.measurement_types.append(measurement_type)
+                    self.session.commit()
+                    record = 'measurement type %s added to equipment %s' % (str(measurement_type), str(equipment))
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    return True
+                except IntegrityError:
+                    self.session.rollback()
+                    record = 'measurement_type %s is already added to equipment %s' % (str(measurement_type),
+                                                                                       str(equipment))
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    return True
+            else:
+                record = 'Wrong argument type for adding measurement type to equipment'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to add measurement type to equipment before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
