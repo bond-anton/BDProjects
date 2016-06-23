@@ -33,8 +33,8 @@ class UserManager(EntityManager):
         self.log_manager = self.session_manager.log_manager
         self.project_manager = ProjectManager(self.engine, self)
         self.measurement_type_manager = MeasurementTypeManager(self.engine, self)
-        self.equipment_manager = EquipmentManager(self.engine, self)
         self.parameter_manager = ParameterManager(self.engine, self)
+        self.equipment_manager = EquipmentManager(self.engine, self)
 
     def create_user(self, name_first, name_last, email, login, password):
         user = User(name_first=str(name_first), name_last=str(name_last),
