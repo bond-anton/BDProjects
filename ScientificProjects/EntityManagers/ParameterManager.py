@@ -4,7 +4,7 @@ import datetime as dt
 import numpy as np
 import numbers
 
-from ScientificProjects import reference_time, datetime_to_float
+from ScientificProjects import datetime_to_float
 from ScientificProjects.Entities.Parameter import ParameterType, Parameter
 from ScientificProjects.EntityManagers import EntityManager
 
@@ -14,9 +14,7 @@ default_parameter_types = {'Numeric value': 'Single numeric value',
                            'DateTime value': 'Single DateTime value',
                            # ranges
                            'Numeric range': 'Numeric values range',
-                           'Multiple numeric range': 'Tuple of numeric ranges',
                            'DateTime range': 'DateTime values range',
-                           'Multiple DateTime range': 'Tuple of DateTime ranges',
                            # grids
                            'Uniform numeric grid': 'Uniform numeric grid',
                            'NonUniform numeric grid': 'NonUniform numeric grid',
@@ -154,3 +152,20 @@ class ParameterManager(EntityManager):
         return self._create_parameter(name, parameter_type=default_parameter_types['DateTime value'],
                                       float_value=td, description=description, parent=parent)
 
+    def create_numeric_range_parameter(self, name, start, stop, description=None, parent=None):
+        if not (isinstance(start, numbers.Number) and isinstance(stop, numbers.Number)):
+            raise ValueError('Expected numeric value for start and stop')
+        range_parameter = self._create_parameter(name, parameter_type=default_parameter_types['Numeric range'],
+                                                 description=description, parent=parent)
+        self.create_numeric_parameter(name=name+'-start', value=start, parent=range_parameter)
+        self.create_numeric_parameter(name=name + '-stop', value=stop, parent=range_parameter)
+        return range_parameter
+
+    def create_datetime_range_parameter(self, name, start, stop, description=None, parent=None):
+        if not (isinstance(start, dt.datetime) and isinstance(stop, dt.datetime)):
+            raise ValueError('Expected datetime value for start and stop')
+        range_parameter = self._create_parameter(name, parameter_type=default_parameter_types['DateTime range'],
+                                                 description=description, parent=parent)
+        self.create_datetime_parameter(name=name + '-start', value=start, parent=range_parameter)
+        self.create_datetime_parameter(name=name + '-stop', value=stop, parent=range_parameter)
+        return range_parameter
