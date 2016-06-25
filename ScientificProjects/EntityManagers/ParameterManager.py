@@ -4,7 +4,7 @@ import datetime as dt
 import numpy as np
 import numbers
 
-from ScientificProjects import datetime_to_float
+from ScientificProjects import datetime_to_float, float_to_datetime
 from ScientificProjects.Entities.Parameter import ParameterType, Parameter
 from ScientificProjects.EntityManagers import EntityManager
 
@@ -85,7 +85,7 @@ class ParameterManager(EntityManager):
                         self.session_manager.log_manager.log_record('Parent must be valid Parameter or its ID',
                                                                     'Warning')
                 parameter = Parameter(name=name, type_id=parameter_type_id, index=index,
-                                      user_id=self.session_manager.user.id)
+                                      session_id=self.session_manager.session_data.id)
                 parameter.unit_name = unit_name
                 if parent_id:
                     parameter.parent_id = parent_id
@@ -128,44 +128,62 @@ class ParameterManager(EntityManager):
     def create_numeric_parameter(self, name, value, unit_name=None, description=None, parent=None):
         if not isinstance(value, numbers.Number):
             raise ValueError('Expected numeric value for a parameter')
-        return self._create_parameter(name, parameter_type=default_parameter_types['Numeric value'],
+        return self._create_parameter(name, parameter_type='Numeric value',
                                       float_value=np.float(value), unit_name=unit_name, description=description,
                                       parent=parent)
 
     def create_string_parameter(self, name, value, unit_name=None, description=None, parent=None):
         if not isinstance(value, str):
             raise ValueError('Expected string value for a parameter')
-        return self._create_parameter(name, parameter_type=default_parameter_types['String value'],
+        return self._create_parameter(name, parameter_type='String value',
                                       string_value=value, unit_name=unit_name, description=description,
                                       parent=parent)
 
     def create_boolean_parameter(self, name, value, description=None, parent=None):
         if not isinstance(value, numbers.Number):
             raise ValueError('Expected boolean or numeric value for a parameter')
-        return self._create_parameter(name, parameter_type=default_parameter_types['Boolean value'],
+        return self._create_parameter(name, parameter_type='Boolean value',
                                       float_value=np.float(bool(value)), description=description, parent=parent)
 
     def create_datetime_parameter(self, name, value, description=None, parent=None):
         if not isinstance(value, dt.datetime):
             raise ValueError('Expected datetime value for a parameter')
         td = datetime_to_float(value)
-        return self._create_parameter(name, parameter_type=default_parameter_types['DateTime value'],
+        return self._create_parameter(name, parameter_type='DateTime value',
                                       float_value=td, description=description, parent=parent)
 
     def create_numeric_range_parameter(self, name, start, stop, description=None, parent=None):
         if not (isinstance(start, numbers.Number) and isinstance(stop, numbers.Number)):
             raise ValueError('Expected numeric value for start and stop')
-        range_parameter = self._create_parameter(name, parameter_type=default_parameter_types['Numeric range'],
+        range_parameter = self._create_parameter(name, parameter_type='Numeric range',
                                                  description=description, parent=parent)
-        self.create_numeric_parameter(name=name+'-start', value=start, parent=range_parameter)
-        self.create_numeric_parameter(name=name + '-stop', value=stop, parent=range_parameter)
+        self.create_numeric_parameter(name='start', value=start, parent=range_parameter)
+        self.create_numeric_parameter(name='stop', value=stop, parent=range_parameter)
         return range_parameter
 
     def create_datetime_range_parameter(self, name, start, stop, description=None, parent=None):
         if not (isinstance(start, dt.datetime) and isinstance(stop, dt.datetime)):
             raise ValueError('Expected datetime value for start and stop')
-        range_parameter = self._create_parameter(name, parameter_type=default_parameter_types['DateTime range'],
+        range_parameter = self._create_parameter(name, parameter_type='DateTime range',
                                                  description=description, parent=parent)
-        self.create_datetime_parameter(name=name + '-start', value=start, parent=range_parameter)
-        self.create_datetime_parameter(name=name + '-stop', value=stop, parent=range_parameter)
+        self.create_datetime_parameter(name='start', value=start, parent=range_parameter)
+        self.create_datetime_parameter(name='stop', value=stop, parent=range_parameter)
         return range_parameter
+
+
+def get_range_parameter_value(parameter):
+    if not isinstance(parameter, Parameter):
+        raise ValueError('Expected valid Parameter object')
+    if parameter.type.name not in ['DateTime range', 'Numeric range']:
+        raise ValueError('Expected valid Parameter object of range type')
+    start = None
+    stop = None
+    for child in parameter.children:
+        if child.name == 'start':
+            start = child.float_value
+        elif child.name == 'stop':
+            stop = child.float_value
+    if parameter.type.name == 'DateTime range':
+        start = float_to_datetime(start)
+        stop = float_to_datetime(stop)
+    return start, stop
