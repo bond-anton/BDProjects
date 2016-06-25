@@ -3,7 +3,7 @@ from __future__ import division, print_function
 from sqlalchemy import Table, Column, UniqueConstraint, Integer, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
-from ScientificProjects import Base
+from ScientificProjects import Base, default_date_time_format
 from ScientificProjects.Entities.Session import Session
 from ScientificProjects.Entities.Parameter import Parameter
 from ScientificProjects.Entities.MeasurementType import MeasurementType
@@ -38,7 +38,12 @@ class Manufacturer(Base):
     created = Column(DateTime, default=func.now())
 
     def __str__(self):
-        return self.name
+        description = 'Manufacturer: %s (%s)' % (self.name, self.name_short)
+        description += '\n %s' % description
+        created = self.created.strftime(default_date_time_format)
+        description += '\n Created: %s' % created
+        description += '\n Created by: @%s' % self.session.user.login
+        return description
 
 
 class EquipmentCategory(Base):

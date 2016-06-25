@@ -25,16 +25,16 @@ class EquipmentManager(EntityManager):
                 self.session.commit()
                 record = 'Manufacturer "%s" created' % manufacturer.name
                 self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return True
             except IntegrityError:
                 self.session.rollback()
+                manufacturer = self.session.query(Manufacturer).filter(Manufacturer.name == name).all()[0]
                 record = 'Manufacturer "%s" already exists' % manufacturer.name
                 self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return False
+            return manufacturer
         else:
             record = 'Attempt to create manufacturer before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return False
+            return None
 
     def create_equipment_category(self, name, description=None, parent=None):
         if self.session_manager.signed_in():
