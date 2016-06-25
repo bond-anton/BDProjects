@@ -11,4 +11,7 @@ my_manufacturer = client.user_manager.equipment_manager.create_manufacturer(name
                                                                             description='Test manufacturer')
 print(my_manufacturer)
 
+manufacturers = client.user_manager.equipment_manager.get_manufacturers(name='aic')
+print(manufacturers)
+
 client.user_manager.sign_out()

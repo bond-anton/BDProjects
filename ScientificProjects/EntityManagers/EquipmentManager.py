@@ -1,6 +1,7 @@
 from __future__ import division, print_function
 import uuid
 
+from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from ScientificProjects.Entities.Equipment import Manufacturer, EquipmentCategory, EquipmentAssembly, Equipment
@@ -36,6 +37,14 @@ class EquipmentManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
 
+    def get_manufacturers(self, name=None):
+        q = self.session.query(Manufacturer)
+        if name is not None and len(str(name)) > 2:
+            template = '%' + str(name) + '%'
+            q = q.filter(or_(Manufacturer.name.ilike(template),
+                             Manufacturer.name_short.ilike(template)))
+        return q.all()
+
     def create_equipment_category(self, name, description=None, parent=None):
         if self.session_manager.signed_in():
             equipment_category = EquipmentCategory(name=str(name))
@@ -66,7 +75,7 @@ class EquipmentManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
-    def get_equipment_categories(self, root=None):
+    def get_equipment_categories_tree(self, root=None):
         if self.session_manager.signed_in():
             measurement_types = {}
             if root is None:
@@ -83,12 +92,19 @@ class EquipmentManager(EntityManager):
                 except NoResultFound:
                     pass
             for root in roots:
-                measurement_types[root[0]] = self.get_equipment_categories(root[0])
+                measurement_types[root[0]] = self.get_equipment_categories_tree(root[0])
             return measurement_types
         else:
             record = 'Attempt to get equipment categories list before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return {}
+
+    def get_equipment_categories(self, name=None):
+        q = self.session.query(EquipmentCategory)
+        if name is not None and len(str(name)) > 2:
+            template = '%' + str(name) + '%'
+            q = q.filter(EquipmentCategory.name.ilike(template))
+        return q.all()
 
     def create_equipment(self, name, category, serial_number=None, assembly=None, description=None):
         if self.session_manager.signed_in():
