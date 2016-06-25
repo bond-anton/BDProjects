@@ -39,7 +39,7 @@ class Manufacturer(Base):
 
     def __str__(self):
         description = 'Manufacturer: %s (%s)' % (self.name, self.name_short)
-        description += '\n %s' % description
+        description += '\n %s' % self.description
         created = self.created.strftime(default_date_time_format)
         description += '\n Created: %s' % created
         description += '\n Created by: @%s' % self.session.user.login
@@ -51,7 +51,7 @@ class EquipmentCategory(Base):
     __tablename__ = 'equipment_category'
     id = Column(Integer, primary_key=True)
     parent_id = Column(Integer, ForeignKey('equipment_category.id'))
-    subcategories = relationship('EquipmentCategory')
+    subcategories = relationship('EquipmentCategory', backref=backref('parent', remote_side=[id]))
     name = Column(String, unique=True)
     description = Column(Text)
     session_id = Column(Integer, ForeignKey('session.id'))
@@ -59,7 +59,14 @@ class EquipmentCategory(Base):
     created = Column(DateTime, default=func.now())
 
     def __str__(self):
-        return self.name
+        description = 'Equipment category: %s' % self.name
+        description += '\n %s' % self.description
+        created = self.created.strftime(default_date_time_format)
+        description += '\n Created: %s' % created
+        description += '\n Created by: @%s' % self.session.user.login
+        description += '\n Parent: %s' % self.parent
+        description += '\n Subcategories number: %i' % len(self.subcategories)
+        return description
 
 
 class Equipment(Base):

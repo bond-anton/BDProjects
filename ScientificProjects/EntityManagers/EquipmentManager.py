@@ -64,16 +64,17 @@ class EquipmentManager(EntityManager):
                 self.session.commit()
                 record = 'Equipment category "%s" created' % equipment_category.name
                 self.session_manager.log_manager.log_record(record=record, category='Information')
-                return True
             except IntegrityError:
                 self.session.rollback()
+                equipment_category = self.session.query(EquipmentCategory).filter(
+                    EquipmentCategory.name == name).all()[0]
                 record = 'Equipment category "%s" already exists' % equipment_category.name
                 self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return True
+            return equipment_category
         else:
             record = 'Attempt to create equipment category before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return False
+            return None
 
     def get_equipment_categories_tree(self, root=None):
         if self.session_manager.signed_in():

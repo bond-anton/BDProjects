@@ -14,4 +14,9 @@ print(my_manufacturer)
 manufacturers = client.user_manager.equipment_manager.get_manufacturers(name='aic')
 print(manufacturers)
 
+category = client.user_manager.equipment_manager.create_equipment_category(name='Software',
+                                                                           description='Software tools',
+                                                                           parent=None)
+print(category)
+
 client.user_manager.sign_out()
