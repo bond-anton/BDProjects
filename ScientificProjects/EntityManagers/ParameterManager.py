@@ -4,7 +4,7 @@ import datetime as dt
 import numpy as np
 import numbers
 
-from ScientificProjects import reference_time
+from ScientificProjects import reference_time, datetime_to_float
 from ScientificProjects.Entities.Parameter import ParameterType, Parameter
 from ScientificProjects.EntityManagers import EntityManager
 
@@ -150,7 +150,7 @@ class ParameterManager(EntityManager):
     def create_datetime_parameter(self, name, value, description=None, parent=None):
         if not isinstance(value, dt.datetime):
             raise ValueError('Expected datetime value for a parameter')
-        td = (value - reference_time).total_seconds()
-        return self._create_parameter(name, parameter_type=default_parameter_types['Boolean value'],
+        td = datetime_to_float(value)
+        return self._create_parameter(name, parameter_type=default_parameter_types['DateTime value'],
                                       float_value=td, description=description, parent=parent)
 
