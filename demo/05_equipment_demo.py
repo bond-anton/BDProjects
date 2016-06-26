@@ -42,6 +42,16 @@ print(my_tool_2)
 
 my_assembly = client.user_manager.equipment_manager.create_equipment_assembly(name='Advanced pipeline',
                                                                               description='Nice software combination')
+client.user_manager.equipment_manager.add_equipment_to_assembly(my_assembly, my_tool_1)
+client.user_manager.equipment_manager.add_equipment_to_assembly(my_assembly, my_tool_2)
 print(my_assembly)
+
+my_tool_3 = client.user_manager.equipment_manager.create_equipment(name='Super setup',
+                                                                   category=category,
+                                                                   manufacturer=None,
+                                                                   serial_number=None,
+                                                                   assembly=my_assembly,
+                                                                   description='My super experimental setup')
+print(my_tool_3)
 
 client.user_manager.sign_out()

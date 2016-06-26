@@ -149,17 +149,18 @@ class EquipmentManager(EntityManager):
             if assembly is not None:
                 if isinstance(assembly, EquipmentAssembly):
                     equipment.assembly_id = assembly.id
-                assemblies = self.get_equipment_assembly(assembly)
-                if len(assemblies) == 1:
-                    equipment.assembly_id = assemblies[0].id
-                elif len(assemblies) == 0:
-                    record = 'No assembly is found with keyword "%s"' % assembly
-                    self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return None
                 else:
-                    record = 'More than one assembly found with keyword "%s"' % assembly
-                    self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return None
+                    assemblies = self.get_equipment_assembly(assembly)
+                    if len(assemblies) == 1:
+                        equipment.assembly_id = assemblies[0].id
+                    elif len(assemblies) == 0:
+                        record = 'No assembly is found with keyword "%s"' % assembly
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                        return None
+                    else:
+                        record = 'More than one assembly found with keyword "%s"' % assembly
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                        return None
             try:
                 self.session.add(equipment)
                 self.session.commit()
