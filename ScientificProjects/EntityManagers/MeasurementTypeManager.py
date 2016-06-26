@@ -18,29 +18,38 @@ class MeasurementTypeManager(EntityManager):
             if description is not None:
                 measurement_type.description = str(description)
             if parent is not None:
-                try:
-                    parent_id = self.session.query(MeasurementType.id).filter(MeasurementType.name == str(parent)).one()
-                    if parent_id:
-                        measurement_type.parent_id = parent_id[0]
-                except NoResultFound:
-                    pass
+                if isinstance(parent, MeasurementType):
+                    measurement_type.parent_id = parent.id
+                else:
+                    parents = self.get_measurement_types(parent)
+                    if len(parents) == 1:
+                        measurement_type.parent_id = parents[0].id
+                    elif len(parents) == 0:
+                        record = 'No measurement type is found with keyword "%s"' % parent
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                        return None
+                    else:
+                        record = 'More than one measurement type found with keyword "%s"' % parent
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                        return None
             try:
                 self.session.add(measurement_type)
                 self.session.commit()
                 record = 'Measurement type "%s" created' % measurement_type.name
                 self.session_manager.log_manager.log_record(record=record, category='Information')
-                return True
             except IntegrityError:
                 self.session.rollback()
+                q = self.session.query(MeasurementType).filter(MeasurementType.name == str(name))
+                measurement_type = q.all()[0]
                 record = 'Measurement type "%s" already exists' % measurement_type.name
                 self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return True
+            return measurement_type
         else:
             record = 'Attempt to create measurement type before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return False
+            return None
 
-    def get_measurement_types(self, root=None):
+    def get_measurement_types_tree(self, root=None):
         if self.session_manager.signed_in():
             measurement_types = {}
             if root is None:
@@ -62,3 +71,10 @@ class MeasurementTypeManager(EntityManager):
             record = 'Attempt to get measurement types before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return {}
+
+    def get_measurement_types(self, name=None):
+        q = self.session.query(MeasurementType)
+        if name is not None and len(str(name)) > 2:
+            template = '%' + str(name) + '%'
+            q = q.filter(MeasurementType.name.ilike(template))
+        return q.all()
