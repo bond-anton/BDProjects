@@ -27,6 +27,7 @@ my_type = client.user_manager.measurement_type_manager.create_measurement_type('
                                                                                description='Measurement of electrical current',
                                                                                parent=my_parent)
 
+print(my_parent)
 print(my_type)
 
 meas_types = client.user_manager.measurement_type_manager.get_measurement_types()
