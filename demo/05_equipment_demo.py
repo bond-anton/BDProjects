@@ -19,4 +19,7 @@ category = client.user_manager.equipment_manager.create_equipment_category(name=
                                                                            parent=None)
 print(category)
 
+category_tree = client.user_manager.equipment_manager.get_equipment_categories_tree()
+print(category_tree)
+
 client.user_manager.sign_out()

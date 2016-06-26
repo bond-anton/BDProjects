@@ -149,6 +149,19 @@ class EquipmentManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
+    def get_equipment(self, name=None, category=None, serial_number=None):
+        q = self.session.query(Equipment)
+        if name is not None and len(str(name)) > 2:
+            template = '%' + str(name) + '%'
+            q = q.filter(Equipment.name.ilike(template))
+        if category is not None and len(str(category)) > 2:
+            template = '%' + str(category) + '%'
+            q = q.filter(Equipment.category.name.ilike(template))
+        if serial_number is not None and len(str(serial_number)) > 2:
+            template = '%' + str(serial_number) + '%'
+            q = q.filter(Equipment.serial_number.ilike(template))
+        return q.all()
+
     def create_equipment_assembly(self, name, description=None):
         if self.session_manager.signed_in():
             assembly = EquipmentAssembly(name=str(name))
