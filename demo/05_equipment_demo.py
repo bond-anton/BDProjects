@@ -23,22 +23,25 @@ category_tree = client.user_manager.equipment_manager.get_equipment_categories_t
 print(category_tree)
 
 
-my_tool = client.user_manager.equipment_manager.create_equipment(name='MST-01',
-                                                                 category=category,
-                                                                 manufacturer=my_manufacturer,
-                                                                 serial_number='AAA 56-789-FR',
-                                                                 assembly=None,
-                                                                 description='My super duper tool')
+my_tool_1 = client.user_manager.equipment_manager.create_equipment(name='MST-01',
+                                                                   category=category,
+                                                                   manufacturer=my_manufacturer,
+                                                                   serial_number='AAA 56-789-FR',
+                                                                   assembly=None,
+                                                                   description='My super duper tool')
+print(my_tool_1)
 
-print(my_tool)
+my_tool_2 = client.user_manager.equipment_manager.create_equipment(name='Integrator',
+                                                                   category=category,
+                                                                   manufacturer=my_manufacturer,
+                                                                   serial_number=None,
+                                                                   assembly=None,
+                                                                   description='My super duper integrator')
+print(my_tool_2)
 
-my_tool = client.user_manager.equipment_manager.create_equipment(name='Integrator',
-                                                                 category=category,
-                                                                 manufacturer=my_manufacturer,
-                                                                 serial_number=None,
-                                                                 assembly=None,
-                                                                 description='My super duper integrator')
 
-print(my_tool)
+my_assembly = client.user_manager.equipment_manager.create_equipment_assembly(name='Advanced pipeline',
+                                                                              description='Nice software combination')
+print(my_assembly)
 
 client.user_manager.sign_out()

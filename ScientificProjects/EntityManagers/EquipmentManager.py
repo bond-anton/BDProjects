@@ -172,7 +172,6 @@ class EquipmentManager(EntityManager):
                 equipment = q.all()[0]
                 record = 'Equipment "%s (s/n: %s)" already exist' % (equipment.name, equipment.serial_number)
                 self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return equipment
             return equipment
         else:
             record = 'Attempt to create equipment before signing in'
@@ -198,15 +197,22 @@ class EquipmentManager(EntityManager):
             assembly.session_id = self.session_manager.session_data.id
             if description is not None:
                 assembly.description = str(description)
-            self.session.add(assembly)
-            self.session.commit()
-            record = 'Equipment assembly "%s" created' % assembly.name
-            self.session_manager.log_manager.log_record(record=record, category='Information')
-            return True
+            try:
+                self.session.add(assembly)
+                self.session.commit()
+                record = 'Equipment assembly "%s" created' % assembly.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+            except IntegrityError:
+                self.session.rollback()
+                q = self.session.query(EquipmentAssembly).filter(EquipmentAssembly.name == str(name))
+                assembly = q.all()[0]
+                record = 'Equipment assembly "%s" already exist' % assembly.name
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return assembly
         else:
             record = 'Attempt to create equipment assembly before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return False
+            return None
 
     def get_equipment_assembly(self, name=None):
         q = self.session.query(EquipmentAssembly)

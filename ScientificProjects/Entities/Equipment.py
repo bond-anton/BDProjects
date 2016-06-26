@@ -106,6 +106,7 @@ class Equipment(Base):
         else:
             description += '\n Assembly: %s' % self.assembly
         description += '\n Parameters number: %i' % len(self.parameters)
+        description += '\n Measurement types number: %i' % len(self.measurement_types)
         created = self.created.strftime(default_date_time_format)
         description += '\n Created: %s' % created
         description += '\n Created by: @%s' % self.session.user.login
