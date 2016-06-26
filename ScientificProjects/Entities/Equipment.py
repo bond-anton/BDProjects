@@ -93,7 +93,23 @@ class Equipment(Base):
     __table_args__ = (UniqueConstraint('name', 'serial_number', name='_name_serial_number'),)
 
     def __str__(self):
-        return self.name
+        description = 'Equipment: %s' % self.name
+        description += '\n %s' % self.description
+        if self.manufacturer is not None:
+            description += '\n Manufacturer: %s' % self.manufacturer.name
+        if self.category is not None:
+            description += '\n Category: %s' % self.category.name
+        else:
+            description += '\n Category: %s' % self.category
+        if self.assembly is not None:
+            description += '\n Assembly: %s' % self.assembly.name
+        else:
+            description += '\n Assembly: %s' % self.assembly
+        description += '\n Parameters number: %i' % len(self.parameters)
+        created = self.created.strftime(default_date_time_format)
+        description += '\n Created: %s' % created
+        description += '\n Created by: @%s' % self.session.user.login
+        return description
 
 
 class EquipmentAssembly(Base):
@@ -108,4 +124,10 @@ class EquipmentAssembly(Base):
     created = Column(DateTime, default=func.now())
 
     def __str__(self):
-        return self.name
+        description = 'Equipment assembly: %s' % self.name
+        description += '\n %s' % self.description
+        description += '\n Parts number: %i' % len(self.parts)
+        created = self.created.strftime(default_date_time_format)
+        description += '\n Created: %s' % created
+        description += '\n Created by: @%s' % self.session.user.login
+        return description

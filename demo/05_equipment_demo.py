@@ -22,4 +22,23 @@ print(category)
 category_tree = client.user_manager.equipment_manager.get_equipment_categories_tree()
 print(category_tree)
 
+
+my_tool = client.user_manager.equipment_manager.create_equipment(name='MST-01',
+                                                                 category=category,
+                                                                 manufacturer=my_manufacturer,
+                                                                 serial_number='AAA 56-789-FR',
+                                                                 assembly=None,
+                                                                 description='My super duper tool')
+
+print(my_tool)
+
+my_tool = client.user_manager.equipment_manager.create_equipment(name='Integrator',
+                                                                 category=category,
+                                                                 manufacturer=my_manufacturer,
+                                                                 serial_number=None,
+                                                                 assembly=None,
+                                                                 description='My super duper integrator')
+
+print(my_tool)
+
 client.user_manager.sign_out()

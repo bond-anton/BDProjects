@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 import uuid
 
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from ScientificProjects.Entities.Equipment import Manufacturer, EquipmentCategory, EquipmentAssembly, Equipment
@@ -107,32 +107,59 @@ class EquipmentManager(EntityManager):
             q = q.filter(EquipmentCategory.name.ilike(template))
         return q.all()
 
-    def create_equipment(self, name, category, serial_number=None, assembly=None, description=None):
+    def create_equipment(self, name, category, manufacturer=None, serial_number=None, assembly=None, description=None):
         if self.session_manager.signed_in():
             equipment = Equipment(name=str(name))
             equipment.session_id = self.session_manager.session_data.id
             if serial_number is None:
-                equipment.serial_number = str(uuid.uuid4())
-            else:
-                equipment.serial_number = str(serial_number)
+                serial_number = 'n/a'
+            equipment.serial_number = str(serial_number)
             if description is not None:
                 equipment.description = str(description)
+            if manufacturer is not None:
+                if isinstance(manufacturer, Manufacturer):
+                    equipment.manufacturer_id = manufacturer.id
+                else:
+                    manufacturers = self.get_manufacturers(manufacturer)
+                    if len(manufacturers) == 1:
+                        equipment.manufacturer_id = manufacturers[0].id
+                    elif len(manufacturers) == 0:
+                        record = 'No manufacturer is found with keyword "%s"' % manufacturer
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                        return None
+                    else:
+                        record = 'More than one manufacturer found with keyword "%s"' % manufacturer
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                        return None
             if category is not None:
-                try:
-                    category_id = self.session.query(EquipmentCategory.id).filter(
-                        EquipmentCategory.name == str(category)).one()
-                    if category_id:
-                        equipment.category_id = category_id[0]
-                except NoResultFound:
-                    pass
+                if isinstance(category, EquipmentCategory):
+                    equipment.category_id = category.id
+                else:
+                    categories = self.get_equipment_categories(category)
+                    if len(categories) == 1:
+                        equipment.category_id = categories[0].id
+                    elif len(categories) == 0:
+                        record = 'No category is found with keyword "%s"' % category
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                        return None
+                    else:
+                        record = 'More than one category found with keyword "%s"' % category
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                        return None
             if assembly is not None:
-                try:
-                    assembly_id = self.session.query(EquipmentAssembly.id).filter(
-                        EquipmentAssembly.name == str(assembly)).one()
-                    if assembly_id:
-                        equipment.assembly_id = assembly_id[0]
-                except NoResultFound:
-                    pass
+                if isinstance(assembly, EquipmentAssembly):
+                    equipment.assembly_id = assembly.id
+                assemblies = self.get_equipment_assembly(assembly)
+                if len(assemblies) == 1:
+                    equipment.assembly_id = assemblies[0].id
+                elif len(assemblies) == 0:
+                    record = 'No assembly is found with keyword "%s"' % assembly
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return None
+                else:
+                    record = 'More than one assembly found with keyword "%s"' % assembly
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return None
             try:
                 self.session.add(equipment)
                 self.session.commit()
@@ -140,14 +167,17 @@ class EquipmentManager(EntityManager):
                 self.session_manager.log_manager.log_record(record=record, category='Information')
             except IntegrityError:
                 self.session.rollback()
+                q = self.session.query(Equipment).filter(and_(Equipment.name == str(name),
+                                                              Equipment.serial_number == str(serial_number)))
+                equipment = q.all()[0]
                 record = 'Equipment "%s (s/n: %s)" already exist' % (equipment.name, equipment.serial_number)
                 self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return True
-            return True
+                return equipment
+            return equipment
         else:
             record = 'Attempt to create equipment before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return False
+            return None
 
     def get_equipment(self, name=None, category=None, serial_number=None):
         q = self.session.query(Equipment)
@@ -177,6 +207,13 @@ class EquipmentManager(EntityManager):
             record = 'Attempt to create equipment assembly before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
+
+    def get_equipment_assembly(self, name=None):
+        q = self.session.query(EquipmentAssembly)
+        if name is not None and len(str(name)) > 2:
+            template = '%' + str(name) + '%'
+            q = q.filter(EquipmentAssembly.name.ilike(template))
+        return q.all()
 
     def add_measurement_type_to_equipment(self, equipment, measurement_type):
         if self.session_manager.signed_in():
