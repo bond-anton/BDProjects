@@ -118,12 +118,12 @@ class ParameterManager(EntityManager):
             parameter_type_exists = True
         return parameter_type_object, parameter_type_exists
 
-    def get_parameter_types(self):
-        parameter_types = self.session.query(ParameterType).all()
-        result = {}
-        for parameter_type in parameter_types:
-            result[parameter_type.name] = parameter_type.id
-        return result
+    def get_parameter_types(self, name=None):
+        q = self.session.query(ParameterType)
+        if name is not None and len(str(name)) > 2:
+            template = '%' + str(name) + '%'
+            q = q.filter(ParameterType.name.ilike(template))
+        return q.all()
 
     def create_numeric_parameter(self, name, value, unit_name=None, description=None, parent=None):
         if not isinstance(value, numbers.Number):

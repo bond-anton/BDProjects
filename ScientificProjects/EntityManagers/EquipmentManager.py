@@ -1,5 +1,4 @@
 from __future__ import division, print_function
-import uuid
 
 from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
@@ -291,3 +290,14 @@ class EquipmentManager(EntityManager):
             record = 'Attempt to add equipment to assembly before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
+
+    def get_equipment_parameter_by_name(self, equipment, parameter_name):
+        if isinstance(equipment, Equipment) and parameter_name is not None and len(str(parameter_name)) > 2:
+            template = '%' + str(parameter_name) + '%'
+            q = self.session.query(Parameter).join((Equipment, Parameter.equipment))
+            q = q.filter(Equipment.id == equipment.id)
+            q = q.filter(Parameter.name.ilike(template))
+            parameters = q.all()
+        else:
+            raise ValueError('Wrong argument value')
+        return parameters
