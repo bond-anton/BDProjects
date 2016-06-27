@@ -59,11 +59,16 @@ client.user_manager.equipment_manager.add_measurement_type_to_equipment(my_tool_
 print(my_tool_3)
 
 params = client.user_manager.equipment_manager.get_equipment_parameters(my_tool_3, 'Voltage range')
-print(params)
-#my_parameter = client.user_manager.parameter_manager.create_numeric_range_parameter('Voltage range', -1, 5)
-#print(my_parameter, '\n')
-#print(get_range_parameter_value(my_parameter), '\n')
-#client.user_manager.equipment_manager.add_parameter_to_equipment(my_tool_3, my_parameter)
-#print(my_tool_3)
+if len(params) == 0:
+    my_parameter = client.user_manager.parameter_manager.create_numeric_range_parameter('Voltage range', -1, 5)
+    print(my_parameter, '\n')
+    print(get_range_parameter_value(my_parameter), '\n')
+    client.user_manager.equipment_manager.add_parameter_to_equipment(my_tool_3, my_parameter)
+elif len(params) == 1:
+    print(params[0])
+else:
+    for param in params:
+        print(param)
+print(my_tool_3)
 
 client.user_manager.sign_out()
