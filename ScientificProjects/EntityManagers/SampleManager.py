@@ -91,12 +91,17 @@ class SampleManager(EntityManager):
             return False
 
     def get_sample_parameters(self, sample, parameter_name=None):
-        if isinstance(sample, Sample):
-            q = self.session.query(Parameter).join((Sample, Parameter.samples))
-            q = q.filter(Sample.id == sample.id)
-            if parameter_name is not None and len(str(parameter_name)) > 2:
-                template = '%' + str(parameter_name) + '%'
-                q = q.filter(Parameter.name.ilike(template))
-            return q.all()
+        if self.session_manager.signed_in():
+            if isinstance(sample, Sample):
+                q = self.session.query(Parameter).join((Sample, Parameter.samples))
+                q = q.filter(Sample.id == sample.id)
+                if parameter_name is not None and len(str(parameter_name)) > 2:
+                    template = '%' + str(parameter_name) + '%'
+                    q = q.filter(Parameter.name.ilike(template))
+                return q.all()
+            else:
+                raise ValueError('Wrong argument value')
         else:
-            raise ValueError('Wrong argument value')
+            record = 'Attempt to query samples parameters before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False

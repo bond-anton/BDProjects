@@ -37,12 +37,17 @@ class EquipmentManager(EntityManager):
             return None
 
     def get_manufacturers(self, name=None):
-        q = self.session.query(Manufacturer)
-        if name is not None and len(str(name)) > 2:
-            template = '%' + str(name) + '%'
-            q = q.filter(or_(Manufacturer.name.ilike(template),
-                             Manufacturer.name_short.ilike(template)))
-        return q.all()
+        if self.session_manager.signed_in():
+            q = self.session.query(Manufacturer)
+            if name is not None and len(str(name)) > 2:
+                template = '%' + str(name) + '%'
+                q = q.filter(or_(Manufacturer.name.ilike(template),
+                                 Manufacturer.name_short.ilike(template)))
+            return q.all()
+        else:
+            record = 'Attempt to query manufacturers before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return []
 
     def create_equipment_category(self, name, description=None, parent=None):
         if self.session_manager.signed_in():
@@ -95,16 +100,21 @@ class EquipmentManager(EntityManager):
                 measurement_types[root[0]] = self.get_equipment_categories_tree(root[0])
             return measurement_types
         else:
-            record = 'Attempt to get equipment categories list before signing in'
+            record = 'Attempt to query equipment categories before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return {}
 
     def get_equipment_categories(self, name=None):
-        q = self.session.query(EquipmentCategory)
-        if name is not None and len(str(name)) > 2:
-            template = '%' + str(name) + '%'
-            q = q.filter(EquipmentCategory.name.ilike(template))
-        return q.all()
+        if self.session_manager.signed_in():
+            q = self.session.query(EquipmentCategory)
+            if name is not None and len(str(name)) > 2:
+                template = '%' + str(name) + '%'
+                q = q.filter(EquipmentCategory.name.ilike(template))
+            return q.all()
+        else:
+            record = 'Attempt to query equipment categories before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return []
 
     def create_equipment(self, name, category, manufacturer=None, serial_number=None, assembly=None, description=None):
         if self.session_manager.signed_in():
@@ -179,17 +189,22 @@ class EquipmentManager(EntityManager):
             return None
 
     def get_equipment(self, name=None, category=None, serial_number=None):
-        q = self.session.query(Equipment)
-        if name is not None and len(str(name)) > 2:
-            template = '%' + str(name) + '%'
-            q = q.filter(Equipment.name.ilike(template))
-        if category is not None and len(str(category)) > 2:
-            template = '%' + str(category) + '%'
-            q = q.filter(Equipment.category.name.ilike(template))
-        if serial_number is not None and len(str(serial_number)) > 2:
-            template = '%' + str(serial_number) + '%'
-            q = q.filter(Equipment.serial_number.ilike(template))
-        return q.all()
+        if self.session_manager.signed_in():
+            q = self.session.query(Equipment)
+            if name is not None and len(str(name)) > 2:
+                template = '%' + str(name) + '%'
+                q = q.filter(Equipment.name.ilike(template))
+            if category is not None and len(str(category)) > 2:
+                template = '%' + str(category) + '%'
+                q = q.filter(Equipment.category.name.ilike(template))
+            if serial_number is not None and len(str(serial_number)) > 2:
+                template = '%' + str(serial_number) + '%'
+                q = q.filter(Equipment.serial_number.ilike(template))
+            return q.all()
+        else:
+            record = 'Attempt to query equipment before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return []
 
     def create_equipment_assembly(self, name, description=None):
         if self.session_manager.signed_in():
@@ -215,11 +230,16 @@ class EquipmentManager(EntityManager):
             return None
 
     def get_equipment_assembly(self, name=None):
-        q = self.session.query(EquipmentAssembly)
-        if name is not None and len(str(name)) > 2:
-            template = '%' + str(name) + '%'
-            q = q.filter(EquipmentAssembly.name.ilike(template))
-        return q.all()
+        if self.session_manager.signed_in():
+            q = self.session.query(EquipmentAssembly)
+            if name is not None and len(str(name)) > 2:
+                template = '%' + str(name) + '%'
+                q = q.filter(EquipmentAssembly.name.ilike(template))
+            return q.all()
+        else:
+            record = 'Attempt to query equipment assemblies before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return []
 
     def add_measurement_type_to_equipment(self, equipment, measurement_type):
         if self.session_manager.signed_in():
@@ -296,12 +316,17 @@ class EquipmentManager(EntityManager):
             return False
 
     def get_equipment_parameters(self, equipment, parameter_name=None):
-        if isinstance(equipment, Equipment):
-            q = self.session.query(Parameter).join((Equipment, Parameter.equipment))
-            q = q.filter(Equipment.id == equipment.id)
-            if parameter_name is not None and len(str(parameter_name)) > 2:
-                template = '%' + str(parameter_name) + '%'
-                q = q.filter(Parameter.name.ilike(template))
-            return q.all()
+        if self.session_manager.signed_in():
+            if isinstance(equipment, Equipment):
+                q = self.session.query(Parameter).join((Equipment, Parameter.equipment))
+                q = q.filter(Equipment.id == equipment.id)
+                if parameter_name is not None and len(str(parameter_name)) > 2:
+                    template = '%' + str(parameter_name) + '%'
+                    q = q.filter(Parameter.name.ilike(template))
+                return q.all()
+            else:
+                raise ValueError('Wrong argument value')
         else:
-            raise ValueError('Wrong argument value')
+            record = 'Attempt to query equipment parameters before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return []
