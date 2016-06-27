@@ -17,37 +17,45 @@ class ProjectManager(EntityManager):
         super(ProjectManager, self).__init__(engine, session_manager)
         self.log_manager = None
 
-    def create_project(self, name, description, data_dir):
+    def create_project(self, name, data_dir, description=None):
         if self.session_manager.signed_in():
             self.session_data = self.session_manager.session_data
             data_dir = str(data_dir)
             if os.path.isdir(data_dir) and os.access(data_dir, os.W_OK | os.X_OK):
-                project = Project(name=str(name), description=str(description),
-                                  created_session_id=self.session_manager.session_data.id,
-                                  data_dir=data_dir)
+                project = Project(name=str(name))
+                project.created_session_id = self.session_manager.session_data.id
+                project.data_dir = data_dir
+                if description is not None:
+                    project.description = str(description)
                 try:
                     self.session.add(project)
                     self.session.commit()
-                    self.session_manager.log_manager.log_record(record='Project %s created' % project.name,
+                    self.session_manager.log_manager.log_record(record='Project "%s" created' % project.name,
                                                                 category='Information')
                 except IntegrityError:
                     self.session.rollback()
-                    self.session_manager.log_manager.log_record(record='Project %s already exists' % project.name,
+                    project = self.session.query(Project).filter(Project.name == str(name)).all()[0]
+                    self.session_manager.log_manager.log_record(record='Project "%s" already exists' % project.name,
                                                                 category='Warning')
+                return project
             else:
-                self.session_manager.log_manager.log_record(record='Directory %s not writable' % data_dir,
+                self.session_manager.log_manager.log_record(record='Directory "%s" not writable' % data_dir,
                                                             category='Warning')
         else:
             self.session_manager.log_manager.log_record(record='Attempt to create project before signing in',
                                                         category='Warning')
+        return None
 
-    def get_projects_list(self):
+    def get_projects(self, name=None):
         if self.session_manager.signed_in():
             self.session_data = self.session_manager.session_data
-            projects = self.session.query(Project).all()
-            return projects
+            q = self.session.query(Project)
+            if name is not None and len(str(name)) > 2:
+                template = '%' + str(name) + '%'
+                q = q.filter(Project.name.ilike(template))
+            return q.all()
         else:
-            record = 'Attempt to get list of available projects before signing in'
+            record = 'Attempt to query projects before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
 
     def open_project(self, project_name):
@@ -64,25 +72,25 @@ class ProjectManager(EntityManager):
                     self.project = project
                     self.user = self.session_manager.user
                     self.log_manager = LogManager(self.engine, self)
-                    record = 'Project %s opened (#%s)' % (self.project, self.session_data.token)
+                    record = 'Project "%s" opened (#%s)' % (self.project.name, self.session_data.token)
                     self.log_manager.log_record(record=record, category='Information')
-                    return True
+                    return self.project
                 elif self.project_opened(project):
-                    record = 'Project %s is already opened in #%s' % (project_name, self.session_data.token)
+                    record = 'Project "%s" is already opened in #%s' % (project_name, self.session_data.token)
                     self.log_manager.log_record(record=record, category='Information')
-                    return True
+                    return self.project
                 else:
                     record = 'Close opened project before opening another one'
                     self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return False
+                    return None
             else:
-                record = 'Project %s not found' % project_name
+                record = 'Project "%s" not found' % project_name
                 self.session_manager.log_manager.log_record(record=record, category='Information')
-                return False
+                return None
         else:
             record = 'Attempt open project before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return False
+            return None
 
     def project_opened(self, session=None, project=None):
         if self.session_manager.signed_in():
@@ -124,7 +132,7 @@ class ProjectManager(EntityManager):
                         Project).filter(Project.name == str(project)).all()
                 projects[0].closed = datetime.datetime.now()
                 self.session.commit()
-                record = 'Project %s closed (#%s)' % (self.project, session.token)
+                record = 'Project "%s" closed (#%s)' % (self.project.name, session.token)
                 self.log_manager.log_record(record=record, category='Information')
                 self.project = None
                 self.log_manager = None
@@ -133,7 +141,7 @@ class ProjectManager(EntityManager):
                 if project is None:
                     record = 'Session #%s has no projects opened' % session.token
                 else:
-                    record = 'Project %s is not opened' % self.project
+                    record = 'Project "%s" is not opened' % self.project.name
                 self.session_manager.log_manager.log_record(record=record, category='Information')
                 return True
         else:

@@ -3,7 +3,7 @@ from __future__ import division, print_function
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
-from ScientificProjects import Base
+from ScientificProjects import Base, default_date_time_format
 from ScientificProjects.Entities.Session import Session
 
 
@@ -31,4 +31,11 @@ class Project(Base):
     sessions = relationship('SessionProject', back_populates='project')
 
     def __str__(self):
-        return self.name
+        description = 'Project: %s' % self.name
+        if self.description is not None:
+            description += '\n %s' % self.description
+        description += '\n Data dir: %s' % self.data_dir
+        created = self.created.strftime(default_date_time_format)
+        description += '\n Created: %s' % created
+        description += '\n Created by: @%s' % self.created_session.user.login
+        return description
