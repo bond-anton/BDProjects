@@ -14,8 +14,8 @@ class SampleManager(EntityManager):
 
     def create_sample(self, name, description=None):
         if self.session_manager.signed_in():
-            if self.session_manager.project_manger.project_opened():
-                project = self.session_manager.project_manger.project
+            if self.session_manager.project_manager.project_opened():
+                project = self.session_manager.project_manager.project
                 sample = Sample(name=str(name))
                 sample.project_id = project.id
                 sample.session_id = self.session_manager.session_data.id
@@ -44,8 +44,8 @@ class SampleManager(EntityManager):
 
     def get_samples(self, name=None):
         if self.session_manager.signed_in():
-            if self.session_manager.project_manger.project_opened():
-                project = self.session_manager.project_manger.project
+            if self.session_manager.project_manager.project_opened():
+                project = self.session_manager.project_manager.project
                 q = self.session.query(Sample).filter(Sample.project_id == project.id)
                 if name is not None and len(str(name)) > 2:
                     template = '%' + str(name) + '%'
@@ -62,7 +62,7 @@ class SampleManager(EntityManager):
 
     def add_parameter_to_sample(self, sample, parameter):
         if self.session_manager.signed_in():
-            if self.session_manager.project_manger.project_opened():
+            if self.session_manager.project_manager.project_opened():
                 if isinstance(sample, Sample) and isinstance(parameter, Parameter):
                     try:
                         sample.parameters.append(parameter)

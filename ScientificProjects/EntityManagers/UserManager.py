@@ -17,6 +17,7 @@ from ScientificProjects.EntityManagers.ProjectManager import ProjectManager
 from ScientificProjects.EntityManagers.MeasurementTypeManager import MeasurementTypeManager
 from ScientificProjects.EntityManagers.EquipmentManager import EquipmentManager
 from ScientificProjects.EntityManagers.ParameterManager import ParameterManager
+from ScientificProjects.EntityManagers.SampleManager import SampleManager
 
 default_users = {'bot': [None, None, None, 'bot', None]}
 
@@ -37,6 +38,7 @@ class UserManager(EntityManager):
         self.measurement_type_manager = MeasurementTypeManager(self.engine, self)
         self.parameter_manager = ParameterManager(self.engine, self)
         self.equipment_manager = EquipmentManager(self.engine, self)
+        self.sample_manager = SampleManager(self.engine, self)
 
     def create_user(self, name_first, name_last, email, login, password):
         user = User(name_first=str(name_first), name_last=str(name_last),

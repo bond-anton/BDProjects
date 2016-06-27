@@ -10,8 +10,8 @@ client.user_manager.sign_in('john_smith', 'secret_password')
 project_name = 'Super Project'
 client.user_manager.project_manager.open_project(project_name)
 
-ans = client.user_manager.project_manager.project_opened()
-if ans:
-    print(client.user_manager.project_manager.project)
+my_sample = client.user_manager.sample_manager.create_sample(name='SCF343 ab',
+                                                             description='My new shiny sample')
+print(my_sample)
 
 client.user_manager.sign_out()
