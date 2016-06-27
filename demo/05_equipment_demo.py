@@ -58,7 +58,7 @@ measurement_type = client.user_manager.measurement_type_manager.get_measurement_
 client.user_manager.equipment_manager.add_measurement_type_to_equipment(my_tool_3, measurement_type)
 print(my_tool_3)
 
-params = client.user_manager.equipment_manager.get_equipment_parameter_by_name(my_tool_3, 'Voltage range')
+params = client.user_manager.equipment_manager.get_equipment_parameters(my_tool_3, 'Voltage range')
 print(params)
 #my_parameter = client.user_manager.parameter_manager.create_numeric_range_parameter('Voltage range', -1, 5)
 #print(my_parameter, '\n')

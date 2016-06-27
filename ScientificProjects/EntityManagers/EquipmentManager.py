@@ -227,13 +227,14 @@ class EquipmentManager(EntityManager):
                 try:
                     equipment.measurement_types.append(measurement_type)
                     self.session.commit()
-                    record = 'measurement type %s added to equipment %s' % (str(measurement_type), str(equipment))
+                    record = 'measurement type "%s" added to equipment "%s"' % (str(measurement_type.name),
+                                                                                str(equipment.name))
                     self.session_manager.log_manager.log_record(record=record, category='Information')
                     return True
                 except IntegrityError:
                     self.session.rollback()
-                    record = 'measurement_type %s is already added to equipment %s' % (str(measurement_type),
-                                                                                       str(equipment))
+                    record = 'measurement_type "%s" is already added to equipment "%s"' % (str(measurement_type.name),
+                                                                                           str(equipment.name))
                     self.session_manager.log_manager.log_record(record=record, category='Information')
                     return True
             else:
@@ -251,12 +252,14 @@ class EquipmentManager(EntityManager):
                 try:
                     equipment.parameters.append(parameter)
                     self.session.commit()
-                    record = 'parameter %s added to equipment %s' % (str(parameter), str(equipment))
+                    record = 'parameter "%s" added to equipment "%s"' % (str(parameter.name),
+                                                                         str(equipment.name))
                     self.session_manager.log_manager.log_record(record=record, category='Information')
                     return True
                 except IntegrityError:
                     self.session.rollback()
-                    record = 'parameter %s is already added to equipment %s' % (str(parameter), str(equipment))
+                    record = 'parameter "%s" is already added to equipment "%s"' % (str(parameter.name),
+                                                                                    str(equipment.name))
                     self.session_manager.log_manager.log_record(record=record, category='Information')
                     return True
             else:
@@ -274,12 +277,13 @@ class EquipmentManager(EntityManager):
                 try:
                     assembly.parts.append(equipment)
                     self.session.commit()
-                    record = 'equipment %s added to assembly %s' % (str(equipment), str(assembly))
+                    record = 'equipment "%s" added to assembly "%s"' % (str(equipment.name), str(assembly.name))
                     self.session_manager.log_manager.log_record(record=record, category='Information')
                     return True
                 except IntegrityError:
                     self.session.rollback()
-                    record = 'equipment %s is already added to assembly %s' % (str(equipment), str(assembly))
+                    record = 'equipment "%s" is already added to assembly "%s"' % (str(equipment.name),
+                                                                                   str(assembly.name))
                     self.session_manager.log_manager.log_record(record=record, category='Information')
                     return True
             else:
@@ -291,13 +295,13 @@ class EquipmentManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
-    def get_equipment_parameter_by_name(self, equipment, parameter_name):
-        if isinstance(equipment, Equipment) and parameter_name is not None and len(str(parameter_name)) > 2:
-            template = '%' + str(parameter_name) + '%'
+    def get_equipment_parameters(self, equipment, parameter_name=None):
+        if isinstance(equipment, Equipment):
             q = self.session.query(Parameter).join((Equipment, Parameter.equipment))
             q = q.filter(Equipment.id == equipment.id)
-            q = q.filter(Parameter.name.ilike(template))
-            parameters = q.all()
+            if parameter_name is not None and len(str(parameter_name)) > 2:
+                template = '%' + str(parameter_name) + '%'
+                q = q.filter(Parameter.name.ilike(template))
+            return q.all()
         else:
             raise ValueError('Wrong argument value')
-        return parameters
