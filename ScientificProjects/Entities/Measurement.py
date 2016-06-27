@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-from sqlalchemy import Table, Column, Integer, Float, String, Text, DateTime, ForeignKey, func
+from sqlalchemy import Table, Column, UniqueConstraint, Integer, Float, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
@@ -32,21 +32,25 @@ class MeasurementsCollection(Base):
 
     __tablename__ = 'measurements_collection'
     id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True)
+    name = Column(String)
     description = Column(Text)
+    project_id = Column(Integer, ForeignKey('project.id'))
+    project = relationship(Project, backref=backref('measurements_collections', uselist=True,
+                                                    cascade='delete,all'))
     session_id = Column(Integer, ForeignKey('session.id'))
     session = relationship(Session, backref=backref('measurements_collections', uselist=True,
                                                     cascade='delete,all'))
     measurements = relationship('Measurement', secondary=measurement_collection_table,
                                 backref="collections")
     created = Column(DateTime, default=func.now())
+    __table_args__ = (UniqueConstraint('name', 'project_id', name='_collection_project'),)
 
 
 class Measurement(Base):
 
     __tablename__ = 'measurement'
     id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True)
+    name = Column(String)
     measurement_type_id = Column(Integer, ForeignKey('measurement_type.id'))
     measurement_type = relationship(MeasurementType, backref=backref('measurements', uselist=True,
                                                                      cascade='delete,all'))
