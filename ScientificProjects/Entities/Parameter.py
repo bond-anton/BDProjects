@@ -41,7 +41,10 @@ class Parameter(Base):
     value_altered = Column(DateTime, default=func.now(), onupdate=func.now())
 
     def __str__(self):
-        description = 'Parameter %s of type %s' % (self.name, self.type.name)
+        description = 'Parameter: %s' % self.name
+        if self.description is not None:
+            description += '\n %s' % self.description
+        description += '\n Type: %s' % self.type.name
         description += '\n Numeric val: %s' % str(self.float_value)
         description += '\n String val: %s' % str(self.string_value)
         created = self.value_added.strftime(default_date_time_format)

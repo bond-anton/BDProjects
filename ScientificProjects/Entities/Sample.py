@@ -30,7 +30,8 @@ class Sample(Base):
 
     def __str__(self):
         description = 'Sample: %s' % self.name
-        description += '\n %s' % self.description
+        if self.description is not None:
+            description += '\n %s' % self.description
         if self.project is not None:
             description += '\n Project: %s' % self.project.name
         else:

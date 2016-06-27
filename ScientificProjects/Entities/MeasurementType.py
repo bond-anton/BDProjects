@@ -21,7 +21,8 @@ class MeasurementType(Base):
 
     def __str__(self):
         description = 'Measurement type: %s' % self.name
-        description += '\n %s' % self.description
+        if self.description is not None:
+            description += '\n %s' % self.description
         if self.parent is not None:
             description += '\n Parent: %s' % self.parent.name
         else:

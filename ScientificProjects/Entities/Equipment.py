@@ -39,7 +39,8 @@ class Manufacturer(Base):
 
     def __str__(self):
         description = 'Manufacturer: %s (%s)' % (self.name, self.name_short)
-        description += '\n %s' % self.description
+        if self.description is not None:
+            description += '\n %s' % self.description
         created = self.created.strftime(default_date_time_format)
         description += '\n Created: %s' % created
         description += '\n Created by: @%s' % self.session.user.login
@@ -60,7 +61,8 @@ class EquipmentCategory(Base):
 
     def __str__(self):
         description = 'Equipment category: %s' % self.name
-        description += '\n %s' % self.description
+        if self.description is not None:
+            description += '\n %s' % self.description
         created = self.created.strftime(default_date_time_format)
         description += '\n Created: %s' % created
         description += '\n Created by: @%s' % self.session.user.login
@@ -94,7 +96,8 @@ class Equipment(Base):
 
     def __str__(self):
         description = 'Equipment: %s' % self.name
-        description += '\n %s' % self.description
+        if self.description is not None:
+            description += '\n %s' % self.description
         if self.manufacturer is not None:
             description += '\n Manufacturer: %s' % self.manufacturer.name
         if self.category is not None:
@@ -126,7 +129,8 @@ class EquipmentAssembly(Base):
 
     def __str__(self):
         description = 'Equipment assembly: %s' % self.name
-        description += '\n %s' % self.description
+        if self.description is not None:
+            description += '\n %s' % self.description
         description += '\n Parts number: %i' % len(self.parts)
         created = self.created.strftime(default_date_time_format)
         description += '\n Created: %s' % created
