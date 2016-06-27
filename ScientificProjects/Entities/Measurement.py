@@ -9,7 +9,12 @@ from ScientificProjects.Entities.Equipment import Equipment
 from ScientificProjects.Entities.Project import Project
 from ScientificProjects.Entities.Session import Session
 from ScientificProjects.Entities.Parameter import Parameter
+from ScientificProjects.Entities.Sample import Sample
 
+
+measurement_sample_table = Table('measurement_sample', Base.metadata,
+                                 Column('measurement_id', Integer, ForeignKey('measurement.id')),
+                                 Column('sample_id', Integer, ForeignKey('sample.id')))
 
 measurement_collection_table = Table('measurement_collection', Base.metadata,
                                      Column('collection_id', Integer,
@@ -57,6 +62,7 @@ class Measurement(Base):
     input_data_id = Column(Integer, ForeignKey('measurements_collection.id'))
     input_data = relationship(MeasurementsCollection, backref=backref('analyses', uselist=True,
                                                                       cascade='delete,all'))
+    samples = relationship(Sample, secondary=measurement_sample_table, backref='measurements')
     parameters = relationship(Parameter, secondary=measurement_parameter_table,
                               backref='measurements')
     description = Column(Text)
