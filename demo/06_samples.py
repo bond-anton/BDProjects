@@ -7,7 +7,8 @@ client = Client(config_file_name='config.ini')
 client.user_manager.sign_in('john_smith', 'secret_password')
 
 project_name = 'Super Project'
-client.user_manager.project_manager.open_project(project_name)
+project = client.user_manager.project_manager.open_project(project_name)
+print(project)
 
 my_sample = client.user_manager.sample_manager.create_sample(name='SCF343 ab',
                                                              description='My new shiny sample')
