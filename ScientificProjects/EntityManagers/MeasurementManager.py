@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 
 from ScientificProjects.Entities.MeasurementType import MeasurementType
 from ScientificProjects.Entities.Measurement import Measurement, MeasurementsCollection
+from ScientificProjects.Entities.DataPoint import DataChannel
 from ScientificProjects.Entities.Equipment import Equipment
 from ScientificProjects.Entities.Sample import Sample
 from ScientificProjects.Entities.Parameter import Parameter
@@ -228,5 +229,87 @@ class MeasurementManager(EntityManager):
                 return []
         else:
             record = 'Attempt to query measurements collections before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return []
+
+    def create_data_channel(self, name, measurement, description=None, unit_name=None):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                data_channel = DataChannel(name=str(name))
+                data_channel.session_id = self.session_manager.session_data.id
+                if isinstance(measurement, Measurement):
+                    data_channel.measurement_id = measurement.id
+                else:
+                    record = 'Not valid Measurement object to create data channel'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return None
+                if description is not None:
+                    data_channel.description = str(description)
+                if unit_name is not None:
+                    data_channel.unit_name = str(unit_name)
+                try:
+                    self.session.add(data_channel)
+                    self.session.commit()
+                    record = 'Data channel "%s" created' % data_channel.name
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                except IntegrityError:
+                    self.session.rollback()
+                    q = self.session.query(DataChannel).filter(DataChannel.name == str(name))
+                    q = q.filter(DataChannel.measurement_id == measurement.id)
+                    data_channel = q.all()[0]
+                    record = 'Data channel "%s" already exists' % data_channel.name
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return data_channel
+            else:
+                record = 'Attempt to create data channel before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return None
+        else:
+            record = 'Attempt to create data channel before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return None
+
+    def add_parameter_to_data_channel(self, data_channel, parameter):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if isinstance(data_channel, DataChannel) and isinstance(parameter, Parameter):
+                    data_channel.parameters.append(parameter)
+                    self.session.commit()
+                    record = 'Parameter "%s" added to data channel "%s"' % (parameter.name,
+                                                                            data_channel.name)
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    return True
+                else:
+                    record = 'Wrong argument for adding parameter to data channel'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+            else:
+                record = 'Attempt to add parameter to data channel before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to add parameter to data channel before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def get_data_channels(self, measurement, name=None):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if isinstance(measurement, Measurement):
+                    q = self.session.query(DataChannel).filter(DataChannel.measurement_id == measurement.id)
+                    if name is not None and len(str(name)) > 2:
+                        template = '%' + str(name) + '%'
+                        q = q.filter(DataChannel.name.ilike(template))
+                    return q.all()
+                else:
+                    record = 'Wrong Measurement object to query data channels'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return []
+            else:
+                record = 'Attempt to query data channel before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return []
+        else:
+            record = 'Attempt to query data channel before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return []
