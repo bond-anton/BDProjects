@@ -58,7 +58,7 @@ class Measurement(Base):
     input_data = relationship(MeasurementsCollection, backref=backref('analyses', uselist=True,
                                                                       cascade='delete,all'))
     parameters = relationship(Parameter, secondary=measurement_parameter_table,
-                              backref="measurements")
+                              backref='measurements')
     description = Column(Text)
     started = Column(DateTime, default=func.now())
     finished = Column(DateTime)
