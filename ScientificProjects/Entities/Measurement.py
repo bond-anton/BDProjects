@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-from sqlalchemy import Table, Column, Integer, String, Text, DateTime, ForeignKey, func
+from sqlalchemy import Table, Column, Integer, Float, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
@@ -45,9 +45,9 @@ class Measurement(Base):
     measurement_type_id = Column(Integer, ForeignKey('measurement_type.id'))
     measurement_type = relationship(MeasurementType, backref=backref('measurements', uselist=True,
                                                                      cascade='delete,all'))
-    tool_id = Column(Integer, ForeignKey('equipment.id'))
-    tool = relationship(Equipment, backref=backref('measurements', uselist=True,
-                                                   cascade='delete,all'))
+    equipment_id = Column(Integer, ForeignKey('equipment.id'))
+    equipment = relationship(Equipment, backref=backref('measurements', uselist=True,
+                                                        cascade='delete,all'))
     project_id = Column(Integer, ForeignKey('project.id'))
     project = relationship(Project, backref=backref('measurements', uselist=True,
                                                     cascade='delete,all'))
@@ -62,6 +62,7 @@ class Measurement(Base):
     description = Column(Text)
     started = Column(DateTime, default=func.now())
     finished = Column(DateTime)
+    progress = Column(Float, default=0.0)
 
     def __str__(self):
         return self.name
