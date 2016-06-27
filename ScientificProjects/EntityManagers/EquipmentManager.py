@@ -24,7 +24,7 @@ class EquipmentManager(EntityManager):
                 self.session.add(manufacturer)
                 self.session.commit()
                 record = 'Manufacturer "%s" created' % manufacturer.name
-                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                self.session_manager.log_manager.log_record(record=record, category='Information')
             except IntegrityError:
                 self.session.rollback()
                 manufacturer = self.session.query(Manufacturer).filter(Manufacturer.name == name).all()[0]
