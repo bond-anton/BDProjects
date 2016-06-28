@@ -46,6 +46,6 @@ class DataPoint(Base):
     session_id = Column(Integer, ForeignKey('session.id'))
     session = relationship(Session, backref=backref('data_points', uselist=True,
                                                     cascade='delete,all'))
-    value_measured = Column(DateTime, nullable=False)
-    value_added = Column(DateTime, default=func.now())
-    value_altered = Column(DateTime, default=func.now(), onupdate=func.now())
+    measured = Column(DateTime, default=func.now())
+    added = Column(DateTime, default=func.now())
+    altered = Column(DateTime, default=func.now(), onupdate=func.now())

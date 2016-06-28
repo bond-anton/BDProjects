@@ -1,10 +1,11 @@
 from __future__ import division, print_function
+import datetime as dt
 
 from sqlalchemy.exc import IntegrityError
 
 from ScientificProjects.Entities.MeasurementType import MeasurementType
 from ScientificProjects.Entities.Measurement import Measurement, MeasurementsCollection
-from ScientificProjects.Entities.DataPoint import DataChannel
+from ScientificProjects.Entities.DataPoint import DataChannel, DataPoint
 from ScientificProjects.Entities.Equipment import Equipment
 from ScientificProjects.Entities.Sample import Sample
 from ScientificProjects.Entities.Parameter import Parameter
@@ -313,3 +314,37 @@ class MeasurementManager(EntityManager):
             record = 'Attempt to query data channel before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return []
+
+    def create_data_point(self, channel, string_value=None, float_value=None, index=None, measured=None):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if string_value is None and float_value is None:
+                    record = 'Either string or float value is needed to create data point'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return None
+                if not isinstance(channel, DataChannel):
+                    record = 'Wrong DataChannel object to create data point'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return None
+                data_point = DataPoint()
+                data_point.channel_id = channel.id
+                data_point.session_id = self.session_manager.session_data.id
+                if string_value is not None:
+                    data_point.string_value = str(string_value)
+                if float_value is not None:
+                    data_point.float_value = float(float_value)
+                if index is not None:
+                    data_point.index = int(abs(index))
+                if isinstance(measured, dt.datetime):
+                    data_point.measured = measured
+                self.session.add(data_point)
+                self.session.commit()
+                return data_point
+            else:
+                record = 'Attempt to create data point before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return None
+        else:
+            record = 'Attempt to create data point before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return None
