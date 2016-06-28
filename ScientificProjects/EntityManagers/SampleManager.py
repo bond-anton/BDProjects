@@ -105,3 +105,27 @@ class SampleManager(EntityManager):
             record = 'Attempt to query samples parameters before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
+
+    def delete_sample(self, sample):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                project = self.session_manager.project_manager.project
+                check_sample = isinstance(sample, Sample) and sample.project_id == project.id
+                if check_sample:
+                    self.session.delete(sample)
+                    self.session.commit()
+                    record = 'Sample "%s" successfully deleted' % sample.name
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    return True
+                else:
+                    record = 'Wrong argument for sample delete operation'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+            else:
+                record = 'Attempt to delete sample before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete sample before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
