@@ -381,7 +381,7 @@ class MeasurementManager(EntityManager):
                                 } for i in range(float_value.size)]
                 self.engine.execute(DataPoint.__table__.insert(), data_points)
 
-                record = 'Data point added to channel "%s"' % channel.name
+                record = 'Data points added to channel "%s"' % channel.name
                 self.session_manager.log_manager.log_record(record=record, category='Information')
                 return data_points
             else:
@@ -400,7 +400,7 @@ class MeasurementManager(EntityManager):
                     record = 'Wrong DataChannel object to query data point'
                     self.session_manager.log_manager.log_record(record=record, category='Warning')
                     return []
-                q = self.session.query(DataPoint).filter(DataChannel.id == channel.id)
+                q = self.session.query(DataPoint).filter(DataPoint.channel_id == channel.id)
                 if index is not None:
                     q = q.filter(DataPoint.index == int(abs(index)))
                 return q.all()
@@ -425,7 +425,7 @@ class MeasurementManager(EntityManager):
                 q = self.session.query(DataPoint.float_value,
                                        DataPoint.string_value,
                                        DataPoint.index,
-                                       DataPoint.measured).filter(DataChannel.id == channel.id)
+                                       DataPoint.measured).filter(DataPoint.channel_id == channel.id)
                 if index is not None:
                     q = q.filter(DataPoint.index == int(abs(index)))
                 return np.array(q.all(), dtype=dtype)

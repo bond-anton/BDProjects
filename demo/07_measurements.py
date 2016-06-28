@@ -34,7 +34,7 @@ voltmeter_channel = client.user_manager.measurement_manager.create_data_channel(
                                                                                 unit_name='V')
 print(measurement)
 
-current_points = np.linspace(-1, 1, endpoint=True)
+current_points = np.linspace(-1, 1, num=11, endpoint=True)
 index = np.arange(current_points.size)
 resistance = 10
 voltage_points = resistance * np.copy(current_points)
