@@ -34,6 +34,7 @@ class MeasurementManager(EntityManager):
                         measurement_type)
                     if len(measurement_types) == 1:
                         measurement.measurement_type_id = measurement_types[0].id
+                        measurement_type = measurement_types[0]
                     elif len(measurement_types) == 0:
                         record = 'No measurement type found for keyword "%s"' % measurement_type
                         self.session_manager.log_manager.log_record(record=record, category='Warning')
@@ -48,6 +49,7 @@ class MeasurementManager(EntityManager):
                     equipment_list = self.session_manager.equipment_manager.get_equipment(equipment)
                     if len(equipment_list) == 1:
                         measurement.equipment_id = equipment_list[0].id
+                        equipment = equipment_list[0]
                     elif len(equipment_list) == 0:
                         record = 'No equipment found for keyword "%s"' % equipment
                         self.session_manager.log_manager.log_record(record=record, category='Warning')
@@ -56,7 +58,7 @@ class MeasurementManager(EntityManager):
                         record = 'More than one equipment item found for keyword "%s"' % equipment
                         self.session_manager.log_manager.log_record(record=record, category='Warning')
                         return None
-                if measurement.measurement_type not in measurement.equipment.measurement_types:
+                if measurement_type not in equipment.measurement_types:
                     record = 'Equipment "%s" does not support measurement type "%s"' % \
                              (measurement.equipment.name, measurement.measurement_type.name)
                     self.session_manager.log_manager.log_record(record=record, category='Warning')
