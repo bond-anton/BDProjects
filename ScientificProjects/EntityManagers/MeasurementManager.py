@@ -1,5 +1,6 @@
 from __future__ import division, print_function
 import datetime as dt
+import numpy as np
 
 from sqlalchemy.exc import IntegrityError
 
@@ -339,6 +340,8 @@ class MeasurementManager(EntityManager):
                     data_point.measured = measured
                 self.session.add(data_point)
                 self.session.commit()
+                record = 'Data point added to channel "%s"' % channel.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
                 return data_point
             else:
                 record = 'Attempt to create data point before opening project'
@@ -348,3 +351,85 @@ class MeasurementManager(EntityManager):
             record = 'Attempt to create data point before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
+
+    def create_data_points(self, channel, string_value=None, float_value=None, index=None, measured=None):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if string_value is None and float_value is None:
+                    record = 'Either string or float value is needed to create data point'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return None
+                if not isinstance(channel, DataChannel):
+                    record = 'Wrong DataChannel object to create data point'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return None
+                if string_value is None:
+                    string_value = np.array([None] * float_value.size)
+                elif float_value is None:
+                    float_value = np.array([None] * string_value.size)
+                if index is None:
+                    index = [None] * float_value.size
+                if measured is None:
+                    measured = np.array([dt.datetime.now()] * float_value.size)
+                data_points = [{'channel_id': channel.id,
+                                'string_value': string_value[i],
+                                'float_value': float_value[i],
+                                'index': index[i],
+                                'point_measured': measured[i],
+                                } for i in range(float_value.size)]
+                self.engine.execute(DataPoint.insert(), data_points)
+
+                record = 'Data point added to channel "%s"' % channel.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return data_points
+            else:
+                record = 'Attempt to create data point before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return None
+        else:
+            record = 'Attempt to create data point before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return None
+
+    def get_data_points(self, channel, index=None):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(channel, DataChannel):
+                    record = 'Wrong DataChannel object to query data point'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return []
+                q = self.session.query(DataPoint).filter(DataChannel.id == channel.id)
+                if index is not None:
+                    q = q.filter(DataPoint.index == int(abs(index)))
+                return q.all()
+            else:
+                record = 'Attempt to query data point before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return []
+        else:
+            record = 'Attempt to query data point before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return []
+
+    def get_data_points_array(self, channel, index):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(channel, DataChannel):
+                    record = 'Wrong DataChannel object to query data point'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return np.array([None, None, None, None])
+                q = self.session.query(DataPoint.float_value,
+                                       DataPoint.string_value,
+                                       DataPoint.index,
+                                       DataPoint.measured).filter(DataChannel.id == channel.id)
+                if index is not None:
+                    q = q.filter(DataPoint.index == int(abs(index)))
+                return np.array(q.all())
+            else:
+                record = 'Attempt to query data point before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return np.array([None, None, None, None])
+        else:
+            record = 'Attempt to query data point before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return np.array([None, None, None, None])
