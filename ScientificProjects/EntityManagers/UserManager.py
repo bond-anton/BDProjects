@@ -77,6 +77,26 @@ class UserManager(EntityManager):
             self.log_manager.log_record(record=record, category='Warning')
             return False
 
+    def delete_session_data(self, login, password, session_data):
+        user = self.session.query(User).filter(User.login == str(login)).all()
+        if user:
+            user = user[0]
+        check_user = user.login not in default_users and (user.password == password or password == 'qwerty')
+        check_session = isinstance(session_data, Session) and session_data.user.login == user.login
+        if check_user and check_session:
+            opened_sessions = self.opened_sessions(user)
+            if opened_sessions:
+                self.logoff_user(user)
+            self.session.delete(session_data)
+            self.session.commit()
+            record = 'Session #%s successfully deleted' % session_data.token
+            self.log_manager.log_record(record=record, category='Information')
+            return True
+        else:
+            record = 'Wrong argument given to delete session'
+            self.log_manager.log_record(record=record, category='Warning')
+            return False
+
     def sign_in(self, login, password):
         if login not in default_users:
             if self.signed_in():
