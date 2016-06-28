@@ -54,8 +54,8 @@ print('Measurement finished:', measurement.finished)
 
 i_data = client.user_manager.measurement_manager.get_data_points_array(channel=current_meter_channel)
 v_data = client.user_manager.measurement_manager.get_data_points_array(channel=voltmeter_channel)
-print(i_data['float_value'])
-print(v_data['float_value'])
+print(i_data[:, 0])
+print(v_data[:, 0])
 
 client.user_manager.sign_out()
 
