@@ -41,8 +41,8 @@ class DataPoint(Base):
     channel = relationship(DataChannel, backref=backref('data_points', uselist=True,
                                                         cascade='delete,all'))
     index = Column(BigInteger, nullable=False, default=0)
-    string_value = Column(String)
     float_value = Column(Float)
+    string_value = Column(String)
     session_id = Column(Integer, ForeignKey('session.id'))
     session = relationship(Session, backref=backref('data_points', uselist=True,
                                                     cascade='delete,all'))

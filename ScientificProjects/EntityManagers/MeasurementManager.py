@@ -379,7 +379,7 @@ class MeasurementManager(EntityManager):
                                 'index': index[i],
                                 'point_measured': measured[i],
                                 } for i in range(float_value.size)]
-                self.engine.execute(DataPoint.insert(), data_points)
+                self.engine.execute(DataPoint.__table__.insert(), data_points)
 
                 record = 'Data point added to channel "%s"' % channel.name
                 self.session_manager.log_manager.log_record(record=record, category='Information')
@@ -413,28 +413,30 @@ class MeasurementManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return []
 
-    def get_data_points_array(self, channel, index):
+    def get_data_points_array(self, channel, index=None):
+        dtype = np.dtype({'names': ['float_value', 'string_value', 'index', 'measured'],
+                          'formats': [np.float, 'S255', np.int, dt.datetime]})
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if not isinstance(channel, DataChannel):
                     record = 'Wrong DataChannel object to query data point'
                     self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return np.array([None, None, None, None])
+                    return np.array([None, None, None, None], dtype=dtype)
                 q = self.session.query(DataPoint.float_value,
                                        DataPoint.string_value,
                                        DataPoint.index,
                                        DataPoint.measured).filter(DataChannel.id == channel.id)
                 if index is not None:
                     q = q.filter(DataPoint.index == int(abs(index)))
-                return np.array(q.all())
+                return np.array(q.all(), dtype=dtype)
             else:
                 record = 'Attempt to query data point before opening project'
                 self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return np.array([None, None, None, None])
+                return np.array([None, None, None, None], dtype=dtype)
         else:
             record = 'Attempt to query data point before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return np.array([None, None, None, None])
+            return np.array([None, None, None, None], dtype=dtype)
 
     def finish_measurement(self, measurement, finished=None):
         if self.session_manager.signed_in():

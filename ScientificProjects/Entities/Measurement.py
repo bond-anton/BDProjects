@@ -87,6 +87,7 @@ class Measurement(Base):
             description += '\n Finished: %s' % finished
         description += '\n Samples number: %i' % len(self.samples)
         description += '\n Parameters number: %i' % len(self.parameters)
+        description += '\n Data channels number: %i' % len(self.data_channels)
         if self.input_data:
             description += '\n Input data: %s' % self.input_data.name
         description += '\n Created by: @%s' % self.session.user.login
