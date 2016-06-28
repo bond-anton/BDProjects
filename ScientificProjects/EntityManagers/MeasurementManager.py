@@ -435,3 +435,47 @@ class MeasurementManager(EntityManager):
             record = 'Attempt to query data point before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return np.array([None, None, None, None])
+
+    def finish_measurement(self, measurement, finished=None):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(measurement, Measurement):
+                    record = 'Expected valid Measurement object for measurement finish'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+                if finished is None:
+                    finished = dt.datetime.now()
+                elif not isinstance(finished, dt.datetime):
+                    record = 'Expected datetime argument for measurement finish'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+                measurement.finished = finished
+                self.session.commit()
+                return True
+            else:
+                record = 'Attempt to finish measurement before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to finish measurement before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def update_measurement_progress(self, measurement, progress):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(measurement, Measurement):
+                    record = 'Expected valid Measurement object for progress update'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+                measurement.progress = float(progress)
+                self.session.commit()
+                return True
+            else:
+                record = 'Attempt to update measurement progress before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to update measurement progress before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False

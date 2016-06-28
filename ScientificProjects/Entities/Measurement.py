@@ -3,7 +3,7 @@ from __future__ import division, print_function
 from sqlalchemy import Table, Column, UniqueConstraint, Integer, Float, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
-from ScientificProjects import Base
+from ScientificProjects import Base, default_date_time_format
 from ScientificProjects.Entities.MeasurementType import MeasurementType
 from ScientificProjects.Entities.Equipment import Equipment
 from ScientificProjects.Entities.Project import Project
@@ -75,4 +75,19 @@ class Measurement(Base):
     progress = Column(Float, default=0.0)
 
     def __str__(self):
-        return self.name
+        description = 'Measurement: %s' % self.name
+        if self.description is not None:
+            description += '\n %s' % self.description
+        description += '\n Type: %s' % self.measurement_type.name
+        description += '\n Equipment: %s' % self.equipment.name
+        started = self.started.strftime(default_date_time_format)
+        description += '\n Started: %s' % started
+        if self.finished:
+            finished = self.started.strftime(default_date_time_format)
+            description += '\n Finished: %s' % finished
+        description += '\n Samples number: %i' % len(self.samples)
+        description += '\n Parameters number: %i' % len(self.parameters)
+        if self.input_data:
+            description += '\n Input data: %s' % self.input_data.name
+        description += '\n Created by: @%s' % self.session.user.login
+        return description
