@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-from sqlalchemy import Column, DateTime, String, Text, Integer, BigInteger, Float, ForeignKey, func
+from sqlalchemy import Column, DateTime, String, Text, Integer, Float, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base, default_date_time_format
@@ -32,7 +32,7 @@ class Parameter(Base):
     name = Column(String)
     description = Column(Text)
     unit_name = Column(String, unique=False)
-    index = Column(BigInteger, nullable=False, default=0)
+    index = Column(Integer, nullable=False, default=0)
     string_value = Column(String)
     float_value = Column(Float)
     session_id = Column(Integer, ForeignKey('session.id'))

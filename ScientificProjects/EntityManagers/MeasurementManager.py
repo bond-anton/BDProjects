@@ -318,7 +318,7 @@ class MeasurementManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return []
 
-    def create_data_point(self, channel, string_value=None, float_value=None, index=None, measured=None):
+    def create_data_point(self, channel, string_value=None, float_value=None, point_index=None, measured=None):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if string_value is None and float_value is None:
@@ -336,8 +336,8 @@ class MeasurementManager(EntityManager):
                     data_point.string_value = str(string_value)
                 if float_value is not None:
                     data_point.float_value = float(float_value)
-                if index is not None:
-                    data_point.index = int(abs(index))
+                if point_index is not None:
+                    data_point.point_index = int(abs(point_index))
                 if isinstance(measured, dt.datetime):
                     data_point.measured = measured
                 self.session.add(data_point)
@@ -354,7 +354,7 @@ class MeasurementManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
 
-    def create_data_points(self, channel, string_value=None, float_value=None, index=None, measured=None):
+    def create_data_points(self, channel, string_value=None, float_value=None, point_index=None, measured=None):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if string_value is None and float_value is None:
@@ -369,14 +369,14 @@ class MeasurementManager(EntityManager):
                     string_value = np.array([None] * float_value.size)
                 elif float_value is None:
                     float_value = np.array([None] * string_value.size)
-                if index is None:
-                    index = [None] * float_value.size
+                if point_index is None:
+                    point_index = np.zeros(float_value.size, dtype=np.int)
                 if measured is None:
                     measured = np.array([dt.datetime.now()] * float_value.size)
                 data_points = [{'channel_id': channel.id,
                                 'string_value': string_value[i],
                                 'float_value': float_value[i],
-                                'index': index[i],
+                                'point_index': int(point_index[i]),
                                 'point_measured': measured[i],
                                 } for i in range(float_value.size)]
                 self.engine.execute(DataPoint.__table__.insert(), data_points)
@@ -393,7 +393,7 @@ class MeasurementManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
 
-    def get_data_points(self, channel, index=None):
+    def get_data_points(self, channel, point_index=None):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if not isinstance(channel, DataChannel):
@@ -401,8 +401,8 @@ class MeasurementManager(EntityManager):
                     self.session_manager.log_manager.log_record(record=record, category='Warning')
                     return []
                 q = self.session.query(DataPoint).filter(DataPoint.channel_id == channel.id)
-                if index is not None:
-                    q = q.filter(DataPoint.index == int(abs(index)))
+                if point_index is not None:
+                    q = q.filter(DataPoint.point_index == int(abs(point_index)))
                 return q.all()
             else:
                 record = 'Attempt to query data point before opening project'
@@ -413,7 +413,7 @@ class MeasurementManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return []
 
-    def get_data_points_array(self, channel, index=None):
+    def get_data_points_array(self, channel, point_index=None):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if not isinstance(channel, DataChannel):
@@ -422,10 +422,10 @@ class MeasurementManager(EntityManager):
                     return np.array([None, None, None, None])
                 q = self.session.query(DataPoint.float_value,
                                        DataPoint.string_value,
-                                       DataPoint.index,
+                                       DataPoint.point_index,
                                        DataPoint.measured).filter(DataPoint.channel_id == channel.id)
-                if index is not None:
-                    q = q.filter(DataPoint.index == int(abs(index)))
+                if isinstance(point_index, (tuple, list, range, np.ndarray)):
+                    q = q.filter(DataPoint.point_index.in_(point_index))
                 return np.array(q.all())
             else:
                 record = 'Attempt to query data point before opening project'
@@ -477,5 +477,114 @@ class MeasurementManager(EntityManager):
                 return False
         else:
             record = 'Attempt to update measurement progress before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def delete_measurement(self, measurement):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(measurement, Measurement):
+                    record = 'Expected valid Measurement object for delete operation'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+                self.session.delete(measurement)
+                self.session.commit()
+                record = 'Measurement "%s" successfully deleted' % measurement.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Attempt to delete measurement before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete measurement before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def delete_collection(self, collection):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(collection, MeasurementsCollection):
+                    record = 'Expected valid MeasurementCollection object for delete operation'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+                self.session.delete(collection)
+                self.session.commit()
+                record = 'Measurement collection "%s" successfully deleted' % collection.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Attempt to delete measurement collection before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete measurement collection before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def delete_data_channel(self, data_channel):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(data_channel, DataChannel):
+                    record = 'Expected valid DataChannel object for delete operation'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+                self.session.delete(data_channel)
+                self.session.commit()
+                record = 'Data channel "%s" successfully deleted' % data_channel.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Attempt to delete data channel before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete data channel before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def delete_data_point(self, data_point):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(data_point, DataPoint):
+                    record = 'Expected valid DataPoint object for delete operation'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+                self.session.delete(data_point)
+                self.session.commit()
+                record = 'Data point successfully deleted'
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Attempt to delete data point before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete data point before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def delete_data_points(self, channel, point_index=None):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(channel, DataChannel):
+                    record = 'Expected valid DataChannel object for data points delete operation'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+                q = self.session.query(DataPoint).filter(DataPoint.channel_id == channel.id)
+                if isinstance(point_index, (tuple, list, range, np.ndarray)):
+                    q = q.filter(DataPoint.point_index.in_(point_index))
+                q.delete(synchronize_session='fetch')
+                # q.delete(synchronize_session=False) # try this if performance is low
+                self.session.commit()
+                record = 'Data points successfully deleted'
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Attempt to delete data points before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete data points before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False

@@ -19,5 +19,5 @@ class User(Base):
     altered = Column(DateTime, default=func.now(), onupdate=func.now())
 
     def __str__(self):
-        user_record = '@%s (%s %s) <%s>' % (self.login, self.name_first.title(), self.name_last.upper(), self.email)
-        return user_record
+        description = '@%s (%s %s) <%s>' % (self.login, self.name_first.title(), self.name_last.upper(), self.email)
+        return description

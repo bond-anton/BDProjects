@@ -10,12 +10,13 @@ from ScientificProjects.Entities.Session import Session
 class SessionProject(Base):
 
     __tablename__ = 'session_project'
-    session_id = Column(Integer, ForeignKey('session.id'), primary_key=True)
-    project_id = Column(Integer, ForeignKey('project.id'), primary_key=True)
+    id = Column(Integer, primary_key=True)
+    session_id = Column(Integer, ForeignKey('session.id'))
+    project_id = Column(Integer, ForeignKey('project.id'))
     opened = Column(DateTime, default=func.now())
     closed = Column(DateTime)
-    session = relationship('Session', back_populates='projects_opened')
-    project = relationship('Project', back_populates='sessions')
+    session = relationship('Session', back_populates='projects_opened', cascade='delete')
+    project = relationship('Project', back_populates='sessions', cascade='delete')
 
 
 class Project(Base):

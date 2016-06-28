@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 
 from sqlalchemy import Table, Column, UniqueConstraint
-from sqlalchemy import DateTime, String, Text, Integer, BigInteger, Float, ForeignKey, func
+from sqlalchemy import DateTime, String, Text, Integer, Float, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
 from ScientificProjects import Base
@@ -40,7 +40,7 @@ class DataPoint(Base):
     channel_id = Column(Integer, ForeignKey('data_channel.id'))
     channel = relationship(DataChannel, backref=backref('data_points', uselist=True,
                                                         cascade='delete,all'))
-    index = Column(BigInteger, nullable=False, default=0)
+    point_index = Column(Integer, default=0)
     float_value = Column(Float)
     string_value = Column(String)
     session_id = Column(Integer, ForeignKey('session.id'))

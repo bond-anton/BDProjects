@@ -35,7 +35,7 @@ voltmeter_channel = client.user_manager.measurement_manager.create_data_channel(
 print(measurement)
 
 current_points = np.linspace(-1, 1, num=11, endpoint=True)
-index = np.arange(current_points.size)
+index = range(current_points.size)
 resistance = 10
 voltage_points = resistance * np.copy(current_points)
 
@@ -43,10 +43,10 @@ print('Measurement progress:', measurement.progress)
 if measurement.finished is None:
     client.user_manager.measurement_manager.create_data_points(channel=current_meter_channel,
                                                                float_value=current_points,
-                                                               index=index)
+                                                               point_index=index)
     client.user_manager.measurement_manager.create_data_points(channel=voltmeter_channel,
                                                                float_value=voltage_points,
-                                                               index=index)
+                                                               point_index=index)
     client.user_manager.measurement_manager.update_measurement_progress(measurement=measurement,
                                                                         progress=100)
     client.user_manager.measurement_manager.finish_measurement(measurement=measurement)
@@ -55,7 +55,13 @@ print('Measurement finished:', measurement.finished)
 i_data = client.user_manager.measurement_manager.get_data_points_array(channel=current_meter_channel)
 v_data = client.user_manager.measurement_manager.get_data_points_array(channel=voltmeter_channel)
 print(i_data[:, 0])
-print(v_data[:, 0])
+print(v_data)
+
+
+#client.user_manager.measurement_manager.delete_measurement(measurement)
+client.user_manager.measurement_manager.delete_data_points(channel=voltmeter_channel,
+                                                           point_index=index[:5])
 
 client.user_manager.sign_out()
 
+#client.user_manager.delete_user('john_smith', 'secret_password')
