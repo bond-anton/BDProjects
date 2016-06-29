@@ -49,14 +49,14 @@ class UserManager(EntityManager):
             self.session.add(user)
             self.session.commit()
             if user.login not in default_users:
-                self.log_manager.log_record(record='User @%s successfully created' % user.login,
-                                            category='Information')
+                record = 'User @%s successfully created' % user.login
+                self.log_manager.log_record(record=record, category='Information')
             return user
         except IntegrityError:
             self.session.rollback()
             if user.login not in default_users:
-                self.log_manager.log_record(record='User @%s already exists' % user.login,
-                                            category='Warning')
+                record = 'User @%s already exists' % user.login
+                self.log_manager.log_record(record=record, category='Warning')
             return self.session.query(User).filter(User.login == str(login)).one()
 
     def delete_user(self, login, password):
@@ -169,23 +169,23 @@ class UserManager(EntityManager):
         user_text = ''
         if user is not None:
             user_text = ' for @%s' % user.login
-        self.log_manager.log_record(record='Listing opened sessions' + user_text,
-                                    category='Information')
+        record = 'Listing opened sessions' + user_text
+        self.log_manager.log_record(record=record, category='Information')
         for opened_session in self.opened_sessions(user=user):
             signed_in_for = (datetime.datetime.now() - opened_session.opened)
             opened = opened_session.opened.strftime(default_date_time_format)
-            self.log_manager.log_record(record='#%s (@%s) is opened for %s (since %s)' % (opened_session.token,
-                                                                                          opened_session.user.login,
-                                                                                          signed_in_for,
-                                                                                          opened),
-                                        category='Information')
+            record = '#%s (@%s) is opened for %s (since %s)' % (opened_session.token,
+                                                                opened_session.user.login,
+                                                                signed_in_for,
+                                                                opened)
+            self.log_manager.log_record(record=record, category='Information')
 
     def signed_in_users(self):
         return self.session.query(User).join(Session).filter(Session.active == 1).all()
 
     def log_signed_in_users(self, log_sessions=False):
-        self.log_manager.log_record(record='Listing signed in users',
-                                    category='Information')
+        record = 'Listing signed in users'
+        self.log_manager.log_record(record=record, category='Information')
         for user in self.signed_in_users():
             self.log_user_info(user, log_sessions=log_sessions)
 
@@ -196,18 +196,17 @@ class UserManager(EntityManager):
                 since = self.session.query(func.min(Session.opened)).filter(Session.user_id == user.id,
                                                                             Session.active == 1).one()[0]
                 since = since.strftime(default_date_time_format)
-                self.log_manager.log_record(record='@%s has %d opened sessions since %s' % (user.login,
-                                                                                            opened_sessions,
-                                                                                            since),
-                                            category='Information')
+                record = '@%s has %d opened sessions since %s' % (user.login,
+                                                                  opened_sessions,
+                                                                  since)
+                self.log_manager.log_record(record=record, category='Information')
                 if log_sessions:
                     self.log_opened_sessions(user)
             else:
                 last_log_off = self.session.query(func.max(Session.closed)).filter(Session.user_id == user.id).one()[0]
                 last_log_off = last_log_off.strftime(default_date_time_format)
-                self.log_manager.log_record(record='@%s id offline since %s' % (user.login,
-                                                                                last_log_off),
-                                            category='Information')
+                record = '@%s id offline since %s' % (user.login, last_log_off)
+                self.log_manager.log_record(record=record, category='Information')
 
     def close_session(self, session):
         if isinstance(session, Session):

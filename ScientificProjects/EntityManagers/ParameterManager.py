@@ -35,22 +35,22 @@ class ParameterManager(EntityManager):
                     self.session.add(parameter_type_object)
                     self.session.commit()
                     if parameter_type_object.name not in default_parameter_types:
-                        self.session_manager.log_manager.log_record('Parameter type %s successfully created' %
-                                                                    parameter_type_object.name, 'Information')
+                        record = 'Parameter type "%s" successfully created' % parameter_type_object.name
+                        self.session_manager.log_manager.log_record(record=record, category='Information')
                     return parameter_type_object
                 else:
                     self.session.rollback()
                     if parameter_type_object.name not in default_parameter_types:
-                        self.session_manager.log_manager.log_record('Parameter type %s is already registered' %
-                                                                    parameter_type_object.name, 'Warning')
+                        record = 'Parameter type "%s" is already registered' % parameter_type_object.name
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
                     return self.session.query(ParameterType).filter(
                         ParameterType.name == parameter_type_object.name).one()
             else:
-                self.session_manager.log_manager.log_record('Attempt to create Parameter Type before signing in',
-                                                            'Warning')
+                record = 'Attempt to create Parameter Type before signing in'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
         else:
-            self.session_manager.log_manager.log_record('Wrong Parameter Type argument',
-                                                        'Warning')
+            record = 'Wrong Parameter Type argument'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
 
     def _create_parameter(self, name, parameter_type, float_value=None, string_value=None,
                           index=0, unit_name=None, description=None, parent=None):
@@ -61,8 +61,8 @@ class ParameterManager(EntityManager):
             else:
                 unit_name = str(unit_name)
             if not parameter_type_exists:
-                self.session_manager.log_manager.log_record('Parameter type %s not exist' %
-                                                            parameter_type_object.name, 'Warning')
+                record = 'Parameter type "%s" not exist' % parameter_type_object.name
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
             else:
                 parameter_type_id = parameter_type_object.id
                 parent_id = None
@@ -72,18 +72,18 @@ class ParameterManager(EntityManager):
                         if existing_parameter:
                             parent_id = existing_parameter[0].id
                         else:
-                            self.session_manager.log_manager.log_record('Parameter %s, id=%d not exist' %
-                                                                        (parent.name, parent.id), 'Warning')
+                            record = 'Parameter "%s", id=%d not exist' % (parent.name, parent.id)
+                            self.session_manager.log_manager.log_record(record=record, category='Warning')
                     elif isinstance(parent, int):
                         existing_parameter = self.session.query(Parameter).filter(Parameter.id == parent).all()
                         if existing_parameter:
                             parent_id = existing_parameter[0].id
                         else:
-                            self.session_manager.log_manager.log_record('Parameter with id=%d not exist' %
-                                                                        parent, 'Warning')
+                            record = 'Parameter with id=%d not exist' % parent
+                            self.session_manager.log_manager.log_record(record=record, category='Warning')
                     else:
-                        self.session_manager.log_manager.log_record('Parent must be valid Parameter or its ID',
-                                                                    'Warning')
+                        record = 'Parent must be valid Parameter or its ID'
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
                 parameter = Parameter(name=name, type_id=parameter_type_id, index=index,
                                       session_id=self.session_manager.session_data.id)
                 parameter.unit_name = unit_name
@@ -95,12 +95,12 @@ class ParameterManager(EntityManager):
                     parameter.float_value = float_value
                 self.session.add(parameter)
                 self.session.commit()
-                self.session_manager.log_manager.log_record('Parameter %s created' % parameter.name,
-                                                            'Information')
+                record = 'Parameter "%s" created' % parameter.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
                 return parameter
         else:
-            self.session_manager.log_manager.log_record('Attempt to create Parameter before signing in',
-                                                        'Warning')
+            record = 'Attempt to create Parameter before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
 
     def _check_parameter_type_name(self, parameter_type, description=None):
         parameter_type_exists = False

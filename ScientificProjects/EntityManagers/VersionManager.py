@@ -25,10 +25,9 @@ class VersionManager(EntityManager):
             self.session.commit()
         else:
             if self.database_version > self.current_version:
-                log_record = 'Version of database %s > software version %s. Upgrade the software'
-                log_record = log_record % (self.database_version, self.current_version)
-                self.session_manager.log_manager.log_record(record=log_record,
-                                                            category='Warning')
+                record = 'Version of database %s > software version %s. Upgrade the software'
+                record = record % (self.database_version, self.current_version)
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
             elif self.database_version < self.current_version:
                 self._upgrade_database()
         self.close_db_session()
@@ -36,10 +35,9 @@ class VersionManager(EntityManager):
     def _upgrade_database(self):
         if not self.session:
             self.open_db_session()
-        log_record = 'Upgrading database version from %s to %s'
-        log_record = log_record % (self.database_version, self.current_version)
-        self.session_manager.log_manager.log_record(record=log_record,
-                                                    category='Information')
+        record = 'Upgrading database version from %s to %s'
+        record = record % (self.database_version, self.current_version)
+        self.session_manager.log_manager.log_record(record=record, category='Information')
         self.session.add(self.current_version)
         self.session.commit()
         self.close_db_session()

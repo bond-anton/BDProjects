@@ -12,11 +12,11 @@ class SessionProject(Base):
     __tablename__ = 'session_project'
     id = Column(Integer, primary_key=True)
     session_id = Column(Integer, ForeignKey('session.id'))
+    session = relationship('Session', back_populates='projects_opened', cascade='all, delete')
     project_id = Column(Integer, ForeignKey('project.id'))
+    project = relationship('Project', back_populates='sessions', cascade='all, delete')
     opened = Column(DateTime, default=func.now())
     closed = Column(DateTime)
-    session = relationship('Session', back_populates='projects_opened', cascade='delete')
-    project = relationship('Project', back_populates='sessions', cascade='delete')
 
 
 class Project(Base):
@@ -27,9 +27,10 @@ class Project(Base):
     description = Column(Text)
     created = Column(DateTime, default=func.now())
     created_session_id = Column(Integer, ForeignKey('session.id'))
-    created_session = relationship(Session, backref=backref('projects_created', uselist=True, cascade='delete,all'))
+    created_session = relationship(Session, backref=backref('projects_created', uselist=True,
+                                                            cascade='all, delete-orphan'))
     data_dir = Column(String)
-    sessions = relationship('SessionProject', back_populates='project')
+    sessions = relationship('SessionProject', back_populates='project', cascade='all, delete-orphan')
 
     def __str__(self):
         description = 'Project: %s' % self.name

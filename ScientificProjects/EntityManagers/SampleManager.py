@@ -70,13 +70,12 @@ class SampleManager(EntityManager):
                         record = 'parameter "%s" added to sample "%s"' % (str(parameter.name),
                                                                           str(sample.name))
                         self.session_manager.log_manager.log_record(record=record, category='Information')
-                        return True
                     except IntegrityError:
                         self.session.rollback()
                         record = 'parameter "%s" is already added to sample "%s"' % (str(parameter.name),
                                                                                      str(sample.name))
                         self.session_manager.log_manager.log_record(record=record, category='Information')
-                        return True
+                    return True
                 else:
                     record = 'Wrong argument type for adding parameter to equipment'
                     self.session_manager.log_manager.log_record(record=record, category='Warning')

@@ -27,19 +27,22 @@ class LogManager(EntityManager):
             self.session.add(log_category)
             self.session.commit()
             if log_category.category not in default_log_categories:
-                self.log_record('Log category %s successfully created' % log_category.category, 'Information')
+                record = 'Log category %s successfully created' % log_category.category
+                self.log_record(record=record, category='Information')
             return log_category
         else:
             self.session.rollback()
             if log_category.category not in default_log_categories:
-                self.log_record('Log category %s is already registered' % log_category.category, 'Warning')
+                record = 'Log category %s is already registered' % log_category.category
+                self.log_record(record=record, category='Warning')
             return self.session.query(LogCategory).filter(LogCategory.category == log_category.category).one()
 
     def log_record(self, record, category=None):
         log_category, category_exists = self._check_category_name(category)
         category_id, project_id, session_id = None, None, None
         if not category_exists:
-            self.log_record('Create log category first', 'Warning')
+            record = 'Create log category first'
+            self.log_record(record=record, category='Warning')
         else:
             category_id = log_category.id
             if self.session_manager.project is not None:

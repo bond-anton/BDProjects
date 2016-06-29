@@ -30,20 +30,20 @@ class ProjectManager(EntityManager):
                 try:
                     self.session.add(project)
                     self.session.commit()
-                    self.session_manager.log_manager.log_record(record='Project "%s" created' % project.name,
-                                                                category='Information')
+                    record = 'Project "%s" created' % project.name
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
                 except IntegrityError:
                     self.session.rollback()
                     project = self.session.query(Project).filter(Project.name == str(name)).all()[0]
-                    self.session_manager.log_manager.log_record(record='Project "%s" already exists' % project.name,
-                                                                category='Warning')
+                    record = 'Project "%s" already exists' % project.name
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
                 return project
             else:
-                self.session_manager.log_manager.log_record(record='Directory "%s" not writable' % data_dir,
-                                                            category='Warning')
+                record = 'Directory "%s" is not writable' % data_dir
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
         else:
-            self.session_manager.log_manager.log_record(record='Attempt to create project before signing in',
-                                                        category='Warning')
+            record = 'Attempt to create project before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
         return None
 
     def get_projects(self, name=None):

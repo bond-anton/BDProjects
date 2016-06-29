@@ -247,13 +247,13 @@ class EquipmentManager(EntityManager):
                 try:
                     equipment.measurement_types.append(measurement_type)
                     self.session.commit()
-                    record = 'measurement type "%s" added to equipment "%s"' % (str(measurement_type.name),
+                    record = 'Measurement type "%s" added to equipment "%s"' % (str(measurement_type.name),
                                                                                 str(equipment.name))
                     self.session_manager.log_manager.log_record(record=record, category='Information')
                     return True
                 except IntegrityError:
                     self.session.rollback()
-                    record = 'measurement_type "%s" is already added to equipment "%s"' % (str(measurement_type.name),
+                    record = 'Measurement_type "%s" is already added to equipment "%s"' % (str(measurement_type.name),
                                                                                            str(equipment.name))
                     self.session_manager.log_manager.log_record(record=record, category='Information')
                     return True
@@ -272,13 +272,13 @@ class EquipmentManager(EntityManager):
                 try:
                     equipment.parameters.append(parameter)
                     self.session.commit()
-                    record = 'parameter "%s" added to equipment "%s"' % (str(parameter.name),
+                    record = 'Parameter "%s" added to equipment "%s"' % (str(parameter.name),
                                                                          str(equipment.name))
                     self.session_manager.log_manager.log_record(record=record, category='Information')
                     return True
                 except IntegrityError:
                     self.session.rollback()
-                    record = 'parameter "%s" is already added to equipment "%s"' % (str(parameter.name),
+                    record = 'Parameter "%s" is already added to equipment "%s"' % (str(parameter.name),
                                                                                     str(equipment.name))
                     self.session_manager.log_manager.log_record(record=record, category='Information')
                     return True
@@ -297,12 +297,12 @@ class EquipmentManager(EntityManager):
                 try:
                     assembly.parts.append(equipment)
                     self.session.commit()
-                    record = 'equipment "%s" added to assembly "%s"' % (str(equipment.name), str(assembly.name))
+                    record = 'Equipment "%s" added to assembly "%s"' % (str(equipment.name), str(assembly.name))
                     self.session_manager.log_manager.log_record(record=record, category='Information')
                     return True
                 except IntegrityError:
                     self.session.rollback()
-                    record = 'equipment "%s" is already added to assembly "%s"' % (str(equipment.name),
+                    record = 'Equipment "%s" is already added to assembly "%s"' % (str(equipment.name),
                                                                                    str(assembly.name))
                     self.session_manager.log_manager.log_record(record=record, category='Information')
                     return True

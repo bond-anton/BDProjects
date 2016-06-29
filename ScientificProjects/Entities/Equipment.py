@@ -10,16 +10,19 @@ from ScientificProjects.Entities.MeasurementType import MeasurementType
 
 
 equipment_assembly_table = Table('assembly_parts', Base.metadata,
+                                 Column('id', Integer, primary_key=True),
                                  Column('assembly_id', Integer, ForeignKey('equipment_assembly.id')),
                                  Column('equipment_id', Integer, ForeignKey('equipment.id')),
                                  UniqueConstraint('assembly_id', 'equipment_id', name='assembly_equipment'))
 
 equipment_parameters_table = Table('equipment_parameters', Base.metadata,
+                                   Column('id', Integer, primary_key=True),
                                    Column('equipment_id', Integer, ForeignKey('equipment.id')),
                                    Column('parameter_id', Integer, ForeignKey('parameter.id')),
                                    UniqueConstraint('equipment_id', 'parameter_id', name='equipment_parameter'))
 
 equipment_measurement_table = Table('equipment_measurement', Base.metadata,
+                                    Column('id', Integer, primary_key=True),
                                     Column('equipment_id', Integer, ForeignKey('equipment.id')),
                                     Column('measurement_type_id', Integer, ForeignKey('measurement_type.id')),
                                     UniqueConstraint('equipment_id', 'measurement_type_id',
@@ -34,7 +37,7 @@ class Manufacturer(Base):
     name_short = Column(String, unique=True)
     description = Column(Text)
     session_id = Column(Integer, ForeignKey('session.id'))
-    session = relationship(Session, backref=backref('manufacturers', uselist=True, cascade='delete,all'))
+    session = relationship(Session, backref=backref('manufacturers', uselist=True, cascade='all, delete-orphan'))
     created = Column(DateTime, default=func.now())
 
     def __str__(self):
@@ -52,11 +55,13 @@ class EquipmentCategory(Base):
     __tablename__ = 'equipment_category'
     id = Column(Integer, primary_key=True)
     parent_id = Column(Integer, ForeignKey('equipment_category.id'))
-    subcategories = relationship('EquipmentCategory', backref=backref('parent', remote_side=[id]))
+    subcategories = relationship('EquipmentCategory', backref=backref('parent', remote_side=[id],
+                                                                      cascade='all, delete'))
     name = Column(String, unique=True)
     description = Column(Text)
     session_id = Column(Integer, ForeignKey('session.id'))
-    session = relationship(Session, backref=backref('equipment_categories', uselist=True, cascade='delete,all'))
+    session = relationship(Session, backref=backref('equipment_categories', uselist=True,
+                                                    cascade='all, delete-orphan'))
     created = Column(DateTime, default=func.now())
 
     def __str__(self):
@@ -79,18 +84,19 @@ class Equipment(Base):
     serial_number = Column(String)
     manufacturer_id = Column(Integer, ForeignKey('manufacturer.id'))
     manufacturer = relationship('Manufacturer', backref=backref('equipment', uselist=True,
-                                                                cascade='delete,all'))
+                                                                cascade='all, delete-orphan'))
     category_id = Column(Integer, ForeignKey('equipment_category.id'))
     category = relationship(EquipmentCategory, backref=backref('equipment', uselist=True,
-                                                               cascade='delete,all'))
+                                                               cascade='all, delete-orphan'))
     assembly_id = Column(Integer, ForeignKey('equipment_assembly.id'))
     assembly = relationship('EquipmentAssembly', backref=backref('equipment', uselist=True,
-                                                                 cascade='delete,all'))
+                                                                 cascade='all, delete-orphan'))
     description = Column(Text)
     session_id = Column(Integer, ForeignKey('session.id'))
-    session = relationship(Session, backref=backref('equipment', uselist=True, cascade='delete,all'))
+    session = relationship(Session, backref=backref('equipment', uselist=True, cascade='all, delete-orphan'))
     parameters = relationship(Parameter, secondary=equipment_parameters_table, backref='equipment')
-    measurement_types = relationship(MeasurementType, secondary=equipment_measurement_table, backref="equipment")
+    measurement_types = relationship(MeasurementType, secondary=equipment_measurement_table, backref='equipment',
+                                     cascade='all, delete')
     created = Column(DateTime, default=func.now())
     __table_args__ = (UniqueConstraint('name', 'serial_number', name='_name_serial_number'),)
 
@@ -122,9 +128,10 @@ class EquipmentAssembly(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     description = Column(Text)
-    parts = relationship(Equipment, secondary=equipment_assembly_table, backref="assemblies")
+    parts = relationship(Equipment, secondary=equipment_assembly_table, backref='assemblies',
+                         cascade='all, delete')
     session_id = Column(Integer, ForeignKey('session.id'))
-    session = relationship(Session, backref=backref('assemblies', uselist=True, cascade='delete,all'))
+    session = relationship(Session, backref=backref('assemblies', uselist=True, cascade='all, delete-orphan'))
     created = Column(DateTime, default=func.now())
 
     def __str__(self):

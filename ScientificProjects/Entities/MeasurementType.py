@@ -12,11 +12,13 @@ class MeasurementType(Base):
     __tablename__ = 'measurement_type'
     id = Column(Integer, primary_key=True)
     parent_id = Column(Integer, ForeignKey('measurement_type.id'))
-    subtypes = relationship('MeasurementType', cascade='delete,all', backref=backref('parent', remote_side=[id]))
+    subtypes = relationship('MeasurementType', backref=backref('parent', remote_side=[id],
+                                                               cascade='all, delete'))
     name = Column(String, unique=True)
     description = Column(Text)
     session_id = Column(Integer, ForeignKey('session.id'))
-    session = relationship(Session, backref=backref('measurement_types', uselist=True, cascade='delete,all'))
+    session = relationship(Session, backref=backref('measurement_types', uselist=True,
+                                                    cascade='all, delete-orphan'))
     created = Column(DateTime, default=func.now())
 
     def __str__(self):

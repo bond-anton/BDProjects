@@ -13,19 +13,26 @@ from ScientificProjects.Entities.Sample import Sample
 
 
 measurement_sample_table = Table('measurement_sample', Base.metadata,
+                                 Column('id', Integer, primary_key=True),
                                  Column('measurement_id', Integer, ForeignKey('measurement.id')),
-                                 Column('sample_id', Integer, ForeignKey('sample.id')))
+                                 Column('sample_id', Integer, ForeignKey('sample.id')),
+                                 UniqueConstraint('measurement_id', 'sample_id', name='_measurement_sample'))
 
 measurement_collection_table = Table('measurement_collection', Base.metadata,
+                                     Column('id', Integer, primary_key=True),
                                      Column('collection_id', Integer,
                                             ForeignKey('measurements_collection.id')),
                                      Column('measurement_id', Integer,
-                                            ForeignKey('measurement.id')))
+                                            ForeignKey('measurement.id')),
+                                     UniqueConstraint('collection_id', 'measurement_id',
+                                                      name='_measurement_collection'))
 
 
 measurement_parameter_table = Table('measurement_parameter', Base.metadata,
+                                    Column('id', Integer, primary_key=True),
                                     Column('measurement_id', Integer, ForeignKey('measurement.id')),
-                                    Column('parameter_id', Integer, ForeignKey('parameter.id')))
+                                    Column('parameter_id', Integer, ForeignKey('parameter.id')),
+                                    UniqueConstraint('measurement_id', 'parameter_id', name='_measurement_parameter'))
 
 
 class MeasurementsCollection(Base):
@@ -36,12 +43,12 @@ class MeasurementsCollection(Base):
     description = Column(Text)
     project_id = Column(Integer, ForeignKey('project.id'))
     project = relationship(Project, backref=backref('measurements_collections', uselist=True,
-                                                    cascade='delete,all'))
+                                                    cascade='all, delete-orphan'))
     session_id = Column(Integer, ForeignKey('session.id'))
     session = relationship(Session, backref=backref('measurements_collections', uselist=True,
-                                                    cascade='delete,all'))
+                                                    cascade='all, delete-orphan'))
     measurements = relationship('Measurement', secondary=measurement_collection_table,
-                                backref="collections")
+                                backref='collections', cascade='all, delete')
     created = Column(DateTime, default=func.now())
     __table_args__ = (UniqueConstraint('name', 'project_id', name='_collection_project'),)
 
@@ -53,22 +60,23 @@ class Measurement(Base):
     name = Column(String)
     measurement_type_id = Column(Integer, ForeignKey('measurement_type.id'))
     measurement_type = relationship(MeasurementType, backref=backref('measurements', uselist=True,
-                                                                     cascade='delete,all'))
+                                                                     cascade='all, delete-orphan'))
     equipment_id = Column(Integer, ForeignKey('equipment.id'))
     equipment = relationship(Equipment, backref=backref('measurements', uselist=True,
-                                                        cascade='delete,all'))
+                                                        cascade='all, delete-orphan'))
     project_id = Column(Integer, ForeignKey('project.id'))
     project = relationship(Project, backref=backref('measurements', uselist=True,
-                                                    cascade='delete,all'))
+                                                    cascade='all, delete-orphan'))
     session_id = Column(Integer, ForeignKey('session.id'))
     session = relationship(Session, backref=backref('measurements', uselist=True,
-                                                    cascade='delete,all'))
+                                                    cascade='all, delete-orphan'))
     input_data_id = Column(Integer, ForeignKey('measurements_collection.id'))
     input_data = relationship(MeasurementsCollection, backref=backref('analyses', uselist=True,
-                                                                      cascade='delete,all'))
-    samples = relationship(Sample, secondary=measurement_sample_table, backref='measurements')
+                                                                      cascade='all, delete-orphan'))
+    samples = relationship(Sample, secondary=measurement_sample_table, backref='measurements',
+                           cascade='all, delete')
     parameters = relationship(Parameter, secondary=measurement_parameter_table,
-                              backref='measurements')
+                              backref='measurements', cascade='all, delete')
     description = Column(Text)
     started = Column(DateTime, default=func.now())
     finished = Column(DateTime)

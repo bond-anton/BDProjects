@@ -15,7 +15,8 @@ class LogCategory(Base):
     category = Column(String, unique=True)
     description = Column(Text)
     session_id = Column(Integer, ForeignKey('session.id'))
-    session = relationship(Session, backref=backref('log_categories', uselist=True, cascade='delete,all'))
+    session = relationship(Session, backref=backref('log_categories', uselist=True,
+                                                    cascade='all, delete-orphan'))
     created = Column(DateTime, default=func.now())
 
 
@@ -25,9 +26,12 @@ class Log(Base):
     id = Column(Integer, primary_key=True)
     record = Column(String)
     category_id = Column(Integer, ForeignKey('log_category.id'))
-    category = relationship(LogCategory, backref=backref('logs', uselist=True, cascade='delete,all'))
+    category = relationship(LogCategory, backref=backref('logs', uselist=True,
+                                                         cascade='all, delete-orphan'))
     session_id = Column(Integer, ForeignKey('session.id'))
-    session = relationship(Session, backref=backref('logs', uselist=True, cascade='delete,all'))
+    session = relationship(Session, backref=backref('logs', uselist=True,
+                                                    cascade='all, delete-orphan'))
     project_id = Column(Integer, ForeignKey('project.id'))
-    project = relationship(Project, backref=backref('logs', uselist=True, cascade='delete,all'))
+    project = relationship(Project, backref=backref('logs', uselist=True,
+                                                    cascade='all, delete-orphan'))
     created = Column(DateTime, default=func.now())

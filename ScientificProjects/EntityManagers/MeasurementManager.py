@@ -81,11 +81,16 @@ class MeasurementManager(EntityManager):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if isinstance(measurement, Measurement) and isinstance(sample, Sample):
-                    measurement.samples.append(sample)
-                    self.session.commit()
-                    record = 'sample "%s" added to measurement "%s"' % (sample.name,
-                                                                        measurement.name)
-                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    try:
+                        measurement.samples.append(sample)
+                        self.session.commit()
+                        record = 'Sample "%s" added to measurement "%s"' % (sample.name,
+                                                                            measurement.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Information')
+                    except IntegrityError:
+                        self.session.rollback()
+                        record = 'Sample "%s" already added to measurement "%s"' % (sample.name, measurement.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
                     return True
                 else:
                     record = 'Wrong argument for adding sample to measurement'
@@ -104,11 +109,16 @@ class MeasurementManager(EntityManager):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if isinstance(measurement, Measurement) and isinstance(parameter, Parameter):
-                    measurement.parameters.append(parameter)
-                    self.session.commit()
-                    record = 'Parameter "%s" added to measurement "%s"' % (parameter.name,
-                                                                           measurement.name)
-                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    try:
+                        measurement.parameters.append(parameter)
+                        self.session.commit()
+                        record = 'Parameter "%s" added to measurement "%s"' % (parameter.name,
+                                                                               measurement.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Information')
+                    except IntegrityError:
+                        self.session.rollback()
+                        record = 'Parameter "%s" already added to measurement "%s"' % (parameter.name, measurement.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
                     return True
                 else:
                     record = 'Wrong argument for adding parameter to measurement'
@@ -158,11 +168,17 @@ class MeasurementManager(EntityManager):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if isinstance(measurements_collection, MeasurementsCollection) and isinstance(measurement, Measurement):
-                    measurements_collection.measurements.append(measurement)
-                    self.session.commit()
-                    record = 'Measurement "%s" added to collection "%s"' % (measurement.name,
-                                                                            measurements_collection.name)
-                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    try:
+                        measurements_collection.measurements.append(measurement)
+                        self.session.commit()
+                        record = 'Measurement "%s" added to collection "%s"' % (measurement.name,
+                                                                                measurements_collection.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Information')
+                    except IntegrityError:
+                        self.session.rollback()
+                        record = 'Measurement "%s" already added to collection "%s"' % (measurement.name,
+                                                                                        measurements_collection.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
                     return True
                 else:
                     record = 'Wrong argument for adding measurement to collection'
@@ -181,11 +197,17 @@ class MeasurementManager(EntityManager):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if isinstance(measurement, Measurement) and isinstance(measurements_collection, MeasurementsCollection):
-                    measurement.input_data_id = measurements_collection.id
-                    self.session.commit()
-                    record = 'Input data "%s" added to Measurement "%s"' % (measurements_collection.name,
-                                                                            measurement.name)
-                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    try:
+                        measurement.input_data_id = measurements_collection.id
+                        self.session.commit()
+                        record = 'Input data "%s" added to measurement "%s"' % (measurements_collection.name,
+                                                                                measurement.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Information')
+                    except IntegrityError:
+                        self.session.rollback()
+                        record = 'Input data "%s" already added to measurement "%s"' % (measurements_collection.name,
+                                                                                        measurement.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
                     return True
                 else:
                     record = 'Wrong argument for adding input data to measurement'
@@ -277,11 +299,17 @@ class MeasurementManager(EntityManager):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if isinstance(data_channel, DataChannel) and isinstance(parameter, Parameter):
-                    data_channel.parameters.append(parameter)
-                    self.session.commit()
-                    record = 'Parameter "%s" added to data channel "%s"' % (parameter.name,
-                                                                            data_channel.name)
-                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    try:
+                        data_channel.parameters.append(parameter)
+                        self.session.commit()
+                        record = 'Parameter "%s" added to data channel "%s"' % (parameter.name,
+                                                                                data_channel.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Information')
+                    except IntegrityError:
+                        self.session.rollback()
+                        record = 'Parameter "%s" already added to data channel "%s"' % (parameter.name,
+                                                                                        data_channel.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
                     return True
                 else:
                     record = 'Wrong argument for adding parameter to data channel'
@@ -402,7 +430,7 @@ class MeasurementManager(EntityManager):
                     return []
                 q = self.session.query(DataPoint).filter(DataPoint.channel_id == channel.id)
                 if point_index is not None:
-                    q = q.filter(DataPoint.point_index == int(abs(point_index)))
+                    q = q.filter(DataPoint.point_index.in_(point_index))
                 return q.all()
             else:
                 record = 'Attempt to query data point before opening project'
@@ -424,7 +452,7 @@ class MeasurementManager(EntityManager):
                                        DataPoint.string_value,
                                        DataPoint.point_index,
                                        DataPoint.measured).filter(DataPoint.channel_id == channel.id)
-                if isinstance(point_index, (tuple, list, range, np.ndarray)):
+                if point_index is not None:
                     q = q.filter(DataPoint.point_index.in_(point_index))
                 return np.array(q.all())
             else:
@@ -572,7 +600,7 @@ class MeasurementManager(EntityManager):
                     self.session_manager.log_manager.log_record(record=record, category='Warning')
                     return False
                 q = self.session.query(DataPoint).filter(DataPoint.channel_id == channel.id)
-                if isinstance(point_index, (tuple, list, range, np.ndarray)):
+                if point_index is not None:
                     q = q.filter(DataPoint.point_index.in_(point_index))
                 q.delete(synchronize_session='fetch')
                 # q.delete(synchronize_session=False) # try this if performance is low

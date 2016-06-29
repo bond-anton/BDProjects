@@ -12,7 +12,7 @@ class Session(Base):
     __tablename__ = 'session'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User, backref=backref('sessions', uselist=True, cascade='delete,all'))
+    user = relationship(User, backref=backref('sessions', uselist=True, cascade='all, delete-orphan'))
     active = Column(Boolean, default=True)
     opened = Column(DateTime, default=func.now())
     closed = Column(DateTime, onupdate=func.now())
@@ -20,4 +20,5 @@ class Session(Base):
     python = Column(String)
     platform = Column(String)
     token = Column(String)
-    projects_opened = relationship('SessionProject', back_populates='session')
+    projects_opened = relationship('SessionProject', back_populates='session',
+                                   cascade='all, delete-orphan')

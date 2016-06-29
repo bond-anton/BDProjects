@@ -15,10 +15,17 @@ class ParameterType(Base):
     description = Column(Text)
     registered = Column(DateTime, default=func.now())
     session_id = Column(Integer, ForeignKey('session.id'))
-    session = relationship(Session, backref=backref('parameter_types', uselist=True, cascade='delete,all'))
+    session = relationship(Session, backref=backref('parameter_types', uselist=True,
+                                                    cascade='all, delete-orphan'))
 
     def __str__(self):
-        return self.name
+        description = 'Parameter type: %s' % self.name
+        if self.description is not None:
+            description += '\n %s' % self.description
+        created = self.registered.strftime(default_date_time_format)
+        description += '\n Created: %s' % created
+        description += '\n Created by: @%s' % self.session.user.login
+        return description
 
 
 class Parameter(Base):
@@ -26,9 +33,11 @@ class Parameter(Base):
     __tablename__ = 'parameter'
     id = Column(Integer, primary_key=True)
     type_id = Column(Integer, ForeignKey('parameter_type.id'))
-    type = relationship(ParameterType, backref=backref('parameters', uselist=True, cascade='delete,all'))
+    type = relationship(ParameterType, backref=backref('parameters', uselist=True,
+                                                       cascade='all, delete-orphan'))
     parent_id = Column(Integer, ForeignKey('parameter.id'))
-    children = relationship('Parameter', backref=backref('parent', remote_side=[id]))
+    children = relationship('Parameter', backref=backref('parent', remote_side=[id],
+                                                         cascade='all, delete'))
     name = Column(String)
     description = Column(Text)
     unit_name = Column(String, unique=False)
@@ -36,7 +45,8 @@ class Parameter(Base):
     string_value = Column(String)
     float_value = Column(Float)
     session_id = Column(Integer, ForeignKey('session.id'))
-    session = relationship(Session, backref=backref('parameters', uselist=True, cascade='delete,all'))
+    session = relationship(Session, backref=backref('parameters', uselist=True,
+                                                    cascade='all, delete-orphan'))
     value_added = Column(DateTime, default=func.now())
     value_altered = Column(DateTime, default=func.now(), onupdate=func.now())
 
