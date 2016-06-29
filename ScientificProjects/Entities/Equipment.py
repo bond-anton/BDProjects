@@ -71,7 +71,7 @@ class EquipmentCategory(Base):
         created = self.created.strftime(default_date_time_format)
         description += '\n Created: %s' % created
         description += '\n Created by: @%s' % self.session.user.login
-        description += '\n Parent: %s' % self.parent
+        description += '\n Parent: %s' % self.parent.name
         description += '\n Subcategories number: %i' % len(self.subcategories)
         return description
 

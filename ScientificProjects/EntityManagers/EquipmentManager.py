@@ -73,13 +73,16 @@ class EquipmentManager(EntityManager):
             if description is not None:
                 equipment_category.description = str(description)
             if parent is not None:
-                try:
-                    parent_id = self.session.query(EquipmentCategory.id).filter(
-                        EquipmentCategory.name == str(parent)).one()
-                    if parent_id:
-                        equipment_category.parent_id = parent_id[0]
-                except NoResultFound:
-                    pass
+                if isinstance(parent, EquipmentCategory):
+                    equipment_category.parent_id = parent.id
+                else:
+                    try:
+                        parent_id = self.session.query(EquipmentCategory.id).filter(
+                            EquipmentCategory.name == str(parent)).one()
+                        if parent_id:
+                            equipment_category.parent_id = parent_id[0]
+                    except NoResultFound:
+                        pass
             try:
                 self.session.add(equipment_category)
                 self.session.commit()
