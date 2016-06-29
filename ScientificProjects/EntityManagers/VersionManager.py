@@ -30,7 +30,8 @@ class VersionManager(EntityManager):
                 self.session_manager.log_manager.log_record(record=record, category='Warning')
             elif self.database_version < self.current_version:
                 self._upgrade_database()
-        self.close_db_session()
+        if self.session is not None:
+            self.close_db_session()
 
     def _upgrade_database(self):
         if not self.session:

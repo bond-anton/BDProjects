@@ -58,9 +58,9 @@ print(i_data[:, 0])
 print(v_data)
 
 
-#client.user_manager.measurement_manager.delete_measurement(measurement)
-client.user_manager.measurement_manager.delete_data_points(channel=voltmeter_channel,
-                                                           point_index=index[:5])
+client.user_manager.measurement_manager.delete_measurement(measurement)
+#client.user_manager.measurement_manager.delete_data_points(channel=voltmeter_channel,
+#                                                           point_index=index[:5])
 
 client.user_manager.sign_out()
 

@@ -73,10 +73,8 @@ class Measurement(Base):
     input_data_id = Column(Integer, ForeignKey('measurements_collection.id'))
     input_data = relationship(MeasurementsCollection, backref=backref('analyses', uselist=True,
                                                                       cascade='all, delete-orphan'))
-    samples = relationship(Sample, secondary=measurement_sample_table, backref='measurements',
-                           cascade='all, delete')
-    parameters = relationship(Parameter, secondary=measurement_parameter_table,
-                              backref='measurements', cascade='all, delete')
+    samples = relationship(Sample, secondary=measurement_sample_table, backref='measurements')
+    parameters = relationship(Parameter, secondary=measurement_parameter_table, backref='measurements')
     description = Column(Text)
     started = Column(DateTime, default=func.now())
     finished = Column(DateTime)

@@ -1,5 +1,6 @@
 from __future__ import division, print_function
 import datetime as dt
+import timeit
 import numpy as np
 
 from sqlalchemy.exc import IntegrityError
@@ -284,6 +285,35 @@ class MeasurementManager(EntityManager):
                 return False
         else:
             record = 'Attempt to add measurement to collection before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def remove_measurement_from_collection(self, measurements_collection, measurement):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if isinstance(measurements_collection, MeasurementsCollection) and isinstance(measurement, Measurement):
+                    if measurement in measurements_collection.measurements:
+                        measurements_collection.measurements.remove(measurement)
+                        self.session.commit()
+                        record = 'Measurement "%s" removed from collection "%s"' % (measurement.name,
+                                                                                    measurements_collection.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Information')
+                        return True
+                    else:
+                        record = 'Measurement "%s" not found in collection "%s"' % (measurement.name,
+                                                                                    measurements_collection.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                        return False
+                else:
+                    record = 'Wrong argument for removing measurement from collection'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+            else:
+                record = 'Attempt to remove measurement from collection before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to remove measurement from collection before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
@@ -573,6 +603,7 @@ class MeasurementManager(EntityManager):
             return False
 
     def create_data_points(self, channel, string_value=None, float_value=None, point_index=None, measured=None):
+        start_time = timeit.default_timer()
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if string_value is None and float_value is None:
@@ -598,8 +629,8 @@ class MeasurementManager(EntityManager):
                                 'point_measured': measured[i],
                                 } for i in range(float_value.size)]
                 self.engine.execute(DataPoint.__table__.insert(), data_points)
-
-                record = 'Data points added to channel "%s"' % channel.name
+                elapsed = timeit.default_timer() - start_time
+                record = '%i data points added to channel "%s" in %3.3f s' % (len(data_points), channel.name, elapsed)
                 self.session_manager.log_manager.log_record(record=record, category='Information')
                 return data_points
             else:
