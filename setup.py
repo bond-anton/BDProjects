@@ -45,12 +45,12 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
     ],
 
     keywords='Scientific database',
 
     packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib']),
-    install_requires=['sqlalchemy', 'sqlalchemy_utils', 'passlib'],
+    install_requires=['numpy', 'sqlalchemy', 'sqlalchemy_utils', 'passlib'],
     test_suite='nose.collector',
 )
