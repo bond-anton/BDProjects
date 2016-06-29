@@ -42,6 +42,30 @@ class SampleManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
 
+    def delete_sample(self, sample):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                project = self.session_manager.project_manager.project
+                check_sample = isinstance(sample, Sample) and sample.project_id == project.id
+                if check_sample:
+                    self.session.delete(sample)
+                    self.session.commit()
+                    record = 'Sample "%s" successfully deleted' % sample.name
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    return True
+                else:
+                    record = 'Wrong argument for sample delete operation'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+            else:
+                record = 'Attempt to delete sample before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete sample before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
     def get_samples(self, name=None):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
@@ -89,6 +113,32 @@ class SampleManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
+    def remove_parameter_from_sample(self, sample, parameter):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if isinstance(sample, Sample) and isinstance(parameter, Parameter):
+                    if parameter in sample.parameters:
+                        sample.parameters.remove(parameter)
+                        self.session.commit()
+                        record = 'Parameter "%s" removed from sample "%s"' % (parameter.name, sample.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Information')
+                    else:
+                        record = 'Parameter "%s" not found in sample "%s"' % (parameter.name, sample.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return True
+                else:
+                    record = 'Wrong argument for removing parameter from sample'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+            else:
+                record = 'Attempt to remove parameter from sample before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to remove parameter from sample before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
     def get_sample_parameters(self, sample, parameter_name=None):
         if self.session_manager.signed_in():
             if isinstance(sample, Sample):
@@ -102,29 +152,5 @@ class SampleManager(EntityManager):
                 raise ValueError('Wrong argument value')
         else:
             record = 'Attempt to query samples parameters before signing in'
-            self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return False
-
-    def delete_sample(self, sample):
-        if self.session_manager.signed_in():
-            if self.session_manager.project_manager.project_opened():
-                project = self.session_manager.project_manager.project
-                check_sample = isinstance(sample, Sample) and sample.project_id == project.id
-                if check_sample:
-                    self.session.delete(sample)
-                    self.session.commit()
-                    record = 'Sample "%s" successfully deleted' % sample.name
-                    self.session_manager.log_manager.log_record(record=record, category='Information')
-                    return True
-                else:
-                    record = 'Wrong argument for sample delete operation'
-                    self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return False
-            else:
-                record = 'Attempt to delete sample before opening project'
-                self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return False
-        else:
-            record = 'Attempt to delete sample before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
