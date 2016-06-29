@@ -77,6 +77,27 @@ class MeasurementManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
 
+    def delete_measurement(self, measurement):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(measurement, Measurement):
+                    record = 'Expected valid Measurement object for delete operation'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+                self.session.delete(measurement)
+                self.session.commit()
+                record = 'Measurement "%s" successfully deleted' % measurement.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Attempt to delete measurement before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete measurement before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
     def add_sample_to_measurement(self, measurement, sample):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
@@ -105,6 +126,32 @@ class MeasurementManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
+    def remove_sample_from_measurement(self, measurement, sample):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if isinstance(measurement, Measurement) and isinstance(sample, Sample):
+                    if sample in measurement.samples:
+                        measurement.samples.remove(sample)
+                        self.session.commit()
+                        record = 'Sample "%s" removed from measurement "%s"' % (sample.name, measurement.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Information')
+                    else:
+                        record = 'Sample "%s" not found in measurement "%s"' % (sample.name, measurement.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return True
+                else:
+                    record = 'Wrong argument for removing sample from measurement'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+            else:
+                record = 'Attempt to remove sample from measurement before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to remove sample from measurement before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
     def add_parameter_to_measurement(self, measurement, parameter):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
@@ -130,6 +177,32 @@ class MeasurementManager(EntityManager):
                 return False
         else:
             record = 'Attempt to add parameter to measurement before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def remove_parameter_from_measurement(self, measurement, parameter):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if isinstance(measurement, Measurement) and isinstance(parameter, Parameter):
+                    if parameter in measurement.parameters:
+                        measurement.parameters.remove(parameter)
+                        self.session.commit()
+                        record = 'Parameter "%s" removed from measurement "%s"' % (parameter.name, measurement.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Information')
+                    else:
+                        record = 'Parameter "%s" not found in measurement "%s"' % (parameter.name, measurement.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return True
+                else:
+                    record = 'Wrong argument for removing parameter from measurement'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+            else:
+                record = 'Attempt to remove parameter from measurement before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to remove parameter from measurement before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
@@ -163,6 +236,27 @@ class MeasurementManager(EntityManager):
             record = 'Attempt to create measurements collection before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
+
+    def delete_collection(self, collection):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(collection, MeasurementsCollection):
+                    record = 'Expected valid MeasurementCollection object for delete operation'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+                self.session.delete(collection)
+                self.session.commit()
+                record = 'Measurement collection "%s" successfully deleted' % collection.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Attempt to delete measurement collection before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete measurement collection before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
 
     def add_measurement_to_collection(self, measurements_collection, measurement):
         if self.session_manager.signed_in():
@@ -219,6 +313,34 @@ class MeasurementManager(EntityManager):
                 return False
         else:
             record = 'Attempt to add input data to measurement before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def remove_input_data_from_measurement(self, measurement, measurements_collection):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if isinstance(measurement, Measurement) and isinstance(measurements_collection, MeasurementsCollection):
+                    if measurements_collection in measurement.parameters:
+                        measurement.parameters.remove(measurements_collection)
+                        self.session.commit()
+                        record = 'Collection "%s" removed from measurement "%s"' % (measurements_collection.name,
+                                                                                    measurement.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Information')
+                    else:
+                        record = 'Collection "%s" not found in measurement "%s"' % (measurements_collection.name,
+                                                                                    measurement.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return True
+                else:
+                    record = 'Wrong argument for removing collection from measurement'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+            else:
+                record = 'Attempt to remove collection from measurement before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to remove collection from measurement before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
@@ -295,6 +417,27 @@ class MeasurementManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
 
+    def delete_data_channel(self, data_channel):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(data_channel, DataChannel):
+                    record = 'Expected valid DataChannel object for delete operation'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+                self.session.delete(data_channel)
+                self.session.commit()
+                record = 'Data channel "%s" successfully deleted' % data_channel.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Attempt to delete data channel before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete data channel before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
     def add_parameter_to_data_channel(self, data_channel, parameter):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
@@ -321,6 +464,32 @@ class MeasurementManager(EntityManager):
                 return False
         else:
             record = 'Attempt to add parameter to data channel before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def remove_parameter_from_data_channel(self, data_channel, parameter):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if isinstance(data_channel, DataChannel) and isinstance(parameter, Parameter):
+                    if parameter in data_channel.parameters:
+                        data_channel.parameters.remove(parameter)
+                        self.session.commit()
+                        record = 'Parameter "%s" removed from data channel "%s"' % (parameter.name, data_channel.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Information')
+                    else:
+                        record = 'Parameter "%s" not found in data channel "%s"' % (parameter.name, data_channel.name)
+                        self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return True
+                else:
+                    record = 'Wrong argument for removing parameter from data channel'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+            else:
+                record = 'Attempt to remove parameter from data channel before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to remove parameter from data channel before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
@@ -382,6 +551,27 @@ class MeasurementManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
 
+    def delete_data_point(self, data_point):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(data_point, DataPoint):
+                    record = 'Expected valid DataPoint object for delete operation'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+                self.session.delete(data_point)
+                self.session.commit()
+                record = 'Data point successfully deleted'
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Attempt to delete data point before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete data point before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
     def create_data_points(self, channel, string_value=None, float_value=None, point_index=None, measured=None):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
@@ -420,6 +610,31 @@ class MeasurementManager(EntityManager):
             record = 'Attempt to create data point before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
+
+    def delete_data_points(self, channel, point_index=None):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(channel, DataChannel):
+                    record = 'Expected valid DataChannel object for data points delete operation'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+                q = self.session.query(DataPoint).filter(DataPoint.channel_id == channel.id)
+                if point_index is not None:
+                    q = q.filter(DataPoint.point_index.in_(point_index))
+                q.delete(synchronize_session='fetch')
+                # q.delete(synchronize_session=False) # try this if performance is low
+                self.session.commit()
+                record = 'Data points successfully deleted'
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Attempt to delete data points before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete data points before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
 
     def get_data_points(self, channel, point_index=None):
         if self.session_manager.signed_in():
@@ -505,114 +720,5 @@ class MeasurementManager(EntityManager):
                 return False
         else:
             record = 'Attempt to update measurement progress before signing in'
-            self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return False
-
-    def delete_measurement(self, measurement):
-        if self.session_manager.signed_in():
-            if self.session_manager.project_manager.project_opened():
-                if not isinstance(measurement, Measurement):
-                    record = 'Expected valid Measurement object for delete operation'
-                    self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return False
-                self.session.delete(measurement)
-                self.session.commit()
-                record = 'Measurement "%s" successfully deleted' % measurement.name
-                self.session_manager.log_manager.log_record(record=record, category='Information')
-                return True
-            else:
-                record = 'Attempt to delete measurement before opening project'
-                self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return False
-        else:
-            record = 'Attempt to delete measurement before signing in'
-            self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return False
-
-    def delete_collection(self, collection):
-        if self.session_manager.signed_in():
-            if self.session_manager.project_manager.project_opened():
-                if not isinstance(collection, MeasurementsCollection):
-                    record = 'Expected valid MeasurementCollection object for delete operation'
-                    self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return False
-                self.session.delete(collection)
-                self.session.commit()
-                record = 'Measurement collection "%s" successfully deleted' % collection.name
-                self.session_manager.log_manager.log_record(record=record, category='Information')
-                return True
-            else:
-                record = 'Attempt to delete measurement collection before opening project'
-                self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return False
-        else:
-            record = 'Attempt to delete measurement collection before signing in'
-            self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return False
-
-    def delete_data_channel(self, data_channel):
-        if self.session_manager.signed_in():
-            if self.session_manager.project_manager.project_opened():
-                if not isinstance(data_channel, DataChannel):
-                    record = 'Expected valid DataChannel object for delete operation'
-                    self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return False
-                self.session.delete(data_channel)
-                self.session.commit()
-                record = 'Data channel "%s" successfully deleted' % data_channel.name
-                self.session_manager.log_manager.log_record(record=record, category='Information')
-                return True
-            else:
-                record = 'Attempt to delete data channel before opening project'
-                self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return False
-        else:
-            record = 'Attempt to delete data channel before signing in'
-            self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return False
-
-    def delete_data_point(self, data_point):
-        if self.session_manager.signed_in():
-            if self.session_manager.project_manager.project_opened():
-                if not isinstance(data_point, DataPoint):
-                    record = 'Expected valid DataPoint object for delete operation'
-                    self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return False
-                self.session.delete(data_point)
-                self.session.commit()
-                record = 'Data point successfully deleted'
-                self.session_manager.log_manager.log_record(record=record, category='Information')
-                return True
-            else:
-                record = 'Attempt to delete data point before opening project'
-                self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return False
-        else:
-            record = 'Attempt to delete data point before signing in'
-            self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return False
-
-    def delete_data_points(self, channel, point_index=None):
-        if self.session_manager.signed_in():
-            if self.session_manager.project_manager.project_opened():
-                if not isinstance(channel, DataChannel):
-                    record = 'Expected valid DataChannel object for data points delete operation'
-                    self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return False
-                q = self.session.query(DataPoint).filter(DataPoint.channel_id == channel.id)
-                if point_index is not None:
-                    q = q.filter(DataPoint.point_index.in_(point_index))
-                q.delete(synchronize_session='fetch')
-                # q.delete(synchronize_session=False) # try this if performance is low
-                self.session.commit()
-                record = 'Data points successfully deleted'
-                self.session_manager.log_manager.log_record(record=record, category='Information')
-                return True
-            else:
-                record = 'Attempt to delete data points before opening project'
-                self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return False
-        else:
-            record = 'Attempt to delete data points before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
