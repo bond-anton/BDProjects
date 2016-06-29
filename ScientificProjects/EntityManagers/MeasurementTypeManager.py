@@ -49,6 +49,23 @@ class MeasurementTypeManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
 
+    def delete_measurement_type(self, measurement_type):
+        if self.session_manager.signed_in():
+            if isinstance(measurement_type, MeasurementType):
+                self.session.delete(measurement_type)
+                self.session.commit()
+                record = 'Measurement type "%s" deleted' % measurement_type.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Wrong argument for measurement type delete operation'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete measurement type before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
     def get_measurement_types_tree(self, root=None):
         if self.session_manager.signed_in():
             measurement_types = {}
