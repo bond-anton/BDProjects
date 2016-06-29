@@ -36,6 +36,23 @@ class EquipmentManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
 
+    def delete_manufacturer(self, manufacturer):
+        if self.session_manager.signed_in():
+            if isinstance(manufacturer, Manufacturer):
+                self.session.delete(manufacturer)
+                self.session.commit()
+                record = 'Manufacturer "%s" successfully deleted' % manufacturer.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Wrong argument for manufacturer delete operation'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete manufacturer before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
     def get_manufacturers(self, name=None):
         if self.session_manager.signed_in():
             q = self.session.query(Manufacturer)
@@ -79,6 +96,23 @@ class EquipmentManager(EntityManager):
             record = 'Attempt to create equipment category before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
+
+    def delete_equipment_category(self, category):
+        if self.session_manager.signed_in():
+            if isinstance(category, EquipmentCategory):
+                self.session.delete(category)
+                self.session.commit()
+                record = 'Equipment category "%s" successfully deleted' % category.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Wrong argument for equipment category delete operation'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete equipment category before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
 
     def get_equipment_categories_tree(self, root=None):
         if self.session_manager.signed_in():
@@ -188,6 +222,23 @@ class EquipmentManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
 
+    def delete_equipment(self, equipment):
+        if self.session_manager.signed_in():
+            if isinstance(equipment, Equipment):
+                self.session.delete(equipment)
+                self.session.commit()
+                record = 'Equipment "%s" successfully deleted' % equipment.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Wrong argument for equipment delete operation'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete equipment before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
     def get_equipment(self, name=None, category=None, serial_number=None):
         if self.session_manager.signed_in():
             q = self.session.query(Equipment)
@@ -229,6 +280,23 @@ class EquipmentManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return None
 
+    def delete_equipment_assembly(self, assembly):
+        if self.session_manager.signed_in():
+            if isinstance(assembly, EquipmentAssembly):
+                self.session.delete(assembly)
+                self.session.commit()
+                record = 'Equipment assembly "%s" successfully deleted' % assembly.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return True
+            else:
+                record = 'Wrong argument for equipment assembly delete operation'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete equipment assembly before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
     def get_equipment_assembly(self, name=None):
         if self.session_manager.signed_in():
             q = self.session.query(EquipmentAssembly)
@@ -266,6 +334,30 @@ class EquipmentManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
+    def remove_measurement_type_from_equipment(self, equipment, measurement_type):
+        if self.session_manager.signed_in():
+            if isinstance(equipment, Equipment) and isinstance(measurement_type, MeasurementType):
+                if measurement_type in equipment.measurement_types:
+                    equipment.measurement_types.remove(measurement_type)
+                    self.session.commit()
+                    record = 'Measurement type "%s" removed from equipment "%s"' % (str(measurement_type.name),
+                                                                                    str(equipment.name))
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    return True
+                else:
+                    record = 'Measurement_type "%s" not found in equipment "%s"' % (str(measurement_type.name),
+                                                                                    str(equipment.name))
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return True
+            else:
+                record = 'Wrong argument type for removing measurement type from equipment'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to remove measurement type from equipment before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
     def add_parameter_to_equipment(self, equipment, parameter):
         if self.session_manager.signed_in():
             if isinstance(equipment, Equipment) and isinstance(parameter, Parameter):
@@ -291,6 +383,43 @@ class EquipmentManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
+    def remove_parameter_from_equipment(self, equipment, parameter):
+        if self.session_manager.signed_in():
+            if isinstance(equipment, Equipment) and isinstance(parameter, Parameter):
+                if parameter in equipment.parameters:
+                    equipment.parameters.remove(parameter)
+                    self.session.commit()
+                    record = 'Parameter "%s" removed from equipment "%s"' % (parameter.name, equipment.name)
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                else:
+                    record = 'Parameter "%s" not found in equipment "%s"' % (parameter.name, equipment.name)
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return True
+            else:
+                record = 'Wrong argument for removing parameter from equipment'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+        else:
+            record = 'Attempt to remove parameter from equipment before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
+    def get_equipment_parameters(self, equipment, parameter_name=None):
+        if self.session_manager.signed_in():
+            if isinstance(equipment, Equipment):
+                q = self.session.query(Parameter).join((Equipment, Parameter.equipment))
+                q = q.filter(Equipment.id == equipment.id)
+                if parameter_name is not None and len(str(parameter_name)) > 2:
+                    template = '%' + str(parameter_name) + '%'
+                    q = q.filter(Parameter.name.ilike(template))
+                return q.all()
+            else:
+                raise ValueError('Wrong argument value')
+        else:
+            record = 'Attempt to query equipment parameters before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return []
+
     def add_equipment_to_assembly(self, assembly, equipment):
         if self.session_manager.signed_in():
             if isinstance(assembly, EquipmentAssembly) and isinstance(equipment, Equipment):
@@ -315,18 +444,24 @@ class EquipmentManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
-    def get_equipment_parameters(self, equipment, parameter_name=None):
+    def remove_equipment_from_assembly(self, assembly, equipment):
         if self.session_manager.signed_in():
-            if isinstance(equipment, Equipment):
-                q = self.session.query(Parameter).join((Equipment, Parameter.equipment))
-                q = q.filter(Equipment.id == equipment.id)
-                if parameter_name is not None and len(str(parameter_name)) > 2:
-                    template = '%' + str(parameter_name) + '%'
-                    q = q.filter(Parameter.name.ilike(template))
-                return q.all()
+            if isinstance(assembly, EquipmentAssembly) and isinstance(equipment, Equipment):
+                if equipment in assembly.parts:
+                    assembly.parts.remove(equipment)
+                    self.session.commit()
+                    record = 'Equipment "%s" removed from assembly "%s"' % (str(equipment.name), str(assembly.name))
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    return True
+                else:
+                    record = 'Equipment "%s" not found in assembly "%s"' % (str(equipment.name), str(assembly.name))
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
             else:
-                raise ValueError('Wrong argument value')
+                record = 'Wrong argument type for removing equipment from assembly'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
         else:
-            record = 'Attempt to query equipment parameters before signing in'
+            record = 'Attempt to remove equipment from assembly before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return []
+            return False
