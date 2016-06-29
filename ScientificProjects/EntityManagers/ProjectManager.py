@@ -46,6 +46,27 @@ class ProjectManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
         return None
 
+    def delete_project(self, project):
+        if self.session_manager.signed_in():
+            self.session_data = self.session_manager.session_data
+            if isinstance(project, Project):
+                self.session.delete(project)
+                self.session.commit()
+                record = 'Project "%s" successfully deleted' % project.name
+                self.session_manager.log_manager.log_record(record=record,
+                                                            category='Information')
+                return True
+            else:
+                record = 'Wrong argument for project delete operation'
+                self.session_manager.log_manager.log_record(record=record,
+                                                            category='Warning')
+                return False
+        else:
+            record = 'Attempt to delete project before signing in'
+            self.session_manager.log_manager.log_record(record=record,
+                                                        category='Warning')
+            return False
+
     def get_projects(self, name=None):
         if self.session_manager.signed_in():
             self.session_data = self.session_manager.session_data
@@ -147,25 +168,4 @@ class ProjectManager(EntityManager):
         else:
             record = 'Attempt to close project before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return False
-
-    def delete_project(self, project):
-        if self.session_manager.signed_in():
-            self.session_data = self.session_manager.session_data
-            if isinstance(project, Project):
-                self.session.delete(project)
-                self.session.commit()
-                record = 'Project "%s" successfully deleted' % project.name
-                self.session_manager.log_manager.log_record(record=record,
-                                                            category='Information')
-                return True
-            else:
-                record = 'Wrong argument for project delete operation'
-                self.session_manager.log_manager.log_record(record=record,
-                                                            category='Warning')
-                return False
-        else:
-            record = 'Attempt to delete project before signing in'
-            self.session_manager.log_manager.log_record(record=record,
-                                                        category='Warning')
             return False
