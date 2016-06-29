@@ -52,6 +52,22 @@ class ParameterManager(EntityManager):
             record = 'Wrong Parameter Type argument'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
 
+    def delete_parameter_type(self, parameter_type):
+        if self.session_manager.signed_in():
+            if not isinstance(parameter_type, ParameterType):
+                record = 'Wrong argument for Parameter Type delete operation'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+            self.session.delete(parameter_type)
+            self.session.commit()
+            record = 'Parameter type "%s" deleted' % parameter_type.name
+            self.session_manager.log_manager.log_record(record=record, category='Information')
+            return True
+        else:
+            record = 'Attempt to delete Parameter Type before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
+
     def _create_parameter(self, name, parameter_type, float_value=None, string_value=None,
                           index=0, unit_name=None, description=None, parent=None):
         if self.session_manager.signed_in():
@@ -101,6 +117,27 @@ class ParameterManager(EntityManager):
         else:
             record = 'Attempt to create Parameter before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
+
+    def delete_parameter(self, parameter):
+        if self.session_manager.signed_in():
+            if not isinstance(parameter, Parameter):
+                record = 'Wrong argument for Parameter delete operation'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return False
+            if parameter.parent:
+                if 'range' in parameter.parent.type.name and (parameter.name == 'start' or parameter.name == 'stop'):
+                    record = 'Can not delete START or STOP from RANGE parameter. Delete RANGE parameter itself.'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return False
+            self.session.delete(parameter)
+            self.session.commit()
+            record = 'Parameter "%s" deleted' % parameter.name
+            self.session_manager.log_manager.log_record(record=record, category='Information')
+            return True
+        else:
+            record = 'Attempt to delete Parameter before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return False
 
     def _check_parameter_type_name(self, parameter_type, description=None):
         parameter_type_exists = False
