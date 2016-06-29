@@ -98,8 +98,7 @@ class Equipment(Base):
     session_id = Column(Integer, ForeignKey('session.id'))
     session = relationship(Session, backref=backref('equipment', uselist=True, cascade='all, delete-orphan'))
     parameters = relationship(Parameter, secondary=equipment_parameters_table, backref='equipment')
-    measurement_types = relationship(MeasurementType, secondary=equipment_measurement_table, backref='equipment',
-                                     cascade='all, delete')
+    measurement_types = relationship(MeasurementType, secondary=equipment_measurement_table, backref='equipment')
     created = Column(DateTime, default=func.now())
     __table_args__ = (UniqueConstraint('name', 'serial_number', name='_name_serial_number'),)
 

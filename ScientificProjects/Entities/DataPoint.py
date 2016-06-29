@@ -28,7 +28,7 @@ class DataChannel(Base):
     description = Column(Text)
     unit_name = Column(String)
     parameters = relationship(Parameter, secondary=channel_parameter_table,
-                              backref='data_channels', cascade='all, delete')
+                              backref='data_channels')
     session_id = Column(Integer, ForeignKey('session.id'))
     session = relationship(Session, backref=backref('data_channels', uselist=True,
                                                     cascade='all, delete-orphan'))

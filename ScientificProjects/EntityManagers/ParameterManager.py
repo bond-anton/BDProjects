@@ -207,6 +207,29 @@ class ParameterManager(EntityManager):
         self.create_datetime_parameter(name='stop', value=stop, parent=range_parameter)
         return range_parameter
 
+    def get_dangling_parameters(self, delete=False):
+        if self.session_manager.signed_in():
+            q = self.session.query(Parameter).filter(Parameter.parent == None)
+            q = q.filter(Parameter.measurements == None)
+            q = q.filter(Parameter.samples == None)
+            q = q.filter(Parameter.equipment == None)
+            q = q.filter(Parameter.data_channels == None)
+            if delete:
+                result = q.delete(synchronize_session='fetch')
+                self.session.commit()
+                record = 'Deleted %i dangling Parameters' % result
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+            else:
+                result = q.all()
+                self.session.commit()
+                record = 'Found %i dangling Parameters' % len(result)
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+            return result
+        else:
+            record = 'Attempt to query Parameter before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return []
+
 
 def get_range_parameter_value(parameter):
     if not isinstance(parameter, Parameter):

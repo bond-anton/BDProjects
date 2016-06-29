@@ -62,6 +62,8 @@ client.user_manager.measurement_manager.delete_measurement(measurement)
 #client.user_manager.measurement_manager.delete_data_points(channel=voltmeter_channel,
 #                                                           point_index=index[:5])
 
+dp = client.user_manager.parameter_manager.get_dangling_parameters(delete=True)
+
 client.user_manager.sign_out()
 
 #client.user_manager.delete_user('john_smith', 'secret_password')
