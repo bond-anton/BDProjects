@@ -83,6 +83,14 @@ class EquipmentManager(EntityManager):
                             equipment_category.parent_id = parent_id[0]
                     except NoResultFound:
                         pass
+            q = self.session.query(EquipmentCategory).filter(EquipmentCategory.name == str(name))
+            if parent is not None:
+                q = q.filter(EquipmentCategory.parent_id == equipment_category.parent_id)
+            similar = q.all()
+            if similar:
+                record = 'Equipment category "%s" already exists' % equipment_category.name
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return similar[0]
             try:
                 self.session.add(equipment_category)
                 self.session.commit()
@@ -119,7 +127,7 @@ class EquipmentManager(EntityManager):
 
     def get_equipment_categories_tree(self, root=None):
         if self.session_manager.signed_in():
-            measurement_types = {}
+            equipment_categories = {}
             if root is None:
                 roots = self.session.query(EquipmentCategory.name).filter(
                     EquipmentCategory.parent_id == None).all()
@@ -134,8 +142,8 @@ class EquipmentManager(EntityManager):
                 except NoResultFound:
                     pass
             for root in roots:
-                measurement_types[root[0]] = self.get_equipment_categories_tree(root[0])
-            return measurement_types
+                equipment_categories[root[0]] = self.get_equipment_categories_tree(root[0])
+            return equipment_categories
         else:
             record = 'Attempt to query equipment categories before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
