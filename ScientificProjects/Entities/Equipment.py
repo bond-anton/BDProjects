@@ -57,12 +57,13 @@ class EquipmentCategory(Base):
     parent_id = Column(Integer, ForeignKey('equipment_category.id'))
     subcategories = relationship('EquipmentCategory', backref=backref('parent', remote_side=[id],
                                                                       cascade='all, delete'))
-    name = Column(String, unique=True)
+    name = Column(String)
     description = Column(Text)
     session_id = Column(Integer, ForeignKey('session.id'))
     session = relationship(Session, backref=backref('equipment_categories', uselist=True,
                                                     cascade='all, delete-orphan'))
     created = Column(DateTime, default=func.now())
+    __table_args__ = (UniqueConstraint('name', 'parent_id', name='name_parent'),)
 
     def __str__(self):
         description = 'Equipment category: %s' % self.name
