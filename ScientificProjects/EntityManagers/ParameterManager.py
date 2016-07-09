@@ -12,6 +12,8 @@ default_parameter_types = {'Numeric value': 'Single numeric value',
                            'String value': 'String value',
                            'Boolean value': 'Boolean value',
                            'DateTime value': 'Single DateTime value',
+                           # dictionary
+                           'Dictionary': 'Dictionary',
                            # ranges
                            'Numeric range': 'Numeric values range',
                            'DateTime range': 'DateTime values range',
