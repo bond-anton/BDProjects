@@ -96,7 +96,7 @@ class ProjectManager(EntityManager):
                     #self.log_manager = LogManager(self.engine, self)
                     self.session_manager.log_manager = LogManager(self.engine, self)
                     record = 'Project "%s" opened (#%s)' % (self.project.name, self.session_data.token)
-                    self.log_manager.log_record(record=record, category='Information')
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
                     return self.project
                 elif self.project_opened(project):
                     record = 'Project "%s" is already opened in #%s' % (project_name, self.session_data.token)
