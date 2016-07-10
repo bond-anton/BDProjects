@@ -15,7 +15,6 @@ class ProjectManager(EntityManager):
 
     def __init__(self, engine, session_manager):
         super(ProjectManager, self).__init__(engine, session_manager)
-        #self.log_manager = None
         self._log_manager_backup = self.session_manager.log_manager
 
     def create_project(self, name, data_dir, description=None):
@@ -93,7 +92,6 @@ class ProjectManager(EntityManager):
                     self.session.commit()
                     self.project = project
                     self.user = self.session_manager.user
-                    #self.log_manager = LogManager(self.engine, self)
                     self.session_manager.log_manager = LogManager(self.engine, self)
                     record = 'Project "%s" opened (#%s)' % (self.project.name, self.session_data.token)
                     self.session_manager.log_manager.log_record(record=record, category='Information')
@@ -159,7 +157,6 @@ class ProjectManager(EntityManager):
                 self.session_manager.log_manager.log_record(record=record, category='Information')
                 self.project = None
                 self.session_manager.log_manager = self._log_manager_backup
-                #self.log_manager = None
                 return True
             else:
                 if project is None:
