@@ -8,7 +8,9 @@ from ScientificProjects import datetime_to_float, float_to_datetime
 from ScientificProjects.Entities.Parameter import ParameterType, Parameter
 from ScientificProjects.EntityManagers import EntityManager
 
-default_parameter_types = {'Numeric value': 'Single numeric value',
+default_parameter_types = {'Generic': 'Unspecified parameter',
+                           # Single value parameters
+                           'Numeric value': 'Single numeric value',
                            'String value': 'String value',
                            'Boolean value': 'Boolean value',
                            'DateTime value': 'Single DateTime value',
