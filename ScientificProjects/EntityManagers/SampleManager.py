@@ -101,7 +101,7 @@ class SampleManager(EntityManager):
                         self.session_manager.log_manager.log_record(record=record, category='Information')
                     return True
                 else:
-                    record = 'Wrong argument type for adding parameter to equipment'
+                    record = 'Wrong argument type for adding parameter to sample'
                     self.session_manager.log_manager.log_record(record=record, category='Warning')
                     return False
             else:
