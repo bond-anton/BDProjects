@@ -115,7 +115,6 @@ class MeasurementManager(EntityManager):
                         self.session_manager.log_manager.log_record(record=record, category='Warning')
                     return True
                 else:
-                    print(isinstance(measurement, Measurement), isinstance(sample, Sample))
                     record = 'Wrong argument for adding sample to measurement'
                     self.session_manager.log_manager.log_record(record=record, category='Warning')
                     return False
