@@ -700,7 +700,10 @@ class MeasurementManager(EntityManager):
                                        DataPoint.measured).filter(DataPoint.channel_id == channel.id)
                 if point_index is not None:
                     q = q.filter(DataPoint.point_index.in_(point_index))
-                return np.array(q.all())
+                result = np.array(q.all())
+                if not result:
+                    result = np.array([[None, None, None, None]])
+                return result
             else:
                 record = 'Attempt to query data point before opening project'
                 self.session_manager.log_manager.log_record(record=record, category='Warning')
