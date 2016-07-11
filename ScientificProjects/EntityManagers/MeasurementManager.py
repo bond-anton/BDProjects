@@ -644,6 +644,7 @@ class MeasurementManager(EntityManager):
             return None
 
     def delete_data_points(self, channel, point_index=None):
+        start_time = timeit.default_timer()
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if not isinstance(channel, DataChannel):
@@ -653,10 +654,11 @@ class MeasurementManager(EntityManager):
                 q = self.session.query(DataPoint).filter(DataPoint.channel_id == channel.id)
                 if point_index is not None:
                     q = q.filter(DataPoint.point_index.in_(point_index))
-                q.delete(synchronize_session='fetch')
-                # q.delete(synchronize_session=False) # try this if performance is low
+                count = q.delete(synchronize_session='fetch')
+                # count = q.delete(synchronize_session=False) # try this if performance is low
                 self.session.commit()
-                record = 'Data points successfully deleted'
+                elapsed = timeit.default_timer() - start_time
+                record = '%i data points deleted from channel "%s" in %3.3f s' % (count, channel.name, elapsed)
                 self.session_manager.log_manager.log_record(record=record, category='Information')
                 return True
             else:
