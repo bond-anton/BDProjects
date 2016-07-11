@@ -701,7 +701,7 @@ class MeasurementManager(EntityManager):
                 if point_index is not None:
                     q = q.filter(DataPoint.point_index.in_(point_index))
                 result = np.array(q.all())
-                if result == np.array([]):
+                if result.size == 0:
                     result = np.array([[None, None, None, None]])
                 return result
             else:
