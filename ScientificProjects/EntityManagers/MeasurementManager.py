@@ -669,6 +669,7 @@ class MeasurementManager(EntityManager):
             return False
 
     def get_data_points(self, channel, point_index=None):
+        start_time = timeit.default_timer()
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if not isinstance(channel, DataChannel):
@@ -678,7 +679,11 @@ class MeasurementManager(EntityManager):
                 q = self.session.query(DataPoint).filter(DataPoint.channel_id == channel.id)
                 if point_index is not None:
                     q = q.filter(DataPoint.point_index.in_(point_index))
-                return q.all()
+                result = q.all()
+                elapsed = timeit.default_timer() - start_time
+                record = '%i data points pooled from channel "%s" in %3.3f s' % (len(result), channel.name, elapsed)
+                self.session_manager.log_manager.log_record(record=record, category='Information')
+                return result
             else:
                 record = 'Attempt to query data point before opening project'
                 self.session_manager.log_manager.log_record(record=record, category='Warning')
@@ -689,6 +694,7 @@ class MeasurementManager(EntityManager):
             return []
 
     def get_data_points_array(self, channel, point_index=None):
+        start_time = timeit.default_timer()
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if not isinstance(channel, DataChannel):
@@ -704,6 +710,9 @@ class MeasurementManager(EntityManager):
                 result = np.array(q.all())
                 if result.size == 0:
                     result = np.array([[None, None, None, None]])
+                elapsed = timeit.default_timer() - start_time
+                record = '%i data points pooled from channel "%s" in %3.3f s' % (len(result), channel.name, elapsed)
+                self.session_manager.log_manager.log_record(record=record, category='Information')
                 return result
             else:
                 record = 'Attempt to query data point before opening project'
