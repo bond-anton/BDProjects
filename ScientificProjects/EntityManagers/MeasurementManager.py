@@ -627,6 +627,7 @@ class MeasurementManager(EntityManager):
                                 'float_value': float_value[i],
                                 'point_index': int(point_index[i]),
                                 'point_measured': measured[i],
+                                'session_id': self.session_manager.session_data.id,
                                 } for i in range(float_value.size)]
                 self.engine.execute(DataPoint.__table__.insert(), data_points)
                 elapsed = timeit.default_timer() - start_time
