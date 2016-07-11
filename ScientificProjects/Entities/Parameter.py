@@ -36,8 +36,8 @@ class Parameter(Base):
     type = relationship(ParameterType, backref=backref('parameters', uselist=True,
                                                        cascade='all, delete-orphan'))
     parent_id = Column(Integer, ForeignKey('parameter.id'))
-    children = relationship('Parameter', backref=backref('parent', remote_side=[id],
-                                                         cascade='all, delete-orphan', single_parent=True))
+    children = relationship('Parameter', backref=backref('parent', remote_side=[id]),
+                            cascade='all, delete')
     name = Column(String)
     description = Column(Text)
     unit_name = Column(String, unique=False)
