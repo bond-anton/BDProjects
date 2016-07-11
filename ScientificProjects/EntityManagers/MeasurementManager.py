@@ -693,7 +693,7 @@ class MeasurementManager(EntityManager):
                 if not isinstance(channel, DataChannel):
                     record = 'Wrong DataChannel object to query data point'
                     self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return np.array([None, None, None, None])
+                    return np.array([[None, None, None, None]])
                 q = self.session.query(DataPoint.float_value,
                                        DataPoint.string_value,
                                        DataPoint.point_index,
@@ -704,11 +704,11 @@ class MeasurementManager(EntityManager):
             else:
                 record = 'Attempt to query data point before opening project'
                 self.session_manager.log_manager.log_record(record=record, category='Warning')
-                return np.array([None, None, None, None])
+                return np.array([[None, None, None, None]])
         else:
             record = 'Attempt to query data point before signing in'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
-            return np.array([None, None, None, None])
+            return np.array([[None, None, None, None]])
 
     def finish_measurement(self, measurement, finished=None):
         if self.session_manager.signed_in():
