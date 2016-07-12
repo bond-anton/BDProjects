@@ -205,6 +205,11 @@ class ParameterManager(EntityManager):
                                       unit_name=unit_name, description=description,
                                       parent=parent)
 
+    def create_dict_parameter(self, name, description=None, parent=None):
+        return self._create_parameter(name, parameter_type='Dictionary',
+                                      description=description,
+                                      parent=parent)
+
     def create_numeric_parameter(self, name, value, unit_name=None, description=None, parent=None):
         if not isinstance(value, numbers.Number):
             raise ValueError('Expected numeric value for a parameter')
