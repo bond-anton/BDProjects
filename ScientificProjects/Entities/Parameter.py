@@ -65,3 +65,33 @@ class Parameter(Base):
         description += '\n Parent: %s' % self.parent
         description += '\n Children number: %i' % len(self.children)
         return description
+
+    def equals(self, other):
+        assert isinstance(other, Parameter)
+        result = True
+        if self.name != other.name:
+            result = False
+        if self.type_id != other.type_id:
+            result = False
+        if self.unit_name != other.unit_name:
+            result = False
+        if self.description != other.description:
+            result = False
+        if self.index != other.index:
+            result = False
+        if self.string_value != other.string_value:
+            result = False
+        if self.float_value != other.float_value:
+            result = False
+        if len(self.children) != len(other.children):
+            result = False
+        else:
+            for child in self.children:
+                matched = False
+                for other_child in other.children:
+                    if child == other_child:
+                        matched = True
+                        break
+                if not matched:
+                    result = False
+        return result

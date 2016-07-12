@@ -143,6 +143,35 @@ class ParameterManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
+    def copy_parameter(self, parameter, suppress_parent_warning=False):
+        if self.session_manager.signed_in():
+            if not isinstance(parameter, Parameter):
+                record = 'Wrong argument for Parameter copy operation'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return None
+            if parameter.parent and not suppress_parent_warning:
+                record = 'Parameter belongs to its PARENT. This information will be lost in parameter copy.'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+            new = self._create_parameter(name=parameter.name,
+                                         parameter_type=parameter.type,
+                                         float_value=parameter.float_value,
+                                         string_value=parameter.string_value,
+                                         index=parameter.index,
+                                         unit_name=parameter.unit_name,
+                                         description=parameter.description,
+                                         parent=None)
+            for child in parameter.children:
+                child_copy = self.copy_parameter(child, suppress_parent_warning=True)
+                child_copy.parent_id = new.id
+            self.session.commit()
+            record = 'Parameter "%s" copied' % parameter.name
+            self.session_manager.log_manager.log_record(record=record, category='Information')
+            return new
+        else:
+            record = 'Attempt to copy Parameter before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return None
+
     def _check_parameter_type_name(self, parameter_type, description=None):
         parameter_type_exists = False
         if isinstance(parameter_type, str):
@@ -165,6 +194,16 @@ class ParameterManager(EntityManager):
             template = '%' + str(name) + '%'
             q = q.filter(ParameterType.name.ilike(template))
         return q.all()
+
+    def create_generic_parameter(self, name, float_value=None, string_value=None,
+                                 unit_name=None, description=None, parent=None):
+        if not isinstance(float_value, numbers.Number):
+            raise ValueError('Expected numeric value for a float_value')
+        return self._create_parameter(name, parameter_type='Generic',
+                                      float_value=np.float(float_value),
+                                      string_value=string_value,
+                                      unit_name=unit_name, description=description,
+                                      parent=parent)
 
     def create_numeric_parameter(self, name, value, unit_name=None, description=None, parent=None):
         if not isinstance(value, numbers.Number):
