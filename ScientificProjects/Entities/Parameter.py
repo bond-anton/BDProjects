@@ -1,4 +1,5 @@
 from __future__ import division, print_function
+import numpy as np
 
 from sqlalchemy import Column, DateTime, String, Text, Integer, Float, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
@@ -81,7 +82,7 @@ class Parameter(Base):
             result = False
         if self.string_value != other.string_value:
             result = False
-        if self.float_value != other.float_value:
+        if not np.allclose(self.float_value, other.float_value):
             result = False
         if len(self.children) != len(other.children):
             result = False
