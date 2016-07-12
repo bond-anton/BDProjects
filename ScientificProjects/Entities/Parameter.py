@@ -82,8 +82,12 @@ class Parameter(Base):
             result = False
         if self.string_value != other.string_value:
             result = False
-        if not np.allclose(self.float_value, other.float_value):
-            result = False
+        if self.float_value is None or other.float_value is None:
+            if self.float_value != other.float_value:
+                result = False
+        else:
+            if not np.allclose(self.float_value, other.float_value):
+                result = False
         if len(self.children) != len(other.children):
             result = False
         else:
