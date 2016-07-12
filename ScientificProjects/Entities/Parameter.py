@@ -70,20 +70,28 @@ class Parameter(Base):
         assert isinstance(other, Parameter)
         result = True
         if self.name != other.name:
+            print('name')
             result = False
         if self.type_id != other.type_id:
+            print('type')
             result = False
         if self.unit_name != other.unit_name:
+            print('unit')
             result = False
         if self.description != other.description:
+            print('descr')
             result = False
         if self.index != other.index:
+            print('index')
             result = False
         if self.string_value != other.string_value:
+            print('string')
             result = False
         if self.float_value != other.float_value:
+            print('float')
             result = False
         if len(self.children) != len(other.children):
+            print('ch_len')
             result = False
         else:
             for child in self.children:
@@ -93,5 +101,6 @@ class Parameter(Base):
                         matched = True
                         break
                 if not matched:
+                    print('ch_not_match')
                     result = False
         return result
