@@ -89,7 +89,7 @@ class Parameter(Base):
             for child in self.children:
                 matched = False
                 for other_child in other.children:
-                    if child == other_child:
+                    if child.equals(other_child):
                         matched = True
                         break
                 if not matched:
