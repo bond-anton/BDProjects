@@ -73,7 +73,7 @@ class ParameterManager(EntityManager):
             return False
 
     def _create_parameter(self, name, parameter_type, float_value=None, string_value=None,
-                          index=0, unit_name=None, description=None, parent=None):
+                          index=0, unit_name=None, description=None, parent=None, commit=True):
         if self.session_manager.signed_in():
             parameter_type_object, parameter_type_exists = self._check_parameter_type_name(parameter_type, description)
             if unit_name is None:
@@ -113,10 +113,11 @@ class ParameterManager(EntityManager):
                     parameter.string_value = string_value
                 if float_value is not None:
                     parameter.float_value = float_value
-                self.session.add(parameter)
-                self.session.commit()
-                record = 'Parameter "%s" created' % parameter.name
-                self.session_manager.log_manager.log_record(record=record, category='Information')
+                if commit:
+                    self.session.add(parameter)
+                    self.session.commit()
+                    record = 'Parameter "%s" created' % parameter.name
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
                 return parameter
         else:
             record = 'Attempt to create Parameter before signing in'
@@ -143,7 +144,7 @@ class ParameterManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
-    def copy_parameter(self, parameter, suppress_parent_warning=False):
+    def copy_parameter(self, parameter, suppress_parent_warning=False, commit=True):
         if self.session_manager.signed_in():
             if not isinstance(parameter, Parameter):
                 record = 'Wrong argument for Parameter copy operation'
@@ -159,13 +160,15 @@ class ParameterManager(EntityManager):
                                          index=parameter.index,
                                          unit_name=parameter.unit_name,
                                          description=parameter.description,
-                                         parent=None)
+                                         parent=None,
+                                         commit=commit)
             for child in parameter.children:
-                child_copy = self.copy_parameter(child, suppress_parent_warning=True)
+                child_copy = self.copy_parameter(child, suppress_parent_warning=True, commit=commit)
                 child_copy.parent_id = new.id
-            self.session.commit()
-            record = 'Parameter "%s" copied' % parameter.name
-            self.session_manager.log_manager.log_record(record=record, category='Information')
+            if commit:
+                self.session.commit()
+                record = 'Parameter "%s" copied' % parameter.name
+                self.session_manager.log_manager.log_record(record=record, category='Information')
             return new
         else:
             record = 'Attempt to copy Parameter before signing in'
@@ -196,63 +199,66 @@ class ParameterManager(EntityManager):
         return q.all()
 
     def create_generic_parameter(self, name, float_value=None, string_value=None,
-                                 unit_name=None, description=None, parent=None):
+                                 unit_name=None, description=None, parent=None, commit=True):
         if not isinstance(float_value, numbers.Number):
             raise ValueError('Expected numeric value for a float_value')
         return self._create_parameter(name, parameter_type='Generic',
                                       float_value=np.float(float_value),
                                       string_value=string_value,
                                       unit_name=unit_name, description=description,
-                                      parent=parent)
+                                      parent=parent,
+                                      commit=commit)
 
-    def create_dict_parameter(self, name, description=None, parent=None):
+    def create_dict_parameter(self, name, description=None, parent=None, commit=True):
         return self._create_parameter(name, parameter_type='Dictionary',
                                       description=description,
-                                      parent=parent)
+                                      parent=parent,
+                                      commit=commit)
 
-    def create_numeric_parameter(self, name, value, unit_name=None, description=None, parent=None):
+    def create_numeric_parameter(self, name, value, unit_name=None, description=None, parent=None, commit=True):
         if not isinstance(value, numbers.Number):
             raise ValueError('Expected numeric value for a parameter')
         return self._create_parameter(name, parameter_type='Numeric value',
                                       float_value=np.float(value), unit_name=unit_name, description=description,
-                                      parent=parent)
+                                      parent=parent, commit=commit)
 
-    def create_string_parameter(self, name, value, unit_name=None, description=None, parent=None):
+    def create_string_parameter(self, name, value, unit_name=None, description=None, parent=None, commit=True):
         if not isinstance(value, str):
             raise ValueError('Expected string value for a parameter')
         return self._create_parameter(name, parameter_type='String value',
                                       string_value=value, unit_name=unit_name, description=description,
-                                      parent=parent)
+                                      parent=parent, commit=commit)
 
-    def create_boolean_parameter(self, name, value, description=None, parent=None):
+    def create_boolean_parameter(self, name, value, description=None, parent=None, commit=True):
         if not isinstance(value, numbers.Number):
             raise ValueError('Expected boolean or numeric value for a parameter')
         return self._create_parameter(name, parameter_type='Boolean value',
-                                      float_value=np.float(bool(value)), description=description, parent=parent)
+                                      float_value=np.float(bool(value)), description=description,
+                                      parent=parent, commit=commit)
 
-    def create_datetime_parameter(self, name, value, description=None, parent=None):
+    def create_datetime_parameter(self, name, value, description=None, parent=None, commit=True):
         if not isinstance(value, dt.datetime):
             raise ValueError('Expected datetime value for a parameter')
         td = datetime_to_float(value)
         return self._create_parameter(name, parameter_type='DateTime value',
-                                      float_value=td, description=description, parent=parent)
+                                      float_value=td, description=description, parent=parent, commit=commit)
 
-    def create_numeric_range_parameter(self, name, start, stop, description=None, parent=None):
+    def create_numeric_range_parameter(self, name, start, stop, description=None, parent=None, commit=True):
         if not (isinstance(start, numbers.Number) and isinstance(stop, numbers.Number)):
             raise ValueError('Expected numeric value for start and stop')
         range_parameter = self._create_parameter(name, parameter_type='Numeric range',
-                                                 description=description, parent=parent)
-        self.create_numeric_parameter(name='start', value=start, parent=range_parameter)
-        self.create_numeric_parameter(name='stop', value=stop, parent=range_parameter)
+                                                 description=description, parent=parent, commit=commit)
+        self.create_numeric_parameter(name='start', value=start, parent=range_parameter, commit=commit)
+        self.create_numeric_parameter(name='stop', value=stop, parent=range_parameter, commit=commit)
         return range_parameter
 
-    def create_datetime_range_parameter(self, name, start, stop, description=None, parent=None):
+    def create_datetime_range_parameter(self, name, start, stop, description=None, parent=None, commit=True):
         if not (isinstance(start, dt.datetime) and isinstance(stop, dt.datetime)):
             raise ValueError('Expected datetime value for start and stop')
         range_parameter = self._create_parameter(name, parameter_type='DateTime range',
-                                                 description=description, parent=parent)
-        self.create_datetime_parameter(name='start', value=start, parent=range_parameter)
-        self.create_datetime_parameter(name='stop', value=stop, parent=range_parameter)
+                                                 description=description, parent=parent, commit=commit)
+        self.create_datetime_parameter(name='start', value=start, parent=range_parameter, commit=commit)
+        self.create_datetime_parameter(name='stop', value=stop, parent=range_parameter, commit=commit)
         return range_parameter
 
     def get_dangling_parameters(self, delete=False):
