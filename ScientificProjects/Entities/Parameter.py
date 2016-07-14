@@ -95,7 +95,8 @@ class Parameter(Base):
                 matched = False
                 for other_child in other.children:
                     if child.equals(other_child):
-                        print('\t', child.name, 'equals', other_child.name)
+                        # debug message. Uncomment if needed
+                        # print('\t', child.name, 'equals', other_child.name)
                         matched = True
                         break
                 if not matched:

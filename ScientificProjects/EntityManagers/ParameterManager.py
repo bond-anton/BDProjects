@@ -73,7 +73,8 @@ class ParameterManager(EntityManager):
             return False
 
     def _create_parameter(self, name, parameter_type, float_value=None, string_value=None,
-                          index=0, unit_name=None, description=None, parent=None, commit=True):
+                          index=0, unit_name=None, description=None, parent=None, commit=True,
+                          suppres_log_message=False):
         if self.session_manager.signed_in():
             parameter_type_object, parameter_type_exists = self._check_parameter_type_name(parameter_type, description)
             if unit_name is None:
@@ -116,8 +117,9 @@ class ParameterManager(EntityManager):
                 if commit:
                     self.session.add(parameter)
                     self.session.commit()
-                    record = 'Parameter "%s" created' % parameter.name
-                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                    if not suppres_log_message:
+                        record = 'Parameter "%s" created' % parameter.name
+                        self.session_manager.log_manager.log_record(record=record, category='Information')
                 return parameter
         else:
             record = 'Attempt to create Parameter before signing in'
@@ -161,7 +163,8 @@ class ParameterManager(EntityManager):
                                          unit_name=parameter.unit_name,
                                          description=parameter.description,
                                          parent=None,
-                                         commit=commit)
+                                         commit=commit,
+                                         suppres_log_message=True)
             for child in parameter.children:
                 child_copy = self.copy_parameter(child, suppress_parent_warning=True, commit=commit)
                 child_copy.parent_id = new.id
