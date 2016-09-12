@@ -16,4 +16,4 @@ Please see the demo directory for the usage examples.
 
 ## License
 
-Space is free open source software licensed under Apache license version 2.0
+ScientificProjects is free open source software licensed under Apache license version 2.0
