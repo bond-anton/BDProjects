@@ -50,6 +50,7 @@ def write_config(connection_parameters, file_name):
         db_config['user'] = connection_parameters['user']
         db_config['password'] = connection_parameters['password']
     else:
+        config.add_section('Database')
         config.set('Database', 'name', connection_parameters['db_name'])
         config.set('Database', 'backend', connection_parameters['backend'])
         config.set('Database', 'host', connection_parameters['host'])
