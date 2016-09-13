@@ -13,7 +13,7 @@ def read_config(file_name=None):
         connection_parameters = default_connection_parameters
     else:
         config = configparser.ConfigParser()
-        config.read('config.ini')
+        config.read(file_name)
         if sys.version_info.major > 2:
             db_config = config['Database']
             db_name = db_config['name']
@@ -37,3 +37,25 @@ def read_config(file_name=None):
                                  'password': password
                                  }
     return connection_parameters
+
+
+def write_config(connection_parameters, file_name):
+    config = configparser.ConfigParser()
+    if sys.version_info.major > 2:
+        db_config = config['Database']
+        db_config['name'] = connection_parameters['db_name']
+        db_config['backend'] = connection_parameters['backend']
+        db_config['host'] = connection_parameters['host']
+        db_config['port'] = connection_parameters['port']
+        db_config['user'] = connection_parameters['user']
+        db_config['password'] = connection_parameters['password']
+    else:
+        config.set('Database', 'name', connection_parameters['db_name'])
+        config.set('Database', 'backend', connection_parameters['backend'])
+        config.set('Database', 'host', connection_parameters['host'])
+        config.set('Database', 'port', str(connection_parameters['port']))
+        config.set('Database', 'user', connection_parameters['user'])
+        config.set('Database', 'password', connection_parameters['password'])
+    with open(file_name, 'w') as configfile:
+        config.write(configfile)
+
