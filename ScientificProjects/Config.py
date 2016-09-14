@@ -30,6 +30,10 @@ def read_config(file_name=None):
             port = config.get('Database', 'port')
             user = config.get('Database', 'user')
             password = config.get('Database', 'password')
+        try:
+            port = int(port)
+        except TypeError:
+            pass
         connection_parameters = {'db_name': db_name,
                                  'backend': backend,
                                  'host': hostname,
