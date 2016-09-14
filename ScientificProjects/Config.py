@@ -41,6 +41,7 @@ def read_config(file_name=None):
 
 def write_config(connection_parameters, file_name):
     config = configparser.ConfigParser()
+    config.add_section('Database')
     if sys.version_info.major > 2:
         db_config = config['Database']
         db_config['name'] = connection_parameters['db_name']
@@ -50,7 +51,6 @@ def write_config(connection_parameters, file_name):
         db_config['user'] = connection_parameters['user']
         db_config['password'] = connection_parameters['password']
     else:
-        config.add_section('Database')
         config.set('Database', 'name', connection_parameters['db_name'])
         config.set('Database', 'backend', connection_parameters['backend'])
         config.set('Database', 'host', connection_parameters['host'])
