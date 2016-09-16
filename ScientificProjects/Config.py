@@ -1,5 +1,6 @@
 from __future__ import division, print_function
 import sys
+from os.path import isfile
 import numbers
 try:
     import configparser
@@ -13,6 +14,8 @@ def read_config(file_name=None):
     if file_name is None:
         connection_parameters = default_connection_parameters
     else:
+        if not isfile(file_name):
+            raise IOError('Config file not found')
         config = configparser.ConfigParser()
         config.read(file_name)
         if sys.version_info.major > 2:
