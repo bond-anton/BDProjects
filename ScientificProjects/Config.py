@@ -17,7 +17,10 @@ def read_config(file_name=None):
         if not isfile(file_name):
             raise IOError('Config file not found')
         config = configparser.ConfigParser()
-        config.read(file_name)
+        try:
+            config.read(file_name)
+        except configparser.MissingSectionHeaderError:
+            raise ValueError('Wrong format of config file')
         try:
             if sys.version_info.major > 2:
                 db_config = config['Database']
