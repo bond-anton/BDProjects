@@ -2,7 +2,7 @@ from __future__ import division, print_function
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy.exc import ArgumentError
 from ScientificProjects import Base
 from ScientificProjects.Config import read_config
 from ScientificProjects.EntityManagers.VersionManager import VersionManager
@@ -22,8 +22,10 @@ class Client(object):
         if config['port']:
             hostname += ':' + str(config['port'])
         db_url = config['backend'] + '://' + credentials + hostname + '/' + config['db_name']
-
-        self.engine = create_engine(db_url)
+        try:
+            self.engine = create_engine(db_url)
+        except ArgumentError:
+            raise ValueError('Wrong DB URL')
         self.metadata = Base.metadata
 
         session = sessionmaker()

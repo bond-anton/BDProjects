@@ -1,5 +1,6 @@
 from __future__ import division, print_function
 import sys
+from os.path import isfile
 import numbers
 try:
     import configparser
@@ -13,30 +14,38 @@ def read_config(file_name=None):
     if file_name is None:
         connection_parameters = default_connection_parameters
     else:
+        if not isfile(file_name):
+            raise IOError('Config file not found')
         config = configparser.ConfigParser()
-        config.read(file_name)
-        if sys.version_info.major > 2:
-            db_config = config['Database']
-            db_name = db_config['name']
-            backend = db_config['backend']
-            hostname = db_config['host']
-            port = db_config['port']
-            user = db_config['user']
-            password = db_config['password']
-        else:
-            db_name = config.get('Database', 'name')
-            backend = config.get('Database', 'backend')
-            hostname = config.get('Database', 'host')
-            port = config.get('Database', 'port')
-            user = config.get('Database', 'user')
-            password = config.get('Database', 'password')
-        connection_parameters = {'db_name': db_name,
-                                 'backend': backend,
-                                 'host': hostname,
-                                 'port': port,
-                                 'user': user,
-                                 'password': password
-                                 }
+        try:
+            config.read(file_name)
+        except configparser.MissingSectionHeaderError:
+            raise ValueError('Wrong format of config file')
+        try:
+            if sys.version_info.major > 2:
+                db_config = config['Database']
+                db_name = db_config['name']
+                backend = db_config['backend']
+                hostname = db_config['host']
+                port = db_config['port']
+                user = db_config['user']
+                password = db_config['password']
+            else:
+                db_name = config.get('Database', 'name')
+                backend = config.get('Database', 'backend')
+                hostname = config.get('Database', 'host')
+                port = config.get('Database', 'port')
+                user = config.get('Database', 'user')
+                password = config.get('Database', 'password')
+            connection_parameters = {'db_name': db_name,
+                                     'backend': backend,
+                                     'host': hostname,
+                                     'port': port,
+                                     'user': user,
+                                     'password': password
+                                     }
+        except(configparser.NoSectionError, configparser.NoOptionError):
+            raise ValueError('Section or Option not found in config file')
     return connection_parameters
 
 
