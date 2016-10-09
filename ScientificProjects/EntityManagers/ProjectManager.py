@@ -153,7 +153,7 @@ class ProjectManager(EntityManager):
                         Project).filter(Project.name == str(project)).all()
                 projects[0].closed = datetime.datetime.now()
                 self.session.commit()
-                record = 'Project "%s" closed (#%s)' % (self.project.name, session.token)
+                record = 'Project "%s" closed (#%s)' % (projects[0].name, session.token)
                 self.session_manager.log_manager.log_record(record=record, category='Information')
                 self.project = None
                 self.session_manager.log_manager = self._log_manager_backup
@@ -162,7 +162,8 @@ class ProjectManager(EntityManager):
                 if project is None:
                     record = 'Session #%s has no projects opened' % session.token
                 else:
-                    record = 'Project "%s" is not opened' % self.project.name
+                    # record = 'Project "%s" is not opened' % self.project.name
+                    record = 'Project "%s" is not opened' % str(project)
                 self.session_manager.log_manager.log_record(record=record, category='Information')
                 return True
         else:
