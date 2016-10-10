@@ -100,7 +100,7 @@ class UserManager(EntityManager):
     def sign_in(self, login, password):
         if login not in default_users:
             if self.signed_in():
-                record = 'Please sign out first'
+                record = 'You are already signed in. Please sign out first'
                 self.log_manager.log_record(record=record, category='Warning')
                 return False
             user = self.session.query(User).filter(User.login == str(login)).all()
