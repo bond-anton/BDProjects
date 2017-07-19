@@ -118,7 +118,10 @@ class ParameterManager(EntityManager):
                     self.session.add(parameter)
                     self.session.commit()
                     if not suppres_log_message:
-                        record = 'Parameter "%s" created' % parameter.name
+                        if parent_id:
+                            record = 'Parameter "%s"->"%s" created' % (parameter.parent.name, parameter.name)
+                        else:
+                            record = 'Parameter "%s" created' % parameter.name
                         self.session_manager.log_manager.log_record(record=record, category='Information')
                 return parameter
         else:
