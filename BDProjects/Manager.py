@@ -3,19 +3,19 @@ from __future__ import division, print_function
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from ScientificProjects import Base
-from ScientificProjects.Config import read_config
-from ScientificProjects.EntityManagers.VersionManager import VersionManager
-from ScientificProjects.EntityManagers.LogManager import LogManager, default_log_categories
-from ScientificProjects.EntityManagers.UserManager import UserManager, default_users
-from ScientificProjects.EntityManagers.ParameterManager import default_parameter_types
-from ScientificProjects.Entities.User import User
-from ScientificProjects.Entities.Session import Session
-from ScientificProjects.Entities.Project import Project
-from ScientificProjects.Entities.Sample import Sample
-from ScientificProjects.Entities.Equipment import Equipment
-from ScientificProjects.Entities.Measurement import Measurement
-from ScientificProjects.Entities.DataPoint import DataPoint
+from BDProjects import Base
+from BDProjects.Config import read_config
+from BDProjects.EntityManagers.VersionManager import VersionManager
+from BDProjects.EntityManagers.LogManager import LogManager, default_log_categories
+from BDProjects.EntityManagers.UserManager import UserManager, default_users
+from BDProjects.EntityManagers.ParameterManager import default_parameter_types
+from BDProjects.Entities.User import User
+from BDProjects.Entities.Session import Session
+from BDProjects.Entities.Project import Project
+from BDProjects.Entities.Sample import Sample
+from BDProjects.Entities.Equipment import Equipment
+from BDProjects.Entities.Measurement import Measurement
+from BDProjects.Entities.DataPoint import DataPoint
 
 
 class Installer(object):

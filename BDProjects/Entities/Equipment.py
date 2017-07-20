@@ -3,10 +3,10 @@ from __future__ import division, print_function
 from sqlalchemy import Table, Column, UniqueConstraint, Integer, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
-from ScientificProjects import Base, default_date_time_format
-from ScientificProjects.Entities.Session import Session
-from ScientificProjects.Entities.Parameter import Parameter
-from ScientificProjects.Entities.MeasurementType import MeasurementType
+from BDProjects import Base, default_date_time_format
+from BDProjects.Entities.Session import Session
+from BDProjects.Entities.Parameter import Parameter
+from BDProjects.Entities.MeasurementType import MeasurementType
 
 
 equipment_assembly_table = Table('assembly_parts', Base.metadata,

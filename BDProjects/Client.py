@@ -3,11 +3,11 @@ from __future__ import division, print_function
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import ArgumentError
-from ScientificProjects import Base
-from ScientificProjects.Config import read_config
-from ScientificProjects.EntityManagers.VersionManager import VersionManager
-from ScientificProjects.EntityManagers.LogManager import LogManager
-from ScientificProjects.EntityManagers.UserManager import UserManager
+from BDProjects import Base
+from BDProjects.Config import read_config
+from BDProjects.EntityManagers.VersionManager import VersionManager
+from BDProjects.EntityManagers.LogManager import LogManager
+from BDProjects.EntityManagers.UserManager import UserManager
 
 
 class Client(object):

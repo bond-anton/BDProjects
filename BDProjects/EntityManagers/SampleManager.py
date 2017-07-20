@@ -2,9 +2,9 @@ from __future__ import division, print_function
 
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-from ScientificProjects.Entities.Sample import Sample
-from ScientificProjects.Entities.Parameter import Parameter
-from ScientificProjects.EntityManagers import EntityManager
+from BDProjects.Entities.Sample import Sample
+from BDProjects.Entities.Parameter import Parameter
+from BDProjects.EntityManagers import EntityManager
 
 
 class SampleManager(EntityManager):

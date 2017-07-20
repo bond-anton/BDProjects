@@ -2,7 +2,7 @@ from __future__ import division, print_function
 
 from sqlalchemy import Column, Integer, DateTime, func
 
-from ScientificProjects import Base
+from BDProjects import Base
 
 
 class Version(Base):

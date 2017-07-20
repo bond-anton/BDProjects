@@ -5,10 +5,10 @@ import datetime
 
 from sqlalchemy.exc import IntegrityError
 
-from ScientificProjects.Entities.Session import Session
-from ScientificProjects.Entities.Project import Project, SessionProject
-from ScientificProjects.EntityManagers import EntityManager
-from ScientificProjects.EntityManagers.LogManager import LogManager
+from BDProjects.Entities.Session import Session
+from BDProjects.Entities.Project import Project, SessionProject
+from BDProjects.EntityManagers import EntityManager
+from BDProjects.EntityManagers.LogManager import LogManager
 
 
 class ProjectManager(EntityManager):

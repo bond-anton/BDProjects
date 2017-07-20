@@ -3,10 +3,10 @@ from __future__ import division, print_function
 from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
-from ScientificProjects.Entities.Equipment import Manufacturer, EquipmentCategory, EquipmentAssembly, Equipment
-from ScientificProjects.Entities.MeasurementType import MeasurementType
-from ScientificProjects.Entities.Parameter import Parameter
-from ScientificProjects.EntityManagers import EntityManager
+from BDProjects.Entities.Equipment import Manufacturer, EquipmentCategory, EquipmentAssembly, Equipment
+from BDProjects.Entities.MeasurementType import MeasurementType
+from BDProjects.Entities.Parameter import Parameter
+from BDProjects.EntityManagers import EntityManager
 
 
 class EquipmentManager(EntityManager):

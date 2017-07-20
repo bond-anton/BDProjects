@@ -3,7 +3,7 @@ import datetime as dt
 import numbers
 from sqlalchemy.ext.declarative import declarative_base
 
-from ScientificProjects._version import __version__
+from BDProjects._version import __version__
 
 
 reference_time = dt.datetime(1970, 1, 1)

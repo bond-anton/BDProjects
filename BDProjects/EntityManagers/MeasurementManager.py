@@ -5,13 +5,13 @@ import numpy as np
 
 from sqlalchemy.exc import IntegrityError
 
-from ScientificProjects.Entities.MeasurementType import MeasurementType
-from ScientificProjects.Entities.Measurement import Measurement, MeasurementsCollection
-from ScientificProjects.Entities.DataPoint import DataChannel, DataPoint
-from ScientificProjects.Entities.Equipment import Equipment
-from ScientificProjects.Entities.Sample import Sample
-from ScientificProjects.Entities.Parameter import Parameter
-from ScientificProjects.EntityManagers import EntityManager
+from BDProjects.Entities.MeasurementType import MeasurementType
+from BDProjects.Entities.Measurement import Measurement, MeasurementsCollection
+from BDProjects.Entities.DataPoint import DataChannel, DataPoint
+from BDProjects.Entities.Equipment import Equipment
+from BDProjects.Entities.Sample import Sample
+from BDProjects.Entities.Parameter import Parameter
+from BDProjects.EntityManagers import EntityManager
 
 
 class MeasurementManager(EntityManager):

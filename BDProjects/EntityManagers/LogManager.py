@@ -2,11 +2,11 @@ from __future__ import division, print_function
 
 from sqlalchemy import func
 
-from ScientificProjects.Entities.Log import LogCategory, Log
-from ScientificProjects.Entities.Project import Project
-from ScientificProjects.Entities.Session import Session
-from ScientificProjects.Entities.User import User
-from ScientificProjects.EntityManagers import EntityManager
+from BDProjects.Entities.Log import LogCategory, Log
+from BDProjects.Entities.Project import Project
+from BDProjects.Entities.Session import Session
+from BDProjects.Entities.User import User
+from BDProjects.EntityManagers import EntityManager
 
 default_log_categories = {'Information': 'Informational messages',
                           'Warning': 'Warning messages',

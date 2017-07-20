@@ -1,8 +1,8 @@
 from __future__ import division, print_function
 
-from ScientificProjects import __version__
-from ScientificProjects.Entities.Version import Version
-from ScientificProjects.EntityManagers import EntityManager
+from BDProjects import __version__
+from BDProjects.Entities.Version import Version
+from BDProjects.EntityManagers import EntityManager
 
 
 class VersionManager(EntityManager):

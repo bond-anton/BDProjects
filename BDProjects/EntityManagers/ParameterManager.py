@@ -4,9 +4,9 @@ import datetime as dt
 import numpy as np
 import numbers
 
-from ScientificProjects import datetime_to_float, float_to_datetime
-from ScientificProjects.Entities.Parameter import ParameterType, Parameter
-from ScientificProjects.EntityManagers import EntityManager
+from BDProjects import datetime_to_float, float_to_datetime
+from BDProjects.Entities.Parameter import ParameterType, Parameter
+from BDProjects.EntityManagers import EntityManager
 
 default_parameter_types = {'Generic': 'Unspecified parameter',
                            # Single value parameters

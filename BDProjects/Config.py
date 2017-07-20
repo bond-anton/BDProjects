@@ -7,7 +7,7 @@ try:
 except ImportError:
     import ConfigParser as configparser
 
-from ScientificProjects import default_connection_parameters
+from BDProjects import default_connection_parameters
 
 
 def read_config(file_name=None):

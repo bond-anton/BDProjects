@@ -3,8 +3,8 @@ from __future__ import division, print_function
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
-from ScientificProjects import Base, default_date_time_format
-from ScientificProjects.Entities.Session import Session
+from BDProjects import Base, default_date_time_format
+from BDProjects.Entities.Session import Session
 
 
 class MeasurementType(Base):

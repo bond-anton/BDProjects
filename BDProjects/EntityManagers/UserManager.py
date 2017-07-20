@@ -8,17 +8,17 @@ from sqlalchemy import exists, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
-from ScientificProjects import default_date_time_format
-from ScientificProjects.Entities.User import User
-from ScientificProjects.Entities.Session import Session
-from ScientificProjects.EntityManagers import EntityManager
-from ScientificProjects.EntityManagers.LogManager import LogManager
-from ScientificProjects.EntityManagers.ProjectManager import ProjectManager
-from ScientificProjects.EntityManagers.MeasurementTypeManager import MeasurementTypeManager
-from ScientificProjects.EntityManagers.EquipmentManager import EquipmentManager
-from ScientificProjects.EntityManagers.ParameterManager import ParameterManager
-from ScientificProjects.EntityManagers.SampleManager import SampleManager
-from ScientificProjects.EntityManagers.MeasurementManager import MeasurementManager
+from BDProjects import default_date_time_format
+from BDProjects.Entities.User import User
+from BDProjects.Entities.Session import Session
+from BDProjects.EntityManagers import EntityManager
+from BDProjects.EntityManagers.LogManager import LogManager
+from BDProjects.EntityManagers.ProjectManager import ProjectManager
+from BDProjects.EntityManagers.MeasurementTypeManager import MeasurementTypeManager
+from BDProjects.EntityManagers.EquipmentManager import EquipmentManager
+from BDProjects.EntityManagers.ParameterManager import ParameterManager
+from BDProjects.EntityManagers.SampleManager import SampleManager
+from BDProjects.EntityManagers.MeasurementManager import MeasurementManager
 
 default_users = {'bot': [None, None, None, 'bot', None]}
 

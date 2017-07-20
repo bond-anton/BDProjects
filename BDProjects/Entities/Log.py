@@ -3,9 +3,9 @@ from __future__ import division, print_function
 from sqlalchemy import Column, DateTime, String, Text, Integer, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
-from ScientificProjects import Base
-from ScientificProjects.Entities.Project import Project
-from ScientificProjects.Entities.Session import Session
+from BDProjects import Base
+from BDProjects.Entities.Project import Project
+from BDProjects.Entities.Session import Session
 
 
 class LogCategory(Base):

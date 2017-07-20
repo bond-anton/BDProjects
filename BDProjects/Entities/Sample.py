@@ -3,10 +3,10 @@ from __future__ import division, print_function
 from sqlalchemy import Table, Column, UniqueConstraint, Integer, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
-from ScientificProjects import Base, default_date_time_format
-from ScientificProjects.Entities.Project import Project
-from ScientificProjects.Entities.Session import Session
-from ScientificProjects.Entities.Parameter import Parameter
+from BDProjects import Base, default_date_time_format
+from BDProjects.Entities.Project import Project
+from BDProjects.Entities.Session import Session
+from BDProjects.Entities.Parameter import Parameter
 
 
 association_table = Table('sample_parameter', Base.metadata,

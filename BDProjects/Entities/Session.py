@@ -3,8 +3,8 @@ from __future__ import division, print_function
 from sqlalchemy import Column, Integer, Boolean, String, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
-from ScientificProjects import Base
-from ScientificProjects.Entities.User import User
+from BDProjects import Base
+from BDProjects.Entities.User import User
 
 
 class Session(Base):

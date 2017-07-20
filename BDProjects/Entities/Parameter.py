@@ -4,8 +4,8 @@ import numpy as np
 from sqlalchemy import Column, DateTime, String, Text, Integer, Float, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
-from ScientificProjects import Base, default_date_time_format
-from ScientificProjects.Entities.Session import Session
+from BDProjects import Base, default_date_time_format
+from BDProjects.Entities.Session import Session
 
 
 class ParameterType(Base):

@@ -2,9 +2,9 @@ from __future__ import division, print_function
 
 import datetime as dt
 
-from ScientificProjects import float_to_datetime
-from ScientificProjects.EntityManagers.ParameterManager import get_range_parameter_value
-from ScientificProjects.Client import Client
+from BDProjects import float_to_datetime
+from BDProjects.EntityManagers.ParameterManager import get_range_parameter_value
+from BDProjects.Client import Client
 
 client = Client(config_file_name='config.ini')
 
