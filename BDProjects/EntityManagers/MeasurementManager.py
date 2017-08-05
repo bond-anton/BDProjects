@@ -676,10 +676,8 @@ class MeasurementManager(EntityManager):
                 if not isinstance(channel, DataChannel):
                     record = 'Wrong DataChannel object to query data points num'
                     self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return []
-                q = self.session.query(DataPoint).filter(DataPoint.channel_id == channel.id).count()
-                result = q.all()
-                return result
+                    return None
+                return self.session.query(DataPoint).filter(DataPoint.channel_id == channel.id).count()
             else:
                 record = 'Attempt to query data point before opening project'
                 self.session_manager.log_manager.log_record(record=record, category='Warning')
