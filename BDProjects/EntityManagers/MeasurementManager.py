@@ -670,6 +670,25 @@ class MeasurementManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
+    def get_data_points_num(self, channel):
+        if self.session_manager.signed_in():
+            if self.session_manager.project_manager.project_opened():
+                if not isinstance(channel, DataChannel):
+                    record = 'Wrong DataChannel object to query data points num'
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                    return []
+                q = self.session.query(DataPoint).filter(DataPoint.channel_id == channel.id).count()
+                result = q.all()
+                return result
+            else:
+                record = 'Attempt to query data point before opening project'
+                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return []
+        else:
+            record = 'Attempt to query data point before signing in'
+            self.session_manager.log_manager.log_record(record=record, category='Warning')
+            return []
+
     def get_data_points(self, channel, point_index=None):
         start_time = timeit.default_timer()
         if self.session_manager.signed_in():
