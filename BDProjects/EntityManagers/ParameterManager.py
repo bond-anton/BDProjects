@@ -209,7 +209,7 @@ class ParameterManager(EntityManager):
         if not isinstance(float_value, numbers.Number):
             raise ValueError('Expected numeric value for a float_value')
         return self._create_parameter(name, parameter_type='Generic',
-                                      float_value=np.float(float_value),
+                                      float_value=np.float64(float_value),
                                       string_value=string_value,
                                       unit_name=unit_name, description=description,
                                       parent=parent,
@@ -225,7 +225,7 @@ class ParameterManager(EntityManager):
         if not isinstance(value, numbers.Number):
             raise ValueError('Expected numeric value for a parameter')
         return self._create_parameter(name, parameter_type='Numeric value',
-                                      float_value=np.float(value), unit_name=unit_name, description=description,
+                                      float_value=np.float64(value), unit_name=unit_name, description=description,
                                       parent=parent, commit=commit)
 
     def create_string_parameter(self, name, value, unit_name=None, description=None, parent=None, commit=True):
@@ -239,7 +239,7 @@ class ParameterManager(EntityManager):
         if not isinstance(value, numbers.Number):
             raise ValueError('Expected boolean or numeric value for a parameter')
         return self._create_parameter(name, parameter_type='Boolean value',
-                                      float_value=np.float(bool(value)), description=description,
+                                      float_value=np.float64(bool(value)), description=description,
                                       parent=parent, commit=commit)
 
     def create_datetime_parameter(self, name, value, description=None, parent=None, commit=True):
