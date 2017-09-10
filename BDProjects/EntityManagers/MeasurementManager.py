@@ -523,14 +523,17 @@ class MeasurementManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
-    def get_data_channels(self, measurement, name=None):
+    def get_data_channels(self, measurement, name=None, exact=False):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 if isinstance(measurement, Measurement):
                     q = self.session.query(DataChannel).filter(DataChannel.measurement_id == measurement.id)
                     if name is not None and len(str(name)) > 2:
-                        template = '%' + str(name) + '%'
-                        q = q.filter(DataChannel.name.ilike(template))
+                        if exact:
+                            q = q.filter(DataChannel.name == str(name))
+                        else:
+                            template = '%' + str(name) + '%'
+                            q = q.filter(DataChannel.name.ilike(template))
                     return q.all()
                 else:
                     record = 'Wrong Measurement object to query data channels'
