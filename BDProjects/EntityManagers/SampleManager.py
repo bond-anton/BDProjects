@@ -66,14 +66,17 @@ class SampleManager(EntityManager):
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False
 
-    def get_samples(self, name=None):
+    def get_samples(self, name=None, exact=False):
         if self.session_manager.signed_in():
             if self.session_manager.project_manager.project_opened():
                 project = self.session_manager.project_manager.project
                 q = self.session.query(Sample).filter(Sample.project_id == project.id)
                 if name is not None and len(str(name)) > 2:
-                    template = '%' + str(name) + '%'
-                    q = q.filter(Sample.name.ilike(template))
+                    if exact:
+                        q = q.filter(Sample.name == str(name))
+                    else:
+                        template = '%' + str(name) + '%'
+                        q = q.filter(Sample.name.ilike(template))
                 return q.all()
             else:
                 record = 'Attempt to query samples before opening project'
