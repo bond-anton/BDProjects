@@ -5,6 +5,16 @@ from BDProjects.EntityManagers.ParameterManager import get_range_parameter_value
 
 client = Client(config_file_name='config.ini')
 
+my_manufacturer = client.user_manager.equipment_manager.create_manufacturer(name='Advanced Instrumentation Company',
+                                                                            name_short='AIC',
+                                                                            description='Test manufacturer')
+my_tool_1 = client.user_manager.equipment_manager.create_equipment(name='MST-01',
+                                                                   category='some cat',
+                                                                   manufacturer=my_manufacturer,
+                                                                   serial_number='AAA 56-789-FR',
+                                                                   assembly=None,
+                                                                   description='My super duper tool')
+
 client.user_manager.sign_in('john_smith', 'secret_password')
 
 my_manufacturer = client.user_manager.equipment_manager.create_manufacturer(name='Advanced Instrumentation Company',
