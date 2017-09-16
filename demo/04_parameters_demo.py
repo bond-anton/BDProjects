@@ -4,7 +4,7 @@ import datetime as dt
 
 from BDProjects import float_to_datetime
 from BDProjects.EntityManagers.ParameterManager import get_range_parameter_value
-from BDProjects import Client
+from BDProjects.Client import Client
 
 client = Client(config_file_name='config.ini')
 

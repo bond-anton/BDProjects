@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 import numpy as np
 
-from BDProjects import Client
+from BDProjects.Client import Client
 
 client = Client(config_file_name='config.ini')
 

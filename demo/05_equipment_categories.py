@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-from BDProjects import Client
+from BDProjects.Client import Client
 from BDProjects.EntityManagers.ParameterManager import get_range_parameter_value
 
 client = Client(config_file_name='config.ini')
