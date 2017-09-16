@@ -2,6 +2,7 @@ from __future__ import division, print_function
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.session import Session
 from sqlalchemy.exc import ArgumentError
 
 from BDProjects import Base
@@ -47,7 +48,10 @@ class Connector(object):
 
     @session.setter
     def session(self, session):
-        self.__session = session
+        if isinstance(session, Session) or session is None:
+            self.__session = session
+        else:
+            raise ValueError('Can not set session')
 
 
 class Installer(Connector):

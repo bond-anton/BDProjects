@@ -26,7 +26,7 @@ class VersionManager(EntityManager):
 
     @database_version.setter
     def database_version(self, version):
-        if isinstance(version, Version):
+        if isinstance(version, Version) or version is None:
             self.__database_version = version
         else:
             raise ValueError('Can not set database version')
