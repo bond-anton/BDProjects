@@ -1,7 +1,6 @@
 from __future__ import division, print_function
 import sys
 from os.path import isfile
-import numbers
 try:
     import configparser
 except ImportError:
@@ -21,8 +20,8 @@ def read_config(file_name=None):
             config.read(file_name)
         except configparser.MissingSectionHeaderError:
             raise ValueError('Wrong format of config file')
-        try:
-            if sys.version_info.major > 2:
+        if sys.version_info.major > 2:
+            try:
                 db_config = config['Database']
                 db_name = db_config['name']
                 backend = db_config['backend']
@@ -30,27 +29,30 @@ def read_config(file_name=None):
                 port = db_config['port']
                 user = db_config['user']
                 password = db_config['password']
-            else:
+            except KeyError:
+                raise ValueError('Section or Option not found in config file')
+        else:
+            try:
                 db_name = config.get('Database', 'name')
                 backend = config.get('Database', 'backend')
                 hostname = config.get('Database', 'host')
                 port = config.get('Database', 'port')
                 user = config.get('Database', 'user')
                 password = config.get('Database', 'password')
-            connection_parameters = {'db_name': db_name,
-                                     'backend': backend,
-                                     'host': hostname,
-                                     'port': port,
-                                     'user': user,
-                                     'password': password
-                                     }
-        except(configparser.NoSectionError, configparser.NoOptionError):
-            raise ValueError('Section or Option not found in config file')
+            except(configparser.NoSectionError, configparser.NoOptionError):
+                raise ValueError('Section or Option not found in config file')
+        connection_parameters = {'db_name': db_name,
+                                 'backend': backend,
+                                 'host': hostname,
+                                 'port': port,
+                                 'user': user,
+                                 'password': password
+                                 }
     return connection_parameters
 
 
 def write_config(connection_parameters, file_name):
-    if isinstance(connection_parameters['port'], numbers.Number):
+    if isinstance(connection_parameters['port'], int):
         if connection_parameters['port'] == 0:
             port_string = ''
         else:
