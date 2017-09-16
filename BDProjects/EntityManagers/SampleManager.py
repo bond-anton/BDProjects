@@ -2,8 +2,9 @@ from __future__ import division, print_function
 
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-from BDProjects.Entities.Sample import Sample
-from BDProjects.Entities.Parameter import Parameter
+
+from BDProjects.Entities import Sample
+from BDProjects.Entities import Parameter
 from BDProjects.EntityManagers import EntityManager
 
 

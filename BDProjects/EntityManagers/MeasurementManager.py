@@ -5,12 +5,12 @@ import numpy as np
 
 from sqlalchemy.exc import IntegrityError
 
-from BDProjects.Entities.MeasurementType import MeasurementType
-from BDProjects.Entities.Measurement import Measurement, MeasurementsCollection
-from BDProjects.Entities.DataPoint import DataChannel, DataPoint
-from BDProjects.Entities.Equipment import Equipment
-from BDProjects.Entities.Sample import Sample
-from BDProjects.Entities.Parameter import Parameter
+from BDProjects.Entities import MeasurementType
+from BDProjects.Entities import Measurement, MeasurementsCollection
+from BDProjects.Entities import DataChannel, DataPoint
+from BDProjects.Entities import Equipment
+from BDProjects.Entities import Sample
+from BDProjects.Entities import Parameter
 from BDProjects.EntityManagers import EntityManager
 
 

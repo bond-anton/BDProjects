@@ -4,8 +4,8 @@ from sqlalchemy import Column, DateTime, String, Text, Integer, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
 from BDProjects import Base
-from BDProjects.Entities.Project import Project
-from BDProjects.Entities.Session import Session
+from BDProjects.Entities import Project
+from BDProjects.Entities import Session
 
 
 class LogCategory(Base):

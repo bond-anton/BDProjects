@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-from BDProjects.Client import Client
+from BDProjects import Client
 
 client = Client(config_file_name='config.ini')
 

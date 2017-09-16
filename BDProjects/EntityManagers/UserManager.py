@@ -9,16 +9,16 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
 from BDProjects import default_date_time_format
-from BDProjects.Entities.User import User
-from BDProjects.Entities.Session import Session
+from BDProjects.Entities import User
+from BDProjects.Entities import Session
 from BDProjects.EntityManagers import EntityManager
-from BDProjects.EntityManagers.LogManager import LogManager
-from BDProjects.EntityManagers.ProjectManager import ProjectManager
-from BDProjects.EntityManagers.MeasurementTypeManager import MeasurementTypeManager
-from BDProjects.EntityManagers.EquipmentManager import EquipmentManager
-from BDProjects.EntityManagers.ParameterManager import ParameterManager
-from BDProjects.EntityManagers.SampleManager import SampleManager
-from BDProjects.EntityManagers.MeasurementManager import MeasurementManager
+from BDProjects.EntityManagers import LogManager
+from BDProjects.EntityManagers import ProjectManager
+from BDProjects.EntityManagers import MeasurementTypeManager
+from BDProjects.EntityManagers import EquipmentManager
+from BDProjects.EntityManagers import ParameterManager
+from BDProjects.EntityManagers import SampleManager
+from BDProjects.EntityManagers import MeasurementManager
 
 default_users = {'bot': [None, None, None, 'bot', None]}
 

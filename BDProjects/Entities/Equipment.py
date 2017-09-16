@@ -4,9 +4,9 @@ from sqlalchemy import Table, Column, UniqueConstraint, Integer, String, Text, D
 from sqlalchemy.orm import relationship, backref
 
 from BDProjects import Base, default_date_time_format
-from BDProjects.Entities.Session import Session
-from BDProjects.Entities.Parameter import Parameter
-from BDProjects.Entities.MeasurementType import MeasurementType
+from BDProjects.Entities import Session
+from BDProjects.Entities import Parameter
+from BDProjects.Entities import MeasurementType
 
 
 equipment_assembly_table = Table('assembly_parts', Base.metadata,

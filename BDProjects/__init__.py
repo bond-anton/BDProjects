@@ -1,9 +1,10 @@
 from __future__ import division, print_function
 import datetime as dt
 import numbers
+
 from sqlalchemy.ext.declarative import declarative_base
 
-from BDProjects._version import __version__
+from ._version import __version__
 
 
 reference_time = dt.datetime(1970, 1, 1)

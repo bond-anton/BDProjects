@@ -5,7 +5,7 @@ from sqlalchemy import Column, DateTime, String, Text, Integer, Float, ForeignKe
 from sqlalchemy.orm import relationship, backref
 
 from BDProjects import Base, default_date_time_format
-from BDProjects.Entities.Session import Session
+from BDProjects.Entities import Session
 
 
 class ParameterType(Base):

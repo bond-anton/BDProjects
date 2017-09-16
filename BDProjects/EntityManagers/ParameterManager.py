@@ -5,7 +5,7 @@ import numpy as np
 import numbers
 
 from BDProjects import datetime_to_float, float_to_datetime
-from BDProjects.Entities.Parameter import ParameterType, Parameter
+from BDProjects.Entities import ParameterType, Parameter
 from BDProjects.EntityManagers import EntityManager
 
 default_parameter_types = {'Generic': 'Unspecified parameter',

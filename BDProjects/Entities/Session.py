@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, Boolean, String, DateTime, ForeignKey, f
 from sqlalchemy.orm import relationship, backref
 
 from BDProjects import Base
-from BDProjects.Entities.User import User
+from BDProjects.Entities import User
 
 
 class Session(Base):

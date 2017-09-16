@@ -2,7 +2,8 @@ from __future__ import division, print_function
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
-from BDProjects.Entities.MeasurementType import MeasurementType
+
+from BDProjects.Entities import MeasurementType
 from BDProjects.EntityManagers import EntityManager
 
 

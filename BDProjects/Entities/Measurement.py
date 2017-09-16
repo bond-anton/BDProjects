@@ -4,12 +4,12 @@ from sqlalchemy import Table, Column, UniqueConstraint, Integer, Float, String, 
 from sqlalchemy.orm import relationship, backref
 
 from BDProjects import Base, default_date_time_format
-from BDProjects.Entities.MeasurementType import MeasurementType
-from BDProjects.Entities.Equipment import Equipment
-from BDProjects.Entities.Project import Project
-from BDProjects.Entities.Session import Session
-from BDProjects.Entities.Parameter import Parameter
-from BDProjects.Entities.Sample import Sample
+from BDProjects.Entities import MeasurementType
+from BDProjects.Entities import Equipment
+from BDProjects.Entities import Project
+from BDProjects.Entities import Session
+from BDProjects.Entities import Parameter
+from BDProjects.Entities import Sample
 
 
 measurement_sample_table = Table('measurement_sample', Base.metadata,

@@ -5,9 +5,9 @@ from sqlalchemy import DateTime, String, Text, Integer, Float, ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 
 from BDProjects import Base
-from BDProjects.Entities.Session import Session
-from BDProjects.Entities.Measurement import Measurement
-from BDProjects.Entities.Parameter import Parameter
+from BDProjects.Entities import Session
+from BDProjects.Entities import Measurement
+from BDProjects.Entities import Parameter
 
 
 channel_parameter_table = Table('channel_parameter', Base.metadata,

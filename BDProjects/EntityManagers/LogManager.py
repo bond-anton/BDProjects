@@ -2,10 +2,10 @@ from __future__ import division, print_function
 
 from sqlalchemy import func
 
-from BDProjects.Entities.Log import LogCategory, Log
-from BDProjects.Entities.Project import Project
-from BDProjects.Entities.Session import Session
-from BDProjects.Entities.User import User
+from BDProjects.Entities import LogCategory, Log
+from BDProjects.Entities import Project
+from BDProjects.Entities import Session
+from BDProjects.Entities import User
 from BDProjects.EntityManagers import EntityManager
 
 default_log_categories = {'Information': 'Informational messages',
