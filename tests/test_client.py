@@ -34,6 +34,7 @@ class TestClient(unittest.TestCase):
             cp = read_config(self.config_file_name)
             cp['db_name'] = '%^&@/' + cp['db_name']
             cp['host'] = 'myhost.com'
+            cp['port'] = 9000
             Connector(config=cp)
         except Exception as e:
             self.assertIsInstance(e, ValueError)
