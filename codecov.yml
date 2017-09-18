@@ -1,2 +1,3 @@
 fixes:
+  - "::BDProjects/"
   - "*Manager.py::BDProjects/EntityManagers/"
