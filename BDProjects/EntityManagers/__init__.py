@@ -7,4 +7,4 @@ from .ParameterManager import ParameterManager, default_parameter_types
 from .EquipmentManager import EquipmentManager
 from .SampleManager import SampleManager
 from .MeasurementManager import MeasurementManager
-from .UserManager import UserManager, default_users
+from .UserManager import UserManager, system_users, default_roles
