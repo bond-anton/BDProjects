@@ -81,6 +81,10 @@ class UserManager(EntityManager):
     def delete_user(self, user):
         if isinstance(user, User):
             if user.login == self.user.login or self.check_if_user_is_administrator():
+                if user not in self.session:
+                    record = 'User @%s not found in database' % user.login
+                    self.log_manager.log_record(record=record, category='Information')
+                    return False
                 opened_sessions = self.opened_sessions(user)
                 if opened_sessions:
                     self.logoff_user(user)
@@ -112,6 +116,10 @@ class UserManager(EntityManager):
                                                                            self.user.login)
                 self.log_manager.log_record(record=record, category='Information')
                 return True
+            else:
+                record = 'Wrong argument given to delete session'
+                self.log_manager.log_record(record=record, category='Warning')
+                return False
         else:
             record = 'Wrong argument given to delete session'
             self.log_manager.log_record(record=record, category='Warning')
