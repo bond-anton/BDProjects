@@ -31,28 +31,25 @@ class ParameterManager(EntityManager):
     def __init__(self, engine, session_manager):
         super(ParameterManager, self).__init__(engine, session_manager)
 
+    @require_signed_in
     def create_parameter_type(self, parameter_type, description=None):
         parameter_type_object, parameter_type_exists = self._check_parameter_type_name(parameter_type, description)
         if isinstance(parameter_type_object, ParameterType):
-            if self.session_manager.signed_in() or parameter_type_object.name in default_parameter_types:
-                if not parameter_type_exists:
-                    parameter_type_object.user_id = self.session_manager.user.id
-                    self.session.add(parameter_type_object)
-                    self.session.commit()
-                    if parameter_type_object.name not in default_parameter_types:
-                        record = 'Parameter type "%s" successfully created' % parameter_type_object.name
-                        self.session_manager.log_manager.log_record(record=record, category='Information')
-                    return parameter_type_object
-                else:
-                    self.session.rollback()
-                    if parameter_type_object.name not in default_parameter_types:
-                        record = 'Parameter type "%s" is already registered' % parameter_type_object.name
-                        self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return self.session.query(ParameterType).filter(
-                        ParameterType.name == parameter_type_object.name).one()
+            if not parameter_type_exists:
+                parameter_type_object.user_id = self.session_manager.user.id
+                self.session.add(parameter_type_object)
+                self.session.commit()
+                if parameter_type_object.name not in default_parameter_types:
+                    record = 'Parameter type "%s" successfully created' % parameter_type_object.name
+                    self.session_manager.log_manager.log_record(record=record, category='Information')
+                return parameter_type_object
             else:
-                record = 'Attempt to create Parameter Type before signing in'
-                self.session_manager.log_manager.log_record(record=record, category='Warning')
+                self.session.rollback()
+                if parameter_type_object.name not in default_parameter_types:
+                    record = 'Parameter type "%s" is already registered' % parameter_type_object.name
+                    self.session_manager.log_manager.log_record(record=record, category='Warning')
+                return self.session.query(ParameterType).filter(
+                    ParameterType.name == parameter_type_object.name).one()
         else:
             record = 'Wrong Parameter Type argument'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
@@ -112,8 +109,7 @@ class ParameterManager(EntityManager):
             if float_value is not None:
                 parameter.float_value = float_value
             if commit:
-                self.session.add(parameter)
-                self.session.commit()
+                self.commit_parameter(parameter)
                 if not suppres_log_message:
                     if parent_id:
                         record = 'Parameter "%s"->"%s" created' % (parameter.parent.name, parameter.name)
@@ -121,6 +117,12 @@ class ParameterManager(EntityManager):
                         record = 'Parameter "%s" created' % parameter.name
                     self.session_manager.log_manager.log_record(record=record, category='Information')
             return parameter
+
+    @require_signed_in
+    def commit_parameter(self, parameter):
+        if isinstance(parameter, Parameter):
+            self.session.add(parameter)
+            self.session.commit()
 
     @require_signed_in
     def delete_parameter(self, parameter):

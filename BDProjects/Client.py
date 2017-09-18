@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 
 from BDProjects import Base
 from BDProjects.Config import read_config
-from BDProjects.Entities import Role, User, LogCategory
+from BDProjects.Entities import Role, User, LogCategory, ParameterType
 from BDProjects.EntityManagers import VersionManager
 from BDProjects.EntityManagers import LogManager
 from BDProjects.EntityManagers import UserManager
@@ -136,7 +136,7 @@ class Installer(Connector):
         try:
             self.session.add(user)
             self.session.commit()
-        except IntegrityError as e:
+        except IntegrityError:
             self.session.rollback()
 
     def _create_default_users(self):
@@ -158,8 +158,13 @@ class Installer(Connector):
         print('adding default parameter types')
         for parameter_type in default_parameter_types:
             print('  parameter type: %s' % parameter_type)
-            self.user_manager.parameter_manager.create_parameter_type(parameter_type,
-                                                                      default_parameter_types[parameter_type])
+            parameter_type_object = ParameterType(name=parameter_type,
+                                                  description=default_parameter_types[parameter_type])
+            try:
+                self.session.add(parameter_type_object)
+                self.session.commit()
+            except IntegrityError:
+                self.session.rollback()
 
 
 class Client(Connector):
