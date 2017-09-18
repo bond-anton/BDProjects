@@ -136,11 +136,13 @@ class UserManager(EntityManager):
                 self.log_manager.log_record(record=record, category='Information')
                 return True
             else:
-                record = 'Login failed. Username: @%s' % self.user.login
+                record = 'Login failed. Username: @%s' % str(login)
                 self.log_manager.log_record(record=record, category='Warning')
+                return False
         else:
             record = 'Login failed. Username: @%s' % str(login)
             self.log_manager.log_record(record=record, category='Warning')
+            return False
 
     @require_signed_in
     def sign_out(self):
