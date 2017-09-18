@@ -105,3 +105,21 @@ class TestUserManager(unittest.TestCase):
         result = self.client.user_manager.close_session('jessy')
         self.assertFalse(result)
         self.client.user_manager.sign_out()
+
+    def test_kick_off(self):
+        self.client.user_manager.sign_in('administrator', 'admin')
+        client = Client(config_file_name=self.config_file_name)
+        client.user_manager.sign_in('jessy', 'pass')
+        self.client.user_manager.logoff_all()
+
+    def test_log_user_info(self):
+        self.client.user_manager.sign_in('administrator', 'admin')
+        client = Client(config_file_name=self.config_file_name)
+        client.user_manager.sign_in('jessy', 'pass')
+        self.client.user_manager.log_user_info(self.test_user, True)
+        self.client.user_manager.log_user_info(self.test_user2, True)
+        client.user_manager.sign_out()
+        client.user_manager.sign_in('jack', 'pass')
+        self.client.user_manager.log_user_info(self.test_user2, True)
+        self.client.user_manager.log_signed_in_users(True)
+        self.client.user_manager.logoff_all()

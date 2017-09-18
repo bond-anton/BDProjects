@@ -264,8 +264,11 @@ class UserManager(EntityManager):
                 else:
                     last_log_off = self.session.query(
                         func.max(Session.closed)).filter(Session.user_id == user.id).one()[0]
-                    last_log_off = last_log_off.strftime(default_date_time_format)
-                    record = '@%s id offline since %s' % (user.login, last_log_off)
+                    if last_log_off is None:
+                        record = '@%s never logged in' % user.login
+                    else:
+                        last_log_off = last_log_off.strftime(default_date_time_format)
+                        record = '@%s id offline since %s' % (user.login, last_log_off)
                     self.log_manager.log_record(record=record, category='Information')
                 return True
         return False
