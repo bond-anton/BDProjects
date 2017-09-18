@@ -41,6 +41,7 @@ class TestClient(unittest.TestCase):
 
     def test_installer(self):
         Installer(config_file_name=self.config_file_name, overwrite=True)
+        Installer(config_file_name=self.config_file_name, overwrite=False)
 
     def test_client(self):
         Client(config_file_name=self.config_file_name)
