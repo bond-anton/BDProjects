@@ -4,10 +4,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 from sqlalchemy.exc import ArgumentError
+from sqlalchemy.exc import IntegrityError
 
 from BDProjects import Base
 from BDProjects.Config import read_config
-from BDProjects.Entities import User
+from BDProjects.Entities import User, LogCategory
 from BDProjects.EntityManagers import VersionManager
 from BDProjects.EntityManagers import LogManager
 from BDProjects.EntityManagers import UserManager
@@ -56,7 +57,9 @@ class Connector(object):
 
 class Installer(Connector):
 
-    def __init__(self, config=None, config_file_name=None, overwrite=False):
+    def __init__(self, config=None, config_file_name=None,
+                 administrator_password='admin', administrator_email=None,
+                 overwrite=False):
         super(Installer, self).__init__(config=config, config_file_name=config_file_name)
         self._create_tables(overwrite)
 
@@ -68,14 +71,26 @@ class Installer(Connector):
         self.session_data = None
         self.project = None
 
-        self.log_manager = LogManager(self.engine, self)
         self._create_default_log_categories()
-
-        self.user_manager = UserManager(self.engine, self)
         self._create_default_users()
+        self._create_administrator(password=administrator_password, email=administrator_email)
+
+        self.log_manager = LogManager(self.engine, self)
+        self.user_manager = UserManager(self.engine, self)
+        self.user_manager.sign_in('administrator', administrator_password)
+        self.version_manager = VersionManager(self.engine, self)
+
         self._create_default_parameter_types()
 
-        self.version_manager = VersionManager(self.engine, self)
+        print(self.user)
+        print(self.user_manager.user)
+        self.user_manager.sign_out()
+
+    def signed_in(self):
+        return self.user_manager.signed_in()
+
+    def check_if_user_is_administrator(self):
+        return self.user_manager.check_if_user_is_administrator()
 
     def _create_tables(self, overwrite=False):
         print('Creating tables')
@@ -89,18 +104,36 @@ class Installer(Connector):
         print('adding default log categories')
         for category in default_log_categories:
             print('  category: %s' % category)
-            self.log_manager.create_log_category(category, default_log_categories[category])
+            try:
+                log_category = LogCategory(category=category, description=None)
+                self.session.add(log_category)
+                self.session.commit()
+            except IntegrityError:
+                self.session.rollback()
+
+    def _create_administrator(self, password='admin', email=None):
+        if email is None:
+            email = ''
+        user = User(name_first='Storage', name_last='Administrator', email=email,
+                    login='administrator', password=str(password))
+        try:
+            self.session.add(user)
+            self.session.commit()
+        except IntegrityError:
+            self.session.rollback()
 
     def _create_default_users(self):
         print('adding default system users')
         for user_data in default_users:
-            user = default_users[user_data]
-            print('  user: @%s' % user[3])
-            self.user_manager.create_user(user[0], user[1], user[2], user[3], user[4])
-
-        bot_username = default_users['bot'][3]
-        self.user = self.session.query(User).filter(User.login == bot_username).one()
-        self.user_manager.user = self.user
+            user_fields = default_users[user_data]
+            print('  user: @%s' % user_fields[3])
+            user = User(name_first=str(user_fields[0]), name_last=str(user_fields[1]),
+                        email=str(user_fields[2]), login=str(user_fields[3]), password=str(user_fields[4]))
+            try:
+                self.session.add(user)
+                self.session.commit()
+            except IntegrityError:
+                self.session.rollback()
 
     def _create_default_parameter_types(self):
         print('adding default parameter types')
@@ -126,3 +159,9 @@ class Client(Connector):
         self.log_manager = LogManager(self.engine, self)
         self.user_manager = UserManager(self.engine, self)
         self.version_manager = VersionManager(self.engine, self)
+
+    def signed_in(self):
+        return self.user_manager.signed_in()
+
+    def check_if_user_is_administrator(self):
+        return self.user_manager.check_if_user_is_administrator()

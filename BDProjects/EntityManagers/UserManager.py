@@ -19,6 +19,7 @@ from BDProjects.EntityManagers import EquipmentManager
 from BDProjects.EntityManagers import ParameterManager
 from BDProjects.EntityManagers import SampleManager
 from BDProjects.EntityManagers import MeasurementManager
+from ._helpers import require_signed_in, require_administrator
 
 default_users = {'bot': [None, None, None, 'bot', None]}
 
@@ -42,23 +43,23 @@ class UserManager(EntityManager):
         self.sample_manager = SampleManager(self.engine, self)
         self.measurement_manager = MeasurementManager(self.engine, self)
 
+    @require_administrator
     def create_user(self, name_first, name_last, email, login, password):
         user = User(name_first=str(name_first), name_last=str(name_last),
                     email=str(email), login=str(login), password=str(password))
         try:
             self.session.add(user)
             self.session.commit()
-            if user.login not in default_users:
-                record = 'User @%s successfully created' % user.login
-                self.log_manager.log_record(record=record, category='Information')
+            record = 'User @%s successfully created by @%s' % (user.login, self.user.login)
+            self.log_manager.log_record(record=record, category='Information')
             return user
         except IntegrityError:
             self.session.rollback()
-            if user.login not in default_users:
-                record = 'User @%s already exists' % user.login
-                self.log_manager.log_record(record=record, category='Warning')
+            record = 'User @%s already exists' % user.login
+            self.log_manager.log_record(record=record, category='Warning')
             return self.session.query(User).filter(User.login == str(login)).one()
 
+    @require_administrator
     def delete_user(self, login, password):
         user = self.session.query(User).filter(User.login == str(login)).all()
         if user:
@@ -69,7 +70,7 @@ class UserManager(EntityManager):
                 self.logoff_user(user)
             self.session.delete(user)
             self.session.commit()
-            record = 'User @%s successfully deleted' % user.login
+            record = 'User @%s successfully deleted by @%s' % (user.login, self.user.login)
             self.log_manager.log_record(record=record, category='Information')
             return True
         else:
@@ -77,6 +78,7 @@ class UserManager(EntityManager):
             self.log_manager.log_record(record=record, category='Warning')
             return False
 
+    @require_administrator
     def delete_session_data(self, login, password, session_data):
         user = self.session.query(User).filter(User.login == str(login)).all()
         if user:
@@ -89,7 +91,7 @@ class UserManager(EntityManager):
                 self.logoff_user(user)
             self.session.delete(session_data)
             self.session.commit()
-            record = 'Session #%s successfully deleted' % session_data.token
+            record = 'Session #%s successfully deleted by @%s' % (session_data.token, self.user.login)
             self.log_manager.log_record(record=record, category='Information')
             return True
         else:
@@ -126,16 +128,16 @@ class UserManager(EntityManager):
             self.log_manager.log_record(record=record, category='Warning')
         return False
 
+    @require_signed_in
     def sign_out(self):
-        if self.signed_in():
-            record = '@%s (#%s) is going to sign out' % (self.user.login, self.session_data.token)
-            self.log_manager.log_record(record=record, category='Information')
-            self.close_session(session=self.session_data)
-            record = '@%s (#%s) signed out' % (self.user.login, self.session_data.token)
-            self.log_manager.log_record(record=record, category='Information')
-            self.user = self.session_manager.user
-            self.session_data = None
-            self.log_manager = self.session_manager.log_manager
+        record = '@%s (#%s) is going to sign out' % (self.user.login, self.session_data.token)
+        self.log_manager.log_record(record=record, category='Information')
+        self.close_session(session=self.session_data)
+        record = '@%s (#%s) signed out' % (self.user.login, self.session_data.token)
+        self.log_manager.log_record(record=record, category='Information')
+        self.user = self.session_manager.user
+        self.session_data = None
+        self.log_manager = self.session_manager.log_manager
 
     def signed_in(self):
         if isinstance(self.session_data, Session):
@@ -150,18 +152,28 @@ class UserManager(EntityManager):
                 return False
         return False
 
+    @require_signed_in
+    def check_if_user_is_administrator(self):
+        if self.user.login == 'administrator':
+            return True
+        else:
+            return False
+
+    @require_administrator
     def count_opened_sessions(self, user=None):
         if isinstance(user, User):
             return self.session.query(Session).filter(Session.active == 1, Session.user_id == user.id).count()
         else:
             return self.session.query(Session).filter(Session.active == 1).order_by(Session.user_id).count()
 
+    @require_administrator
     def opened_sessions(self, user=None):
         if isinstance(user, User):
             return self.session.query(Session).filter(Session.active == 1, Session.user_id == user.id).all()
         else:
             return self.session.query(Session).filter(Session.active == 1).order_by(Session.user_id).all()
 
+    @require_administrator
     def log_opened_sessions(self, user=None):
         if user is not None:
             if not isinstance(user, User):
@@ -180,15 +192,18 @@ class UserManager(EntityManager):
                                                                 opened)
             self.log_manager.log_record(record=record, category='Information')
 
+    @require_administrator
     def signed_in_users(self):
         return self.session.query(User).join(Session).filter(Session.active == 1).all()
 
+    @require_administrator
     def log_signed_in_users(self, log_sessions=False):
         record = 'Listing signed in users'
         self.log_manager.log_record(record=record, category='Information')
         for user in self.signed_in_users():
             self.log_user_info(user, log_sessions=log_sessions)
 
+    @require_administrator
     def log_user_info(self, user, log_sessions=False):
         if isinstance(user, User):
             opened_sessions = self.count_opened_sessions(user)
@@ -208,15 +223,24 @@ class UserManager(EntityManager):
                 record = '@%s id offline since %s' % (user.login, last_log_off)
                 self.log_manager.log_record(record=record, category='Information')
 
+    @require_signed_in
     def close_session(self, session):
-        if isinstance(session, Session):
-            if session.active:
-                self.project_manager.close_project(session=session)
-                session.active = False
-                self.session.commit()
-                record = 'Session #%s closed' % session.token
-                self.log_manager.log_record(record=record, category='Information')
+        if session == self.session_data or self.check_if_user_is_administrator:
+            if isinstance(session, Session):
+                if session.active:
+                    self.project_manager.close_project(session=session)
+                    session.active = False
+                    self.session.commit()
+                    if session.user.login == self.user.login:
+                        record = 'Session #%s closed' % session.token
+                    else:
+                        record = 'Session #%s (@%s) closed' % (session.token, session.user.login)
+                    self.log_manager.log_record(record=record, category='Information')
+        else:
+            record = 'Attempt to close session #%s (@%s) by @%s' % (session.token, session.user.login, self.user.login)
+            self.log_manager.log_record(record=record, category='Warning')
 
+    @require_administrator
     def logoff_user(self, user):
         if isinstance(user, User):
             record = 'Kicking off @%s' % user.login
@@ -227,11 +251,13 @@ class UserManager(EntityManager):
             record = '@%s was logged off (closed %d sessions)' % (user.login, opened_sessions)
             self.log_manager.log_record(record=record, category='Warning')
 
+    @require_administrator
     def logoff_users(self, users):
         if isinstance(users, (list, tuple)):
             for user in users:
                 self.logoff_user(user)
 
+    @require_administrator
     def logoff_all(self):
         record = 'Kick-off ALL signed in users'
         self.log_manager.log_record(record=record, category='Warning')
