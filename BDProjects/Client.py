@@ -8,11 +8,11 @@ from sqlalchemy.exc import IntegrityError
 
 from BDProjects import Base
 from BDProjects.Config import read_config
-from BDProjects.Entities import User, LogCategory
+from BDProjects.Entities import Role, User, LogCategory
 from BDProjects.EntityManagers import VersionManager
 from BDProjects.EntityManagers import LogManager
 from BDProjects.EntityManagers import UserManager
-from BDProjects.EntityManagers import default_log_categories, default_parameter_types, default_users
+from BDProjects.EntityManagers import default_log_categories, default_parameter_types, system_users, default_roles
 
 
 class Connector(object):
@@ -72,6 +72,7 @@ class Installer(Connector):
         self.project = None
 
         self._create_default_log_categories()
+        self._create_default_roles()
         self._create_default_users()
         self._create_administrator(password=administrator_password, email=administrator_email)
 
@@ -111,24 +112,42 @@ class Installer(Connector):
             except IntegrityError:
                 self.session.rollback()
 
+    def _create_default_roles(self):
+        print('adding default user roles')
+        for role_data in default_roles:
+            print('  role: $%s' % role_data['name'])
+            role = Role(name=str(role_data['name']), description=str(role_data['description']))
+            try:
+                self.session.add(role)
+                self.session.commit()
+            except IntegrityError:
+                self.session.rollback()
+
     def _create_administrator(self, password='admin', email=None):
+        admin_login = 'administrator'
+        roles = self.session.query(Role).filter(Role.name == 'administrator').all()
+        roles += self.session.query(Role).filter(Role.name == 'user').all()
+        print('creating admin user')
         if email is None:
-            email = ''
+            email = 'admin@bdprojects'
+        print('  user: @%s' % admin_login)
         user = User(name_first='Storage', name_last='Administrator', email=email,
-                    login='administrator', password=str(password))
+                    login=admin_login, password=str(password), roles=roles)
         try:
             self.session.add(user)
             self.session.commit()
-        except IntegrityError:
+        except IntegrityError as e:
             self.session.rollback()
 
     def _create_default_users(self):
         print('adding default system users')
-        for user_data in default_users:
-            user_fields = default_users[user_data]
-            print('  user: @%s' % user_fields[3])
-            user = User(name_first=str(user_fields[0]), name_last=str(user_fields[1]),
-                        email=str(user_fields[2]), login=str(user_fields[3]), password=str(user_fields[4]))
+        roles = self.session.query(Role).filter(Role.name == 'system').all()
+        for user_data in system_users:
+            user_fields = system_users[user_data]
+            print('  user: @%s' % user_fields['login'])
+            user = User(name_first=str(user_fields['first']), name_last=str(user_fields['last']),
+                        email=str(user_fields['email']), login=user_fields['login'], password=user_fields['password'],
+                        roles=roles)
             try:
                 self.session.add(user)
                 self.session.commit()

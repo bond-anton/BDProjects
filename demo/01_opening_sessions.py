@@ -4,7 +4,7 @@ import time
 from BDProjects.Client import Client
 
 client = Client(config_file_name='config.ini')
-
+client.user_manager.sign_in('bot', 'bot_password')
 client.user_manager.create_user('John', 'Smith', 'john.smith@somecorp.com', 'john_smith', 'secret_password')
 client.user_manager.sign_in('john_smith', 'secret_password')
 client.user_manager.create_user('Jack', 'Black', 'jack.black@somecorp.com', 'jack_black', 'secret_password')

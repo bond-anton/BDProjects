@@ -1,4 +1,5 @@
 from .Version import Version
+from .Role import Role
 from .User import User
 from .Session import Session
 from .Project import Project, SessionProject
