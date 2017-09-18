@@ -72,6 +72,8 @@ class TestUserManager(unittest.TestCase):
         self.client.user_manager.sign_in('jack', 'pass')
         result = self.client.user_manager.delete_user(self.test_user2)
         self.assertFalse(result)
+        result = self.client.user_manager.delete_user('jack')
+        self.assertFalse(result)
         result = self.client.user_manager.delete_user(self.test_user)
         self.assertTrue(result)
         result = self.client.user_manager.delete_user(self.test_user)
