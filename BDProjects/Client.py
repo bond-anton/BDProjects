@@ -83,8 +83,6 @@ class Installer(Connector):
 
         self._create_default_parameter_types()
 
-        print(self.user)
-        print(self.user_manager.user)
         self.user_manager.sign_out()
 
     def signed_in(self):
