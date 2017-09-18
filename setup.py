@@ -6,7 +6,7 @@ import re
 
 
 here = path.abspath(path.dirname(__file__))
-package_name = 'ScientificProjects'
+package_name = 'BDProjects'
 version_file = path.join(here, package_name, '_version.py')
 with open(version_file, 'rt') as f:
     version_file_line = f.read()
@@ -28,7 +28,7 @@ setup(
     description='SQL database for scientific projects and data management',
     long_description=long_description,
 
-    url='https://github.com/bond-anton/ScientificProjects',
+    url='https://github.com/bond-anton/BDProjects',
 
     author='Anton Bondarenko',
     author_email='bond.anton@gmail.com',
@@ -46,11 +46,13 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
 
     keywords='Scientific database',
 
     packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib']),
-    install_requires=['sqlalchemy', 'sqlalchemy_utils', 'passlib'],
+    install_requires=['numpy', 'sqlalchemy', 'sqlalchemy_utils', 'passlib'],
     test_suite='nose.collector',
 )
