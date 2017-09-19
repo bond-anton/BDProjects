@@ -39,13 +39,8 @@ class UserManager(EntityManager):
 
     def __init__(self, engine, session_manager):
         super(UserManager, self).__init__(engine, session_manager)
-        try:
-            bot_username = system_users['bot']['login']
-            self.session_manager.user = self.session.query(User).filter(User.login == bot_username).one()
-            self.user = self.session_manager.user
-        except NoResultFound:
-            pass
-        self.session_data = None
+        self.session_data = self._generate_session_data()
+        self.user = self.session_manager.user
         self.log_manager = self.session_manager.log_manager
         self.project_manager = ProjectManager(self.engine, self)
         self.measurement_type_manager = MeasurementTypeManager(self.engine, self)
@@ -142,6 +137,8 @@ class UserManager(EntityManager):
                 self.log_manager = LogManager(self.engine, self)
                 record = '@%s signed in (#%s)' % (self.user.login, self.session_data.token)
                 self.log_manager.log_record(record=record, category='Information')
+                self.project_manager.session_data = self.session_data
+                self.project_manager.user = self.user
                 return True
             else:
                 record = 'Login failed. Username: @%s' % str(login)
@@ -161,6 +158,8 @@ class UserManager(EntityManager):
         self.log_manager.log_record(record=record, category='Information')
         self.user = self.session_manager.user
         self.session_data = None
+        self.project_manager.user = self.user
+        self.project_manager.session_data = self.session_data
         self.log_manager = self.session_manager.log_manager
 
     def signed_in(self):
@@ -219,10 +218,7 @@ class UserManager(EntityManager):
     def log_opened_sessions(self, user=None):
         opened_sessions = self.opened_sessions(user=user)
         if opened_sessions:
-            if isinstance(user, User):
-                user_text = ' for @%s' % user.login
-            else:
-                user_text = ''
+            user_text = ' for @%s' % user.login
             record = 'Listing opened sessions' + user_text
             self.log_manager.log_record(record=record, category='Information')
             for opened_session in opened_sessions:

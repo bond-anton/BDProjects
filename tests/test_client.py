@@ -36,6 +36,14 @@ class TestClient(unittest.TestCase):
             Connector(config=cp)
         except Exception as e:
             self.assertIsInstance(e, ValueError)
+        with self.assertRaises(ValueError):
+            conn1.session = 'test'
+        with self.assertRaises(ValueError):
+            conn1.session_data = 'test'
+        with self.assertRaises(ValueError):
+            conn1.user = 'test'
+        with self.assertRaises(ValueError):
+            conn1.project = 'test'
 
     def test_installer(self):
         Installer(config_file_name=self.config_file_name, overwrite=True)
@@ -48,4 +56,7 @@ class TestClient(unittest.TestCase):
         i.user_manager.sign_out()
 
     def test_client(self):
-        Client(config_file_name=self.config_file_name)
+        Installer(config_file_name=self.config_file_name, overwrite=True)
+        cl = Client(config_file_name=self.config_file_name)
+        cl.user_manager.user = None
+        cl.user_manager._generate_session_data()

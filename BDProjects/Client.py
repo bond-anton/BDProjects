@@ -2,13 +2,13 @@ from __future__ import division, print_function
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm.session import Session
+from sqlalchemy.orm.session import Session as orm_Session
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.exc import IntegrityError
 
 from BDProjects import Base
 from BDProjects.Config import read_config
-from BDProjects.Entities import Role, User, LogCategory, ParameterType
+from BDProjects.Entities import Role, User, LogCategory, ParameterType, Session, Project
 from BDProjects.EntityManagers import VersionManager
 from BDProjects.EntityManagers import LogManager
 from BDProjects.EntityManagers import UserManager
@@ -35,6 +35,11 @@ class Connector(object):
         self.__metadata = Base.metadata
         self.__session = None
 
+        self.__session_data = None
+        self.__user = None
+        self.__project = None
+
+
     @property
     def engine(self):
         return self.__engine
@@ -49,10 +54,43 @@ class Connector(object):
 
     @session.setter
     def session(self, session):
-        if isinstance(session, Session) or session is None:
+        if isinstance(session, orm_Session) or session is None:
             self.__session = session
         else:
             raise ValueError('Can not set session')
+
+    @property
+    def session_data(self):
+        return self.__session_data
+
+    @session_data.setter
+    def session_data(self, session):
+        if isinstance(session, Session) or session is None:
+            self.__session_data = session
+        else:
+            raise ValueError('Can not set session data')
+
+    @property
+    def user(self):
+        return self.__user
+
+    @user.setter
+    def user(self, user):
+        if isinstance(user, User) or user is None:
+            self.__user = user
+        else:
+            raise ValueError('Can not set user')
+
+    @property
+    def project(self):
+        return self.__project
+
+    @project.setter
+    def project(self, project):
+        if isinstance(project, Project) or project is None:
+            self.__project = project
+        else:
+            raise ValueError('Can not set project')
 
 
 class Installer(Connector):
@@ -67,14 +105,15 @@ class Installer(Connector):
         session.configure(bind=self.engine)
         self.session = session()
 
-        self.user = None
-        self.session_data = None
-        self.project = None
-
         self._create_default_log_categories()
         self._create_default_roles()
         self._create_default_users()
         self._create_administrator(password=administrator_password, email=administrator_email)
+
+        bot_username = system_users['bot']['login']
+        self.user = self.session.query(User).filter(User.login == bot_username).one()
+        self.session_data = None
+        self.project = None
 
         self.log_manager = LogManager(self.engine, self)
         self.user_manager = UserManager(self.engine, self)
@@ -174,7 +213,8 @@ class Client(Connector):
         session.configure(bind=self.engine)
         self.session = session()
 
-        self.user = None
+        bot_username = system_users['bot']['login']
+        self.user = self.session.query(User).filter(User.login == bot_username).one()
         self.session_data = None
         self.project = None
 
