@@ -33,4 +33,8 @@ print(my_type)
 meas_types = client.user_manager.measurement_type_manager.get_measurement_types()
 pprint.pprint(meas_types)
 
+
+meas_types = client.user_manager.measurement_type_manager.get_measurement_types_tree()
+pprint.pprint(meas_types)
+
 client.user_manager.sign_out()

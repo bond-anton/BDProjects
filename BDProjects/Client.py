@@ -2,17 +2,17 @@ from __future__ import division, print_function
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm.session import Session
+from sqlalchemy.orm.session import Session as orm_Session
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.exc import IntegrityError
 
 from BDProjects import Base
 from BDProjects.Config import read_config
-from BDProjects.Entities import User, LogCategory
+from BDProjects.Entities import Role, User, LogCategory, ParameterType, Session, Project
 from BDProjects.EntityManagers import VersionManager
 from BDProjects.EntityManagers import LogManager
 from BDProjects.EntityManagers import UserManager
-from BDProjects.EntityManagers import default_log_categories, default_parameter_types, default_users
+from BDProjects.EntityManagers import default_log_categories, default_parameter_types, system_users, default_roles
 
 
 class Connector(object):
@@ -35,6 +35,11 @@ class Connector(object):
         self.__metadata = Base.metadata
         self.__session = None
 
+        self.__session_data = None
+        self.__user = None
+        self.__project = None
+
+
     @property
     def engine(self):
         return self.__engine
@@ -49,10 +54,43 @@ class Connector(object):
 
     @session.setter
     def session(self, session):
-        if isinstance(session, Session) or session is None:
+        if isinstance(session, orm_Session) or session is None:
             self.__session = session
         else:
             raise ValueError('Can not set session')
+
+    @property
+    def session_data(self):
+        return self.__session_data
+
+    @session_data.setter
+    def session_data(self, session):
+        if isinstance(session, Session) or session is None:
+            self.__session_data = session
+        else:
+            raise ValueError('Can not set session data')
+
+    @property
+    def user(self):
+        return self.__user
+
+    @user.setter
+    def user(self, user):
+        if isinstance(user, User) or user is None:
+            self.__user = user
+        else:
+            raise ValueError('Can not set user')
+
+    @property
+    def project(self):
+        return self.__project
+
+    @project.setter
+    def project(self, project):
+        if isinstance(project, Project) or project is None:
+            self.__project = project
+        else:
+            raise ValueError('Can not set project')
 
 
 class Installer(Connector):
@@ -67,13 +105,15 @@ class Installer(Connector):
         session.configure(bind=self.engine)
         self.session = session()
 
-        self.user = None
-        self.session_data = None
-        self.project = None
-
         self._create_default_log_categories()
+        self._create_default_roles()
         self._create_default_users()
         self._create_administrator(password=administrator_password, email=administrator_email)
+
+        bot_username = system_users['bot']['login']
+        self.user = self.session.query(User).filter(User.login == bot_username).one()
+        self.session_data = None
+        self.project = None
 
         self.log_manager = LogManager(self.engine, self)
         self.user_manager = UserManager(self.engine, self)
@@ -82,8 +122,6 @@ class Installer(Connector):
 
         self._create_default_parameter_types()
 
-        print(self.user)
-        print(self.user_manager.user)
         self.user_manager.sign_out()
 
     def signed_in(self):
@@ -111,11 +149,27 @@ class Installer(Connector):
             except IntegrityError:
                 self.session.rollback()
 
+    def _create_default_roles(self):
+        print('adding default user roles')
+        for role_data in default_roles:
+            print('  role: $%s' % role_data['name'])
+            role = Role(name=str(role_data['name']), description=str(role_data['description']))
+            try:
+                self.session.add(role)
+                self.session.commit()
+            except IntegrityError:
+                self.session.rollback()
+
     def _create_administrator(self, password='admin', email=None):
+        admin_login = 'administrator'
+        roles = self.session.query(Role).filter(Role.name == 'administrator').all()
+        roles += self.session.query(Role).filter(Role.name == 'user').all()
+        print('creating admin user')
         if email is None:
-            email = ''
+            email = 'admin@bdprojects'
+        print('  user: @%s' % admin_login)
         user = User(name_first='Storage', name_last='Administrator', email=email,
-                    login='administrator', password=str(password))
+                    login=admin_login, password=str(password), roles=roles)
         try:
             self.session.add(user)
             self.session.commit()
@@ -124,11 +178,13 @@ class Installer(Connector):
 
     def _create_default_users(self):
         print('adding default system users')
-        for user_data in default_users:
-            user_fields = default_users[user_data]
-            print('  user: @%s' % user_fields[3])
-            user = User(name_first=str(user_fields[0]), name_last=str(user_fields[1]),
-                        email=str(user_fields[2]), login=str(user_fields[3]), password=str(user_fields[4]))
+        roles = self.session.query(Role).filter(Role.name == 'system').all()
+        for user_data in system_users:
+            user_fields = system_users[user_data]
+            print('  user: @%s' % user_fields['login'])
+            user = User(name_first=str(user_fields['first']), name_last=str(user_fields['last']),
+                        email=str(user_fields['email']), login=user_fields['login'], password=user_fields['password'],
+                        roles=roles)
             try:
                 self.session.add(user)
                 self.session.commit()
@@ -139,8 +195,13 @@ class Installer(Connector):
         print('adding default parameter types')
         for parameter_type in default_parameter_types:
             print('  parameter type: %s' % parameter_type)
-            self.user_manager.parameter_manager.create_parameter_type(parameter_type,
-                                                                      default_parameter_types[parameter_type])
+            parameter_type_object = ParameterType(name=parameter_type,
+                                                  description=default_parameter_types[parameter_type])
+            try:
+                self.session.add(parameter_type_object)
+                self.session.commit()
+            except IntegrityError:
+                self.session.rollback()
 
 
 class Client(Connector):
@@ -152,7 +213,8 @@ class Client(Connector):
         session.configure(bind=self.engine)
         self.session = session()
 
-        self.user = None
+        bot_username = system_users['bot']['login']
+        self.user = self.session.query(User).filter(User.login == bot_username).one()
         self.session_data = None
         self.project = None
 

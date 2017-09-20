@@ -6,7 +6,8 @@ from BDProjects.Entities import LogCategory, Log
 from BDProjects.Entities import Project
 from BDProjects.Entities import Session
 from BDProjects.Entities import User
-from BDProjects.EntityManagers import EntityManager
+
+from .EntityManager import EntityManager
 
 default_log_categories = {'Information': 'Informational messages',
                           'Warning': 'Warning messages',

@@ -2,7 +2,8 @@ from __future__ import division, print_function
 
 from BDProjects import __version__
 from BDProjects.Entities import Version
-from BDProjects.EntityManagers import EntityManager
+
+from .EntityManager import EntityManager
 
 
 class VersionManager(EntityManager):

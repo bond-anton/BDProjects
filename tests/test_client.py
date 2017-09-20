@@ -1,8 +1,6 @@
 from __future__ import division, print_function
 import unittest
 
-from sqlalchemy.exc import ArgumentError
-
 from BDProjects.Config import read_config
 from BDProjects.Client import Connector, Installer, Client
 
@@ -25,7 +23,7 @@ class TestClient(unittest.TestCase):
         cp['user'] = 'test_user'
         if cp['backend'] == 'sqlite':
             try:
-                conn1 = Connector(config=cp)
+                Connector(config=cp)
             except Exception as e:
                 self.assertIsInstance(e, ValueError)
         else:
@@ -38,9 +36,27 @@ class TestClient(unittest.TestCase):
             Connector(config=cp)
         except Exception as e:
             self.assertIsInstance(e, ValueError)
+        with self.assertRaises(ValueError):
+            conn1.session = 'test'
+        with self.assertRaises(ValueError):
+            conn1.session_data = 'test'
+        with self.assertRaises(ValueError):
+            conn1.user = 'test'
+        with self.assertRaises(ValueError):
+            conn1.project = 'test'
 
     def test_installer(self):
         Installer(config_file_name=self.config_file_name, overwrite=True)
+        i = Installer(config_file_name=self.config_file_name, overwrite=False)
+        i.user_manager.sign_in('administrator', 'admin')
+        self.assertTrue(i.check_if_user_is_administrator())
+        self.assertTrue(i.user_manager.check_if_user_is_administrator())
+        self.assertTrue(i.signed_in())
+        self.assertTrue(i.user_manager.signed_in())
+        i.user_manager.sign_out()
 
     def test_client(self):
-        Client(config_file_name=self.config_file_name)
+        Installer(config_file_name=self.config_file_name, overwrite=True)
+        cl = Client(config_file_name=self.config_file_name)
+        cl.user_manager.user = None
+        cl.user_manager._generate_session_data()

@@ -5,7 +5,8 @@ from sqlalchemy.exc import IntegrityError
 
 from BDProjects.Entities import Sample
 from BDProjects.Entities import Parameter
-from BDProjects.EntityManagers import EntityManager
+
+from .EntityManager import EntityManager
 from ._helpers import require_signed_in, require_project_opened
 
 

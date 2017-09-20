@@ -7,7 +7,8 @@ from sqlalchemy.orm.exc import NoResultFound
 from BDProjects.Entities import Manufacturer, EquipmentCategory, EquipmentAssembly, Equipment
 from BDProjects.Entities import MeasurementType
 from BDProjects.Entities import Parameter
-from BDProjects.EntityManagers import EntityManager
+
+from .EntityManager import EntityManager
 from ._helpers import require_signed_in
 
 
