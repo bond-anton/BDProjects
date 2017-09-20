@@ -1,4 +1,3 @@
-from .EntityManager import EntityManager
 from .VersionManager import VersionManager
 from .LogManager import LogManager, default_log_categories
 from .ProjectManager import ProjectManager

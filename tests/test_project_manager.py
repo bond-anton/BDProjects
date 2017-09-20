@@ -128,6 +128,8 @@ class TestProjectManager(unittest.TestCase):
         self.client.user_manager.project_manager.open_project(prj1.name)
         result = self.client.user_manager.project_manager.close_project(project=prj1)
         self.assertTrue(result)
+        result = self.client.user_manager.project_manager.close_project(session='my session', project=prj1)
+        self.assertFalse(result)
         result = self.client.user_manager.project_manager.close_project(project='prj1')
         self.assertFalse(result)
         self.client.user_manager.sign_out()

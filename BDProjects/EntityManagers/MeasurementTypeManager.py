@@ -4,7 +4,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
 from BDProjects.Entities import MeasurementType
-from BDProjects.EntityManagers import EntityManager
+
+from .EntityManager import EntityManager
 from ._helpers import require_signed_in
 
 
@@ -23,15 +24,11 @@ class MeasurementTypeManager(EntityManager):
             if isinstance(parent, MeasurementType):
                 measurement_type.parent_id = parent.id
             else:
-                parents = self.get_measurement_types(parent)
-                if len(parents) == 1:
+                parents = self.get_measurement_types(parent, exact=True)
+                if parents:
                     measurement_type.parent_id = parents[0].id
-                elif len(parents) == 0:
-                    record = 'No measurement type is found with keyword "%s"' % parent
-                    self.session_manager.log_manager.log_record(record=record, category='Warning')
-                    return None
                 else:
-                    record = 'More than one measurement type found with keyword "%s"' % parent
+                    record = 'No measurement type is found with keyword "%s"' % parent
                     self.session_manager.log_manager.log_record(record=record, category='Warning')
                     return None
         try:
@@ -79,9 +76,18 @@ class MeasurementTypeManager(EntityManager):
             measurement_types[root[0]] = self.get_measurement_types(root[0])
         return measurement_types
 
-    def get_measurement_types(self, name=None):
+    @require_signed_in
+    def get_measurement_types(self, name=None, exact=False):
         q = self.session.query(MeasurementType)
-        if name is not None and len(str(name)) > 2:
-            template = '%' + str(name) + '%'
-            q = q.filter(MeasurementType.name.ilike(template))
+        if name is not None:
+            if exact:
+                q = q.filter(MeasurementType.name == str(name))
+            elif len(str(name)) > 2:
+                template = '%' + str(name) + '%'
+                q = q.filter(MeasurementType.name.ilike(template))
+            else:
+                record = 'Please use exact=True than searching measurement types with name shorter than 2 chars'
+                self.session_manager.log_manager.log_record(record=record,
+                                                            category='Warning')
+                return None
         return q.all()

@@ -6,11 +6,11 @@ import uuid
 
 from sqlalchemy import exists, func
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.exc import NoResultFound
 
 from BDProjects import default_date_time_format
 from BDProjects.Entities import Role, User, Session
-from BDProjects.EntityManagers import EntityManager
+
+from .EntityManager import EntityManager
 from BDProjects.EntityManagers import LogManager, ParameterManager, ProjectManager
 from BDProjects.EntityManagers import EquipmentManager, MeasurementTypeManager, MeasurementManager, SampleManager
 from ._helpers import require_signed_in, require_administrator, require_not_system_user
@@ -218,7 +218,9 @@ class UserManager(EntityManager):
     def log_opened_sessions(self, user=None):
         opened_sessions = self.opened_sessions(user=user)
         if opened_sessions:
-            user_text = ' for @%s' % user.login
+            user_text = ''
+            if isinstance(user, User):
+                user_text = ' for @%s' % user.login
             record = 'Listing opened sessions' + user_text
             self.log_manager.log_record(record=record, category='Information')
             for opened_session in opened_sessions:

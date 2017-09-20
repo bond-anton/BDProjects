@@ -7,9 +7,10 @@ from sqlalchemy.exc import IntegrityError
 
 from BDProjects.Entities import Session
 from BDProjects.Entities import Project, SessionProject
-from BDProjects.EntityManagers import EntityManager
+
+from .EntityManager import EntityManager
 from BDProjects.EntityManagers import LogManager
-from ._helpers import require_signed_in, require_project_opened
+from ._helpers import require_signed_in
 
 
 class ProjectManager(EntityManager):
@@ -139,7 +140,7 @@ class ProjectManager(EntityManager):
     def close_project(self, session=None, project=None):
         if session is None:
             session = self.session_data
-        else:
+        elif not isinstance(session, Session):
             record = 'Provide a valid session to close project for, or None for current session'
             self.session_manager.log_manager.log_record(record=record, category='Warning')
             return False

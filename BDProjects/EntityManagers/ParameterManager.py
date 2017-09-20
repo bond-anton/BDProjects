@@ -6,7 +6,8 @@ import numbers
 
 from BDProjects import datetime_to_float, float_to_datetime
 from BDProjects.Entities import ParameterType, Parameter
-from BDProjects.EntityManagers import EntityManager
+
+from .EntityManager import EntityManager
 from ._helpers import require_signed_in
 
 default_parameter_types = {'Generic': 'Unspecified parameter',

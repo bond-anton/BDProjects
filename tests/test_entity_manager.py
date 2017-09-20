@@ -2,7 +2,7 @@ from __future__ import division, print_function
 import unittest
 
 from BDProjects.Client import Installer, Client
-from BDProjects.EntityManagers import EntityManager
+from BDProjects.EntityManagers.EntityManager import EntityManager
 
 
 class TestEntityManager(unittest.TestCase):
