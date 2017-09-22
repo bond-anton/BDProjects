@@ -127,27 +127,31 @@ class UserManager(EntityManager):
             self.log_manager.log_record(record=record, category='Warning')
             return False
         user = self.session.query(User).filter(User.login == str(login)).all()
+        email = self.session.query(User).filter(User.email == str(login)).all()
         if user:
             user = user[0]
-            if user.password == str(password):
-                self.user = user
-                self.session_data = self._generate_session_data()
-                self.session.add(self.session_data)
-                self.session.commit()
-                self.log_manager = LogManager(self.engine, self)
-                record = '@%s signed in (#%s)' % (self.user.login, self.session_data.token)
-                self.log_manager.log_record(record=record, category='Information')
-                self.project_manager.session_data = self.session_data
-                self.project_manager.user = self.user
-                return True
-            else:
-                record = 'Login failed. Username: @%s' % str(login)
-                self.log_manager.log_record(record=record, category='Warning')
-                return False
+        elif email:
+            user = email[0]
         else:
             record = 'Login failed. Username: @%s' % str(login)
             self.log_manager.log_record(record=record, category='Warning')
             return False
+        if user.password == str(password):
+            self.user = user
+            self.session_data = self._generate_session_data()
+            self.session.add(self.session_data)
+            self.session.commit()
+            self.log_manager = LogManager(self.engine, self)
+            record = '@%s signed in (#%s)' % (self.user.login, self.session_data.token)
+            self.log_manager.log_record(record=record, category='Information')
+            self.project_manager.session_data = self.session_data
+            self.project_manager.user = self.user
+            return True
+        else:
+            record = 'Login failed. Username: @%s' % str(login)
+            self.log_manager.log_record(record=record, category='Warning')
+            return False
+
 
     @require_signed_in
     def sign_out(self):

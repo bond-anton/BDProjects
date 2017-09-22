@@ -65,6 +65,9 @@ class TestUserManager(unittest.TestCase):
         result = self.client.user_manager.sign_in('jack_wrong', 'pass')
         self.assertFalse(result)
         self.assertEqual(self.client.user_manager.user.login, 'bot')
+        result = self.client.user_manager.sign_in('jack@somesite.com', 'pass')
+        self.assertTrue(result)
+        self.assertEqual(self.client.user_manager.user.login, 'jack')
 
     def test_delete_user(self):
         result = self.client.user_manager.delete_user(self.test_user)
