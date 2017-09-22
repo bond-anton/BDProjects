@@ -14,8 +14,8 @@ from ._helpers import require_signed_in
 
 class EquipmentManager(EntityManager):
 
-    def __init__(self, engine, session_manager):
-        super(EquipmentManager, self).__init__(engine, session_manager)
+    def __init__(self, session_manager):
+        super(EquipmentManager, self).__init__(session_manager)
 
     @require_signed_in
     def create_manufacturer(self, name, name_short, description=None):

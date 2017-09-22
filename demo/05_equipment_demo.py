@@ -1,9 +1,10 @@
 from __future__ import division, print_function
 
-from BDProjects.Client import Client
+from BDProjects.Client import Connector, Client
 from BDProjects.EntityManagers.ParameterManager import get_range_parameter_value
 
-client = Client(config_file_name='config.ini')
+
+client = Client(Connector(config_file_name='config.ini'))
 
 my_manufacturer = client.user_manager.equipment_manager.create_manufacturer(name='Advanced Instrumentation Company',
                                                                             name_short='AIC',
@@ -14,6 +15,7 @@ my_tool_1 = client.user_manager.equipment_manager.create_equipment(name='MST-01'
                                                                    serial_number='AAA 56-789-FR',
                                                                    assembly=None,
                                                                    description='My super duper tool')
+print(my_tool_1)
 
 client.user_manager.sign_in('john_smith', 'secret_password')
 

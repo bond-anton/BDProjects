@@ -1,15 +1,16 @@
 from __future__ import division, print_function
 import unittest
 
-from BDProjects.Client import Installer, Client
+from BDProjects.Client import Connector, Installer, Client
 
 
 class TestUserManager(unittest.TestCase):
 
     def setUp(self):
         self.config_file_name = 'tests/config.ini'
-        Installer(config_file_name=self.config_file_name, administrator_password='admin', overwrite=True)
-        self.client = Client(config_file_name=self.config_file_name)
+        self.connector = Connector(config_file_name=self.config_file_name)
+        Installer(connector=self.connector, overwrite=True)
+        self.client = Client(connector=self.connector)
         self.client.user_manager.sign_in('administrator', 'admin')
         self.test_user = self.client.user_manager.create_user('jack', 'pass', 'jack@somesite.com', 'Jack', 'Black')
         self.test_user2 = self.client.user_manager.create_user('jessy', 'pass', 'jessy@somesite.com', 'Jessy', 'Kriek')
@@ -44,7 +45,7 @@ class TestUserManager(unittest.TestCase):
     def test_create_user(self):
         result = self.client.user_manager.create_user('john', 'pass', 'john@somesite.com', 'John', 'Smith')
         self.assertFalse(result)
-        result = self.client.user_manager.sign_in('administrator', 'admin')
+        self.client.user_manager.sign_in('administrator', 'admin')
         result = self.client.user_manager.create_user('bot', 'pass', 'bot@bot.net')
         self.assertFalse(result)
         result = self.client.user_manager.create_user('john', 'pass', 'john@somesite.com', 'John', 'Smith')
@@ -113,7 +114,7 @@ class TestUserManager(unittest.TestCase):
 
     def test_kick_off(self):
         self.client.user_manager.sign_in('administrator', 'admin')
-        client = Client(config_file_name=self.config_file_name)
+        client = Client(connector=self.connector)
         client.user_manager.sign_in('jessy', 'pass')
         client.user_manager.logoff_user(self.test_user)
         self.client.user_manager.logoff_user(self.test_user2)
@@ -122,7 +123,7 @@ class TestUserManager(unittest.TestCase):
 
     def test_log_user_info(self):
         self.client.user_manager.sign_in('administrator', 'admin')
-        client = Client(config_file_name=self.config_file_name)
+        client = Client(connector=self.connector)
         client.user_manager.sign_in('jessy', 'pass')
         self.client.user_manager.log_user_info(self.test_user, True)
         self.client.user_manager.log_user_info(self.test_user2, True)

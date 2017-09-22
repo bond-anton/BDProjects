@@ -1,5 +1,8 @@
 from __future__ import division, print_function
 
-from BDProjects.Client import Installer
+from BDProjects.Client import Connector, Installer
 
-installer = Installer(config_file_name='config.ini', overwrite=True)
+
+connector = Connector(config_file_name='config.ini')
+installer = Installer(connector=connector, overwrite=True)
+

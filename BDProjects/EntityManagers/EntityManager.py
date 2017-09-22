@@ -7,9 +7,9 @@ from BDProjects.Entities import Session, Project, User
 
 class EntityManager(object):
 
-    def __init__(self, engine, session_manager):
-        self.__engine = engine
+    def __init__(self, session_manager):
         self.__session_manager = session_manager
+        self.__engine = self.session_manager.engine
         self.__user = None
         self.__session_data = None
         self.__project = None
@@ -19,12 +19,12 @@ class EntityManager(object):
         self.project = None
 
     @property
-    def engine(self):
-        return self.__engine
-
-    @property
     def session_manager(self):
         return self.__session_manager
+
+    @property
+    def engine(self):
+        return self.__engine
 
     @property
     def session(self):

@@ -15,10 +15,7 @@ class TestClient(unittest.TestCase):
         conn1 = Connector(config=cp)
         conn2 = Connector(config_file_name=self.config_file_name)
         self.assertEqual(conn1.engine.url, conn2.engine.url)
-        self.assertIsNone(conn1.session)
-        self.assertIsNone(conn2.session)
-        with self.assertRaises(ValueError):
-            conn2.session = 'Wrong type session'
+
         cp = read_config(self.config_file_name)
         cp['user'] = 'test_user'
         if cp['backend'] == 'sqlite':
@@ -36,18 +33,11 @@ class TestClient(unittest.TestCase):
             Connector(config=cp)
         except Exception as e:
             self.assertIsInstance(e, ValueError)
-        with self.assertRaises(ValueError):
-            conn1.session = 'test'
-        with self.assertRaises(ValueError):
-            conn1.session_data = 'test'
-        with self.assertRaises(ValueError):
-            conn1.user = 'test'
-        with self.assertRaises(ValueError):
-            conn1.project = 'test'
 
     def test_installer(self):
-        Installer(config_file_name=self.config_file_name, overwrite=True)
-        i = Installer(config_file_name=self.config_file_name, overwrite=False)
+        connector = Connector(config_file_name=self.config_file_name)
+        Installer(connector=connector, overwrite=True)
+        i = Installer(connector=connector, overwrite=False)
         i.user_manager.sign_in('administrator', 'admin')
         self.assertTrue(i.check_if_user_is_administrator())
         self.assertTrue(i.user_manager.check_if_user_is_administrator())
@@ -56,7 +46,14 @@ class TestClient(unittest.TestCase):
         i.user_manager.sign_out()
 
     def test_client(self):
-        Installer(config_file_name=self.config_file_name, overwrite=True)
-        cl = Client(config_file_name=self.config_file_name)
+        connector = Connector(config_file_name=self.config_file_name)
+        Installer(connector=connector, overwrite=True)
+        cl = Client(connector=connector)
         cl.user_manager.user = None
         cl.user_manager._generate_session_data()
+        with self.assertRaises(ValueError):
+            cl.user = 'user'
+        with self.assertRaises(ValueError):
+            cl.session_data = 'session data'
+        with self.assertRaises(ValueError):
+            cl.project = 'project'

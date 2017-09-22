@@ -1,8 +1,9 @@
 from __future__ import division, print_function
 
-from BDProjects.Client import Client
+from BDProjects.Client import Connector, Client
 
-client = Client(config_file_name='config.ini')
+
+client = Client(Connector(config_file_name='config.ini'))
 
 client.user_manager.sign_in('john_smith', 'secret_password')
 

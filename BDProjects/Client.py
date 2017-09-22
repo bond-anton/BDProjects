@@ -32,13 +32,11 @@ class Connector(object):
             self.__engine = create_engine(db_url)
         except ArgumentError:
             raise ValueError('Wrong DB URL')
+
         self.__metadata = Base.metadata
-        self.__session = None
 
-        self.__session_data = None
-        self.__user = None
-        self.__project = None
-
+        self.__session = sessionmaker()
+        self.__session.configure(bind=self.engine)
 
     @property
     def engine(self):
@@ -52,58 +50,16 @@ class Connector(object):
     def session(self):
         return self.__session
 
-    @session.setter
-    def session(self, session):
-        if isinstance(session, orm_Session) or session is None:
-            self.__session = session
-        else:
-            raise ValueError('Can not set session')
 
-    @property
-    def session_data(self):
-        return self.__session_data
+class Installer(object):
 
-    @session_data.setter
-    def session_data(self, session):
-        if isinstance(session, Session) or session is None:
-            self.__session_data = session
-        else:
-            raise ValueError('Can not set session data')
+    def __init__(self, connector, administrator_password='admin', administrator_email=None, overwrite=False):
+        self.__connector = connector
 
-    @property
-    def user(self):
-        return self.__user
-
-    @user.setter
-    def user(self, user):
-        if isinstance(user, User) or user is None:
-            self.__user = user
-        else:
-            raise ValueError('Can not set user')
-
-    @property
-    def project(self):
-        return self.__project
-
-    @project.setter
-    def project(self, project):
-        if isinstance(project, Project) or project is None:
-            self.__project = project
-        else:
-            raise ValueError('Can not set project')
-
-
-class Installer(Connector):
-
-    def __init__(self, config=None, config_file_name=None,
-                 administrator_password='admin', administrator_email=None,
-                 overwrite=False):
-        super(Installer, self).__init__(config=config, config_file_name=config_file_name)
         self._create_tables(overwrite)
 
-        session = sessionmaker()
-        session.configure(bind=self.engine)
-        self.session = session()
+        self.__session = None
+        self.session = self.connector.session()
 
         self._create_default_log_categories()
         self._create_default_roles()
@@ -115,14 +71,31 @@ class Installer(Connector):
         self.session_data = None
         self.project = None
 
-        self.log_manager = LogManager(self.engine, self)
-        self.user_manager = UserManager(self.engine, self)
+        self.log_manager = LogManager(self)
+        self.user_manager = UserManager(self)
         self.user_manager.sign_in('administrator', administrator_password)
-        self.version_manager = VersionManager(self.engine, self)
+        self.version_manager = VersionManager(self)
 
         self._create_default_parameter_types()
 
         self.user_manager.sign_out()
+
+    @property
+    def connector(self):
+        return self.__connector
+
+    @property
+    def engine(self):
+        return self.connector.engine
+
+    @property
+    def session(self):
+        return self.__session
+
+    @session.setter
+    def session(self, session):
+        if isinstance(session, orm_Session) or session is None:
+            self.__session = session
 
     def signed_in(self):
         return self.user_manager.signed_in()
@@ -134,8 +107,8 @@ class Installer(Connector):
         print('Creating tables')
         if overwrite:
             print('  deleting old tables')
-            self.metadata.drop_all(self.engine)
-        self.metadata.create_all(self.engine)
+            self.connector.metadata.drop_all(self.connector.engine)
+        self.connector.metadata.create_all(self.connector.engine)
         print(' new tables created.')
 
     def _create_default_log_categories(self):
@@ -204,23 +177,76 @@ class Installer(Connector):
                 self.session.rollback()
 
 
-class Client(Connector):
+class Client(object):
 
-    def __init__(self, config=None, config_file_name=None):
-        super(Client, self).__init__(config=config, config_file_name=config_file_name)
+    def __init__(self, connector):
+        self.__connector = connector
 
-        session = sessionmaker()
-        session.configure(bind=self.engine)
-        self.session = session()
+        self.__session = None
+        self.session = self.connector.session()
+
+        self.__session_data = None
+        self.__user = None
+        self.__project = None
 
         bot_username = system_users['bot']['login']
         self.user = self.session.query(User).filter(User.login == bot_username).one()
         self.session_data = None
         self.project = None
 
-        self.log_manager = LogManager(self.engine, self)
-        self.user_manager = UserManager(self.engine, self)
-        self.version_manager = VersionManager(self.engine, self)
+        self.log_manager = LogManager(self)
+        self.user_manager = UserManager(self)
+        self.version_manager = VersionManager(self)
+
+    @property
+    def connector(self):
+        return self.__connector
+
+    @property
+    def engine(self):
+        return self.connector.engine
+
+    @property
+    def session(self):
+        return self.__session
+
+    @session.setter
+    def session(self, session):
+        if isinstance(session, orm_Session) or session is None:
+            self.__session = session
+
+    @property
+    def session_data(self):
+        return self.__session_data
+
+    @session_data.setter
+    def session_data(self, session):
+        if isinstance(session, Session) or session is None:
+            self.__session_data = session
+        else:
+            raise ValueError('Can not set session data')
+
+    @property
+    def user(self):
+        return self.__user
+
+    @user.setter
+    def user(self, user):
+        if isinstance(user, User) or user is None:
+            self.__user = user
+        else:
+            raise ValueError('Can not set user')
+
+    @property
+    def project(self):
+        return self.__project
+
+    @project.setter
+    def project(self, project):
+        if isinstance(project, Project) or project is None:
+            self.__project = project
+        else:
+            raise ValueError('Can not set project')
 
     def signed_in(self):
         return self.user_manager.signed_in()
