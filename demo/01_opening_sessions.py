@@ -1,9 +1,11 @@
 from __future__ import division, print_function
 import time
 
-from BDProjects.Client import Client
+from BDProjects.Client import Connector, Client
 
-client = Client(config_file_name='config.ini')
+
+connector = Connector(config_file_name='config.ini')
+client = Client(connector=connector)
 client.user_manager.sign_in('administrator', 'admin')
 client.user_manager.create_user('john_smith', 'secret_password', 'john.smith@somecorp.com', 'John', 'Smith')
 client.user_manager.sign_out()

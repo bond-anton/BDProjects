@@ -1,9 +1,11 @@
 from __future__ import division, print_function
 import pprint
 
-from BDProjects.Client import Client
+from BDProjects.Client import Connector, Client
 
-client = Client(config_file_name='config.ini')
+
+connector = Connector(config_file_name='config.ini')
+client = Client(connector=connector)
 
 client.user_manager.sign_in('john_smith', 'secret_password')
 
@@ -14,18 +16,20 @@ client.user_manager.measurement_type_manager.create_measurement_type('Electrical
 client.user_manager.measurement_type_manager.create_measurement_type('Resistance measurement',
                                                                      description='Measurement of electrical resistance',
                                                                      parent='Electrical measurement')
-my_parent = client.user_manager.measurement_type_manager.create_measurement_type('Current measurement',
-                                                                                 description='Measurement of electrical current',
-                                                                                 parent='Electrical measurement')
+my_parent = client.user_manager.measurement_type_manager.create_measurement_type(
+    'Current measurement',
+    description='Measurement of electrical current',
+    parent='Electrical measurement')
 client.user_manager.measurement_type_manager.create_measurement_type('Voltage measurement',
                                                                      description='Measurement of electrical voltage',
                                                                      parent='Electrical measurement')
 client.user_manager.measurement_type_manager.create_measurement_type('Current transient measurement',
                                                                      description='Measurement of electrical current',
                                                                      parent='Current measurement')
-my_type = client.user_manager.measurement_type_manager.create_measurement_type('IV measurement',
-                                                                               description='Measurement of electrical current',
-                                                                               parent=my_parent)
+my_type = client.user_manager.measurement_type_manager.create_measurement_type(
+    'IV measurement',
+    description='Measurement of electrical current',
+    parent=my_parent)
 
 print(my_parent)
 print(my_type)

@@ -8,13 +8,13 @@ from .EntityManager import EntityManager
 
 class VersionManager(EntityManager):
 
-    def __init__(self, engine, session_manager):
+    def __init__(self, session_manager):
         version_string = __version__.split('.')
         self.__current_version = Version(version_major=int(version_string[0]),
                                          version_minor=int(version_string[1]),
                                          version_patch=int(version_string[2]))
         self.__database_version = None
-        super(VersionManager, self).__init__(engine, session_manager)
+        super(VersionManager, self).__init__(session_manager)
         self.check_version()
 
     @property

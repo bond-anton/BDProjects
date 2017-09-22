@@ -2,15 +2,16 @@ from __future__ import division, print_function
 import unittest
 
 from BDProjects.Entities import Project
-from BDProjects.Client import Installer, Client
+from BDProjects.Client import Connector, Installer, Client
 
 
 class TestProjectManager(unittest.TestCase):
 
     def setUp(self):
         self.config_file_name = 'tests/config.ini'
-        Installer(config_file_name=self.config_file_name, administrator_password='admin', overwrite=True)
-        self.client = Client(config_file_name=self.config_file_name)
+        connector = Connector(config_file_name=self.config_file_name)
+        Installer(connector=connector, overwrite=True)
+        self.client = Client(connector=connector)
         self.client.user_manager.sign_in('administrator', 'admin')
         self.test_user = self.client.user_manager.create_user('jack', 'pass', 'jack@somesite.com', 'Jack', 'Black')
         self.test_user2 = self.client.user_manager.create_user('jessy', 'pass', 'jessy@somesite.com', 'Jessy', 'Kriek')
@@ -82,11 +83,11 @@ class TestProjectManager(unittest.TestCase):
 
     def test_open_project(self):
         self.client.user_manager.sign_in('jack', 'pass')
-        prj1 = self.client.user_manager.project_manager.create_project(
+        self.client.user_manager.project_manager.create_project(
             name='Super Project 1',
             description='My first ever really super project',
             data_dir='tests/data/files')
-        prj2 = self.client.user_manager.project_manager.create_project(
+        self.client.user_manager.project_manager.create_project(
             name='Super Project 2',
             description='My first ever really super project',
             data_dir='tests/data/files')

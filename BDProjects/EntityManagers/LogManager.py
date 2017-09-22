@@ -16,9 +16,9 @@ default_log_categories = {'Information': 'Informational messages',
 
 class LogManager(EntityManager):
 
-    def __init__(self, engine, session_manager, echo=True):
+    def __init__(self, session_manager, echo=True):
         self.echo = echo
-        super(LogManager, self).__init__(engine, session_manager)
+        super(LogManager, self).__init__(session_manager)
 
     def create_log_category(self, category, description=None):
         log_category, category_exists = self._check_category_name(category, description)

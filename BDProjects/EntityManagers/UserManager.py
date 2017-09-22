@@ -37,17 +37,17 @@ default_roles = [
 
 class UserManager(EntityManager):
 
-    def __init__(self, engine, session_manager):
-        super(UserManager, self).__init__(engine, session_manager)
+    def __init__(self, session_manager):
+        super(UserManager, self).__init__(session_manager)
         self.session_data = self._generate_session_data()
         self.user = self.session_manager.user
         self.log_manager = self.session_manager.log_manager
-        self.project_manager = ProjectManager(self.engine, self)
-        self.measurement_type_manager = MeasurementTypeManager(self.engine, self)
-        self.parameter_manager = ParameterManager(self.engine, self)
-        self.equipment_manager = EquipmentManager(self.engine, self)
-        self.sample_manager = SampleManager(self.engine, self)
-        self.measurement_manager = MeasurementManager(self.engine, self)
+        self.project_manager = ProjectManager(self)
+        self.measurement_type_manager = MeasurementTypeManager(self)
+        self.parameter_manager = ParameterManager(self)
+        self.equipment_manager = EquipmentManager(self)
+        self.sample_manager = SampleManager(self)
+        self.measurement_manager = MeasurementManager(self)
 
     @require_administrator
     @require_not_system_user
@@ -141,7 +141,7 @@ class UserManager(EntityManager):
             self.session_data = self._generate_session_data()
             self.session.add(self.session_data)
             self.session.commit()
-            self.log_manager = LogManager(self.engine, self)
+            self.log_manager = LogManager(self)
             record = '@%s signed in (#%s)' % (self.user.login, self.session_data.token)
             self.log_manager.log_record(record=record, category='Information')
             self.project_manager.session_data = self.session_data

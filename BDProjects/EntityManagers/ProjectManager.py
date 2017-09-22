@@ -15,8 +15,8 @@ from ._helpers import require_signed_in
 
 class ProjectManager(EntityManager):
 
-    def __init__(self, engine, session_manager):
-        super(ProjectManager, self).__init__(engine, session_manager)
+    def __init__(self, session_manager):
+        super(ProjectManager, self).__init__(session_manager)
         self._log_manager_backup = None
 
     @require_signed_in
@@ -93,7 +93,7 @@ class ProjectManager(EntityManager):
                 self.session.commit()
                 self.project = project
                 self._log_manager_backup = self.session_manager.log_manager
-                self.session_manager.log_manager = LogManager(self.engine, self)
+                self.session_manager.log_manager = LogManager(self)
                 record = 'Project "%s" opened (#%s)' % (self.project.name, self.session_data.token)
                 self.session_manager.log_manager.log_record(record=record, category='Information')
                 return self.project

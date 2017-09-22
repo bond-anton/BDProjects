@@ -2,15 +2,16 @@ from __future__ import division, print_function
 import unittest
 
 from BDProjects.Entities import MeasurementType
-from BDProjects.Client import Installer, Client
+from BDProjects.Client import Connector, Installer, Client
 
 
 class TestMeasurementTypeManager(unittest.TestCase):
 
     def setUp(self):
         self.config_file_name = 'tests/config.ini'
-        Installer(config_file_name=self.config_file_name, administrator_password='admin', overwrite=True)
-        self.client = Client(config_file_name=self.config_file_name)
+        connector = Connector(config_file_name=self.config_file_name)
+        Installer(connector=connector, overwrite=True)
+        self.client = Client(connector=connector)
         self.client.user_manager.sign_in('administrator', 'admin')
         self.test_user = self.client.user_manager.create_user('jack', 'pass', 'jack@somesite.com', 'Jack', 'Black')
         self.test_user2 = self.client.user_manager.create_user('jessy', 'pass', 'jessy@somesite.com', 'Jessy', 'Kriek')
@@ -106,7 +107,7 @@ class TestMeasurementTypeManager(unittest.TestCase):
             name='Novel measurement sub-type 1',
             description='Novel measurement type description text',
             parent=meas_type)
-        meas_type3 = self.client.user_manager.measurement_type_manager.create_measurement_type(
+        self.client.user_manager.measurement_type_manager.create_measurement_type(
             name='No',
             description='Novel measurement type description text',
             parent=meas_type2)
@@ -114,8 +115,8 @@ class TestMeasurementTypeManager(unittest.TestCase):
         result = self.client.user_manager.measurement_type_manager.get_measurement_types_tree()
         self.assertFalse(result)
         self.client.user_manager.sign_in('jack', 'pass')
-        result = self.client.user_manager.measurement_type_manager.get_measurement_types_tree()
-        result = self.client.user_manager.measurement_type_manager.get_measurement_types_tree(
+        self.client.user_manager.measurement_type_manager.get_measurement_types_tree()
+        self.client.user_manager.measurement_type_manager.get_measurement_types_tree(
             root=meas_type2.name)
         result = self.client.user_manager.measurement_type_manager.get_measurement_types_tree(
             root=meas_type2.name + '_s')

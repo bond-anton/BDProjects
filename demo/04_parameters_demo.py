@@ -4,9 +4,9 @@ import datetime as dt
 
 from BDProjects import float_to_datetime
 from BDProjects.EntityManagers.ParameterManager import get_range_parameter_value
-from BDProjects.Client import Client
+from BDProjects.Client import Connector, Client
 
-client = Client(config_file_name='config.ini')
+client = Client(Connector(config_file_name='config.ini'))
 
 client.user_manager.sign_in('john_smith', 'secret_password')
 

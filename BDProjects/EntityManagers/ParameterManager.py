@@ -29,8 +29,8 @@ default_parameter_types = {'Generic': 'Unspecified parameter',
 
 class ParameterManager(EntityManager):
 
-    def __init__(self, engine, session_manager):
-        super(ParameterManager, self).__init__(engine, session_manager)
+    def __init__(self, session_manager):
+        super(ParameterManager, self).__init__(session_manager)
 
     @require_signed_in
     def create_parameter_type(self, parameter_type, description=None):
