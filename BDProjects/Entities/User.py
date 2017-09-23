@@ -39,5 +39,5 @@ class UserActivationCode(Base):
     id = Column(Integer, primary_key=True)
     activation_code = Column(String, unique=True)
     user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User, backref=backref('sessions', uselist=True, cascade='all, delete-orphan'))
+    user = relationship(User, backref=backref('activation_codes', uselist=True, cascade='all, delete-orphan'))
     code_used = Column(Boolean, default=False)
