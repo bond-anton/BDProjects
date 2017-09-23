@@ -51,14 +51,14 @@ class UserManager(EntityManager):
 
     @require_administrator
     @require_not_system_user
-    def create_user(self, login, password, email, name_first=None, name_last=None, roles=None):
+    def create_user(self, login, password, email, name_first=None, name_last=None, roles=None, active=True):
         user_roles = []
         if roles is None:
             roles = ['user']
         for role_name in roles:
             user_roles += self.session.query(Role).filter(Role.name == role_name).all()
         user = User(name_first=name_first, name_last=name_last,
-                    email=email, login=login, password=password, roles=user_roles)
+                    email=email, login=login, password=password, roles=user_roles, active=active)
         try:
             self.session.add(user)
             self.session.commit()
