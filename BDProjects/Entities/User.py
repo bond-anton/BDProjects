@@ -1,7 +1,6 @@
 from __future__ import division, print_function
 
 from sqlalchemy import Table, Column, ForeignKey, UniqueConstraint, Integer, Boolean, String, DateTime, func
-from sqlalchemy_utils import PasswordType
 from sqlalchemy.orm import relationship, backref
 
 from BDProjects import Base
@@ -23,7 +22,7 @@ class User(Base):
     name_last = Column(String)
     email = Column(String, unique=True)
     login = Column(String, unique=True)
-    password = Column(PasswordType(schemes=['pbkdf2_sha512', 'md5_crypt']))
+    password_hash = Column(String)
     registered = Column(DateTime, default=func.now())
     altered = Column(DateTime, default=func.now(), onupdate=func.now())
     active = Column(Boolean, default=False)

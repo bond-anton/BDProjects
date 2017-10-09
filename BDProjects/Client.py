@@ -6,6 +6,9 @@ from sqlalchemy.orm.session import Session as orm_Session
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.exc import IntegrityError
 
+from passlib.apps import custom_app_context as pwd_context
+from passlib import pwd
+
 from BDProjects import Base
 from BDProjects.Config import read_config
 from BDProjects.Entities import Role, User, LogCategory, ParameterType, Session, Project
@@ -141,8 +144,9 @@ class Installer(object):
         if email is None:
             email = 'admin@bdprojects'
         print('  user: @%s' % admin_login)
+        password_hash = pwd_context.encrypt(password)
         user = User(name_first='Storage', name_last='Administrator', email=email,
-                    login=admin_login, password=str(password), roles=roles)
+                    login=admin_login, password_hash=password_hash, roles=roles)
         try:
             self.session.add(user)
             self.session.commit()
@@ -155,8 +159,11 @@ class Installer(object):
         for user_data in system_users:
             user_fields = system_users[user_data]
             print('  user: @%s' % user_fields['login'])
+            if user_fields['password'] is None:
+                user_fields['password'] = pwd.genword()
+            password_hash = pwd_context.encrypt(user_fields['password'])
             user = User(name_first=str(user_fields['first']), name_last=str(user_fields['last']),
-                        email=str(user_fields['email']), login=user_fields['login'], password=user_fields['password'],
+                        email=str(user_fields['email']), login=user_fields['login'], password_hash=password_hash,
                         roles=roles)
             try:
                 self.session.add(user)

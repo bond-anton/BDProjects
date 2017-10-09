@@ -6,6 +6,7 @@ import uuid
 
 from sqlalchemy import exists, func
 from sqlalchemy.exc import IntegrityError
+from passlib.apps import custom_app_context as pwd_context
 
 from BDProjects import default_date_time_format
 from BDProjects.Entities import Role, User, Session
@@ -57,8 +58,9 @@ class UserManager(EntityManager):
             roles = ['user']
         for role_name in roles:
             user_roles += self.session.query(Role).filter(Role.name == role_name).all()
+        password_hash = pwd_context.encrypt(password)
         user = User(name_first=name_first, name_last=name_last,
-                    email=email, login=login, password=password, roles=user_roles, active=active)
+                    email=email, login=login, password_hash=password_hash, roles=user_roles, active=active)
         try:
             self.session.add(user)
             self.session.commit()
@@ -136,7 +138,7 @@ class UserManager(EntityManager):
             record = 'Login failed. Username: @%s' % str(login)
             self.log_manager.log_record(record=record, category='Warning')
             return False
-        if user.password == str(password):
+        if pwd_context.verify(password, user.password_hash):
             self.user = user
             self.session_data = self._generate_session_data()
             self.session.add(self.session_data)
